@@ -2,11 +2,11 @@ import React from 'react';
 import { FaHome, FaChevronRight, FaCube, FaRocket, FaStar, FaHeart, FaLightbulb, FaPalette } from 'react-icons/fa';
 
 function Banner({ 
-  title = "About Us", 
-  subtitle = "Delivering high-quality 3D printing solutions", 
-  breadcrumbs = ["Home", "About"],
-  backgroundImage = null,
-  icon = "cube" // Options: cube, rocket, star, heart, lightbulb, palette
+  title, 
+  subtitle, 
+  breadcrumbs,
+  backgroundImage ,
+  icon 
 }) {
   // Icon mapping
   const iconComponents = {

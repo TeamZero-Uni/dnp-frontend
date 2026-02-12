@@ -1,7 +1,14 @@
-import React from 'react'
+import FeedbackSection from "./home/FeedbackSection"
+import Hero from "./home/Hero"
+import ReadyToStart from "./home/ReadyToStart"
+
 
 export default function Home() {
   return (
-    <div>Home page</div>
+    <>
+      <Hero />
+      <FeedbackSection />
+      <ReadyToStart />
+    </>
   )
 }
