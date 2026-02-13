@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaHome, FaChevronRight, FaCube, FaRocket, FaStar, FaHeart, FaLightbulb, FaPalette } from 'react-icons/fa';
 
+
 function Banner({ 
   title, 
   subtitle, 
