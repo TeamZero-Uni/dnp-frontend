@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
+import LoginForm from "../forms/LoginForm";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(3);
   const [scrolled, setScrolled] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,12 +92,12 @@ function Navbar() {
                 </div>
               </Link>
             ) : (
-              <Link
-                to="/login"
-                className="text-sm font-bold text-gray-700 hover:text-[#5a46c2] px-4"
+              <button
+                onClick={() => setShowLoginPopup(true)}
+                className="text-sm font-bold text-gray-700 hover:text-[#5a46c2] px-4 transition-colors"
               >
                 Sign In
-              </Link>
+              </button>
             )}
 
             <button className="bg-[#5a46c2] hover:bg-[#4838a3] text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-lg shadow-purple-200 active:scale-95">
@@ -172,14 +174,16 @@ function Navbar() {
                 </div>
               </Link>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all border border-gray-200"
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowLoginPopup(true);
+                }}
+                className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all border border-gray-200 w-full"
               >
                 <FiUser size={18} />
                 <span className="font-bold text-gray-900">Sign In</span>
-              </Link>
+              </button>
             )}
 
             <button
@@ -191,6 +195,8 @@ function Navbar() {
           </div>
         </div>
       </div>
+
+      <LoginForm isOpen={showLoginPopup} onClose={() => setShowLoginPopup(false)} />
     </nav>
   );
 }
