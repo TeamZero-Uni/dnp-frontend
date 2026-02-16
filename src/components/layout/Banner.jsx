@@ -22,7 +22,7 @@ function Banner({
   const IconComponent = iconComponents[icon] || FaCube;
 
   return (
-    <div className="relative w-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden">
+    <div className="relative w-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden mt-18">
       {backgroundImage ? (
         <div 
           className="absolute inset-0 opacity-20"

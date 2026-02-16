@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
-import LoginForm from "../forms/LoginForm";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [cartCount, setCartCount] = useState(3);
   const [scrolled, setScrolled] = useState(false);
-  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,12 +30,12 @@ function Navbar() {
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/70 backdrop-blur-md py-3 shadow-sm border-b border-white/20"
-          : "bg-transparent py-5"
+          ? "bg-white/70 backdrop-blur-md shadow-sm border-b border-white/20"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-18">
           <Link to="/" className="flex items-center gap-1 shrink-0 group">
             <div className="p-1 group-hover:rotate-12 transition-transform duration-300">
               <img
@@ -92,12 +90,12 @@ function Navbar() {
                 </div>
               </Link>
             ) : (
-              <button
-                onClick={() => setShowLoginPopup(true)}
+              <Link
+                to="/login"
                 className="text-sm font-bold text-gray-700 hover:text-[#5a46c2] px-4 transition-colors"
               >
                 Sign In
-              </button>
+              </Link>
             )}
 
             <button className="bg-[#5a46c2] hover:bg-[#4838a3] text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-lg shadow-purple-200 active:scale-95">
@@ -125,7 +123,7 @@ function Navbar() {
       </div>
 
       <div
-        className={`md:hidden fixed top-20 left-0 w-full bg-linear-to-b from-white via-purple-50/30 to-white backdrop-blur-xl transition-all duration-500 ease-in-out
+        className={`md:hidden fixed top-18 left-0 w-full bg-linear-to-b from-white via-purple-50/80 to-white backdrop-blur-md transition-all duration-500 ease-in-out
         ${
           isOpen ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none"
         }`}
@@ -174,16 +172,14 @@ function Navbar() {
                 </div>
               </Link>
             ) : (
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setShowLoginPopup(true);
-                }}
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all border border-gray-200 w-full"
               >
                 <FiUser size={18} />
                 <span className="font-bold text-gray-900">Sign In</span>
-              </button>
+              </Link>
             )}
 
             <button
@@ -195,8 +191,6 @@ function Navbar() {
           </div>
         </div>
       </div>
-
-      <LoginForm isOpen={showLoginPopup} onClose={() => setShowLoginPopup(false)} />
     </nav>
   );
 }

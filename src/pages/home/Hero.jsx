@@ -23,7 +23,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/40">
+    <div className="min-h-screen mt-18 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/40">
       <div className="max-w-7xl mx-auto px-8 flex items-center">
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full py-12">
           <div
