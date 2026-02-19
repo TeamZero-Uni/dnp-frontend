@@ -12,6 +12,7 @@ import About from './pages/About';
 import Service from './pages/Services';
 import Product from './pages/Product';
 import Login from './pages/Login';
+import ProductManagement from './pages/admin/ProductManagement';
 
 function App() {
 
@@ -25,11 +26,12 @@ const router = createBrowserRouter(
         <Route path="/service" element={<Service />} />
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
-        </Route>
+      </Route>
 
       {/* Admin layout */}
-      <Route path="/dash" element={<AdminLayout />}>
+      <Route path="dash" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path='productManagement' element={<ProductManagement />} />
       </Route>
     </>
   )
