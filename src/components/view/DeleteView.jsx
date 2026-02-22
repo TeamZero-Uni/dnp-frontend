@@ -1,6 +1,6 @@
-import { FiTrash2, FiAlertTriangle } from "react-icons/fi";
+import { FiAlertTriangle } from "react-icons/fi";
 
-export default function DeleteView({ product, onClose, onConfirm }) {
+export default function DeleteProductView({ t, onClose, onConfirm }) {
   return (
     <div className="space-y-6">
       <div className="bg-rose-50 rounded-2xl p-4 flex items-start gap-4">
@@ -10,7 +10,7 @@ export default function DeleteView({ product, onClose, onConfirm }) {
         <div>
           <p className="text-sm font-bold text-rose-800">Dangerous Action</p>
           <p className="text-sm text-rose-700/80 mt-1 leading-relaxed">
-            You are about to permanently delete <span className="font-bold underline">{product.name}</span>. This cannot be undone.
+            You are about to permanently delete <span className="font-bold underline">{t.name}</span>. This cannot be undone.
           </p>
         </div>
       </div>

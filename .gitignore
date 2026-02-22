@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .env
 res.txt
+
+GalleryManagement.jsx
+QuotetionManagement.jsx
+TransactionManagement.jsx
