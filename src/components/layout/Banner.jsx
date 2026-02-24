@@ -19,9 +19,7 @@ function Banner({
     heart: FaHeart,
     lightbulb: FaLightbulb,
     palette: FaPalette,
-    product: AiOutlineProduct,
-    
-    palette: FaPalette,
+    product: AiOutlineProduct
   };
 
   const IconComponent = iconComponents[icon] || FaCube;
