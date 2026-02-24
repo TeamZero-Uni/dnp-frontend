@@ -11,6 +11,7 @@ import Dashboard from './pages/admin/Dashboard';
 import About from './pages/About';
 import Service from './pages/Services';
 import Product from './pages/Product';
+import ProductDetails from './pages/shop/ProductDetails';
 
 function App() {
 
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
         <Route path="/about" element={<About />} />
         <Route path="/service" element={<Service />} />
          <Route path="/shop" element={<Product />} />
+         <Route path='/product/:id' element={<ProductDetails/>} />
       </Route>
 
       {/* Admin layout */}
