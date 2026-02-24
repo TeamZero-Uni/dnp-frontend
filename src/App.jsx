@@ -14,10 +14,7 @@ import Product from './pages/Product';
 import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
-import GalleryManagement from './pages/admin/GalleryManagement';
 import OrderManagement from './pages/admin/OrderManagement';
-import TransactionManagement from './pages/admin/TransactionManagement';
-import QuotationManagement from './pages/admin/QuotetionManagement';
 
 
 function App() {
@@ -40,10 +37,7 @@ const router = createBrowserRouter(
       <Route path="dash" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path='productManagement' element={<ProductManagement />} />
-        <Route path='galleryimages' element={<GalleryManagement />} />
         <Route path='orders' element={<OrderManagement />} />
-        <Route path='transactions' element={<TransactionManagement />} />
-        <Route path='quotes' element={<QuotationManagement />} />
       </Route>
     </>
   )
