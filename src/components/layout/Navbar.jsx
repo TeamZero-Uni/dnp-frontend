@@ -4,7 +4,7 @@ import { FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(3);
   const [scrolled, setScrolled] = useState(false);
 
@@ -125,7 +125,9 @@ function Navbar() {
       <div
         className={`md:hidden fixed top-18 left-0 w-full bg-linear-to-b from-white via-purple-50/80 to-white backdrop-blur-md transition-all duration-500 ease-in-out
         ${
-          isOpen ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none"
+          isOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "-translate-y-full opacity-0 pointer-events-none"
         }`}
         style={{ zIndex: 40 }}
       >

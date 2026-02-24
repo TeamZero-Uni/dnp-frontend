@@ -47,7 +47,7 @@ function MobileProductCard({ product, onView, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-      {/* Header */}
+    
       <div className="px-4 py-3 flex items-center gap-3">
         <img src={product.image} alt="" className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-200 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -60,7 +60,6 @@ function MobileProductCard({ product, onView, onEdit, onDelete }) {
         </div>
       </div>
 
-      {/* Badges */}
       <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
         <Badge status={product.status} />
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${CATEGORY_COLORS[product.category] || "bg-slate-100 text-slate-600"}`}>
@@ -71,7 +70,6 @@ function MobileProductCard({ product, onView, onEdit, onDelete }) {
         )}
       </div>
 
-      {/* Expanded */}
       {expanded && (
         <div className="px-4 pb-3 border-t border-slate-100 pt-3 space-y-1.5">
           <div className="flex justify-between text-sm">
@@ -89,7 +87,6 @@ function MobileProductCard({ product, onView, onEdit, onDelete }) {
         </div>
       )}
 
-      {/* Footer */}
       <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between">
         <button
           onClick={() => setExpanded(!expanded)}
@@ -114,7 +111,6 @@ function MobileProductCard({ product, onView, onEdit, onDelete }) {
   );
 }
 
-/* ─── Main Component ────────────────────────────────── */
 export default function ProductManagement() {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch]           = useState("");
@@ -161,7 +157,6 @@ export default function ProductManagement() {
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
 
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -183,14 +178,11 @@ export default function ProductManagement() {
         </div>
       </header>
 
-      {/* Main */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
-          {/* Controls */}
           <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-slate-100 space-y-3">
 
-            {/* Row 1: Search + mobile filter toggle */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
@@ -200,7 +192,6 @@ export default function ProductManagement() {
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                 />
               </div>
-              {/* Mobile filter toggle */}
               <button
                 onClick={() => setFiltersOpen(!filtersOpen)}
                 className="sm:hidden relative shrink-0 flex items-center gap-1.5 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-sm text-slate-600"
@@ -213,7 +204,6 @@ export default function ProductManagement() {
               </button>
             </div>
 
-            {/* Desktop filters — always visible */}
             <div className="hidden sm:flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
                 <FiFilter className="text-slate-400" size={13} />
@@ -247,7 +237,6 @@ export default function ProductManagement() {
               )}
             </div>
 
-            {/* Mobile filters — collapsible */}
             {filtersOpen && (
               <div className="sm:hidden flex flex-col gap-2">
                 <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
@@ -284,7 +273,6 @@ export default function ProductManagement() {
             )}
           </div>
 
-          {/* Desktop Table */}
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -346,7 +334,6 @@ export default function ProductManagement() {
             </table>
           </div>
 
-          {/* Mobile Cards */}
           <div className="sm:hidden">
             {paginated.length === 0 ? (
               <div className="text-center py-16 text-slate-400">
@@ -368,7 +355,6 @@ export default function ProductManagement() {
             )}
           </div>
 
-          {/* Pagination */}
           <div className="px-4 sm:px-6 py-4 sm:py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
               Showing {paginated.length} of {filtered.length} products

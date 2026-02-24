@@ -7,7 +7,7 @@ function DeleteOrderView({ order, onClose, onConfirm }) {
   return (
     <div className="space-y-5">
       <div className="bg-rose-50 rounded-xl p-4 flex items-start gap-3">
-        <div className="bg-rose-100 p-2 rounded-lg text-rose-500 flex-shrink-0">
+        <div className="bg-rose-100 p-2 rounded-lg text-rose-500 shrink-0">
           <FiAlertTriangle size={18} />
         </div>
         <div>

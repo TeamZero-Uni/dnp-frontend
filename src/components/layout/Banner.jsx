@@ -16,20 +16,20 @@ function Banner({
     star: FaStar,
     heart: FaHeart,
     lightbulb: FaLightbulb,
-    palette: FaPalette
+    palette: FaPalette,
   };
 
   const IconComponent = iconComponents[icon] || FaCube;
 
   return (
-    <div className="relative w-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden mt-18">
+    <div className="relative w-full bg-linear-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden mt-18">
       {backgroundImage ? (
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         />
       ) : (
@@ -41,21 +41,23 @@ function Banner({
       )}
 
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(to right, #6366f1 1px, transparent 1px), linear-gradient(to bottom, #6366f1 1px, transparent 1px)`,
-          backgroundSize: '40px 40px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(to right, #6366f1 1px, transparent 1px), linear-gradient(to bottom, #6366f1 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="flex flex-col items-center text-center">
-          
           <nav className="flex items-center justify-center space-x-2 mb-4 sm:mb-6 text-sm sm:text-base">
             {breadcrumbs.map((crumb, index) => (
               <React.Fragment key={index}>
                 {index === 0 ? (
-                  <a 
-                    href="/" 
+                  <a
+                    href="/"
                     className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors duration-200"
                   >
                     <FaHome className="mr-2" />
@@ -65,10 +67,12 @@ function Banner({
                   <>
                     <FaChevronRight className="text-gray-400 text-xs" />
                     {index === breadcrumbs.length - 1 ? (
-                      <span className="text-indigo-700 font-semibold">{crumb}</span>
+                      <span className="text-indigo-700 font-semibold">
+                        {crumb}
+                      </span>
                     ) : (
-                      <a 
-                        href={`/${crumb.toLowerCase().replace(/\s+/g, '-')}`}
+                      <a
+                        href={`/${crumb.toLowerCase().replace(/\s+/g, "-")}`}
                         className="text-gray-600 hover:text-indigo-600 transition-colors duration-200"
                       >
                         {crumb}
@@ -82,18 +86,21 @@ function Banner({
 
           <div className="mb-6 sm:mb-8">
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full blur-xl opacity-40 animate-pulse"></div>
-              
-              <div className="relative bg-gradient-to-br from-purple-500 to-indigo-600 p-4 sm:p-5 lg:p-6 rounded-2xl shadow-2xl shadow-purple-300/50 transform hover:scale-110 transition-all duration-300 animate-bounce-slow">
+              <div className="absolute inset-0 bg-linear-to-r from-purple-400 to-indigo-500 rounded-full blur-xl opacity-40 animate-pulse"></div>
+
+              <div className="relative bg-linear-to-br from-purple-500 to-indigo-600 p-4 sm:p-5 lg:p-6 rounded-2xl shadow-2xl shadow-purple-300/50 transform hover:scale-110 transition-all duration-300 animate-bounce-slow">
                 <IconComponent className="text-white text-4xl sm:text-5xl lg:text-6xl" />
               </div>
-              
+
               <div className="absolute -top-2 -right-2 w-3 h-3 bg-purple-400 rounded-full animate-ping"></div>
-              <div className="absolute -bottom-2 -left-2 w-2 h-2 bg-indigo-400 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+              <div
+                className="absolute -bottom-2 -left-2 w-2 h-2 bg-indigo-400 rounded-full animate-ping"
+                style={{ animationDelay: "0.5s" }}
+              ></div>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-indigo-700 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-linear-to-r from-indigo-700 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
             {title}
           </h1>
 
@@ -102,21 +109,21 @@ function Banner({
           </p>
 
           <div className="mt-6 sm:mt-8 flex items-center justify-center space-x-3">
-            <div className="h-1 w-16 sm:w-20 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full shadow-lg shadow-purple-200" />
-            <div className="h-1 w-8 sm:w-10 bg-gradient-to-r from-indigo-500 to-purple-400 rounded-full opacity-60" />
+            <div className="h-1 w-16 sm:w-20 bg-linear-to-r from-purple-500 to-indigo-500 rounded-full shadow-lg shadow-purple-200" />
+            <div className="h-1 w-8 sm:w-10 bg-linear-to-r from-indigo-500 to-purple-400 rounded-full opacity-60" />
             <div className="h-1 w-4 sm:w-6 bg-purple-400 rounded-full opacity-40" />
           </div>
         </div>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0">
-        <svg 
-          className="w-full h-8 sm:h-12 lg:h-16" 
-          viewBox="0 0 1200 120" 
+        <svg
+          className="w-full h-8 sm:h-12 lg:h-16"
+          viewBox="0 0 1200 120"
           preserveAspectRatio="none"
         >
-          <path 
-            d="M0,0 C300,60 600,60 900,30 L900,0 L1200,0 L1200,120 L0,120 Z" 
+          <path
+            d="M0,0 C300,60 600,60 900,30 L900,0 L1200,0 L1200,120 L0,120 Z"
             className="fill-white"
           />
         </svg>
