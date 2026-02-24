@@ -1,5 +1,7 @@
 import React from 'react';
 import { FaHome, FaChevronRight, FaCube, FaRocket, FaStar, FaHeart, FaLightbulb, FaPalette } from 'react-icons/fa';
+import { AiOutlineProduct } from "react-icons/ai";
+
 
 
 function Banner({ 
@@ -16,7 +18,9 @@ function Banner({
     star: FaStar,
     heart: FaHeart,
     lightbulb: FaLightbulb,
-    palette: FaPalette
+    palette: FaPalette,
+    product: AiOutlineProduct
+    
   };
 
   const IconComponent = iconComponents[icon] || FaCube;
