@@ -11,6 +11,7 @@ import Dashboard from './pages/admin/Dashboard';
 import About from './pages/About';
 import Service from './pages/Services';
 import Product from './pages/Product';
+import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
@@ -29,6 +30,8 @@ const router = createBrowserRouter(
         <Route index element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/service" element={<Service />} />
+         <Route path="/shop" element={<Product />} />
+         <Route path='/product/:id' element={<ProductDetails/>} />
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
       </Route>

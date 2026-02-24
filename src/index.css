@@ -90,3 +90,19 @@ html {
     transform: translateY(-20px);
   }
 }
+
+input[type='range'] {
+  pointer-events: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #febc1c;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
