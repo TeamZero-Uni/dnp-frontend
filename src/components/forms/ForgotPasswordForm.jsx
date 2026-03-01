@@ -14,7 +14,7 @@ const ForgotPasswordForm = ({ setActiveForm, setShowOtpPopup, setOtpPurpose }) =
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
+        <p className="text-sm text-[#5a46c2]">
           Enter your email address and we'll send you a verification code to reset your password.
         </p>
       </div>
@@ -30,14 +30,14 @@ const ForgotPasswordForm = ({ setActiveForm, setShowOtpPopup, setOtpPurpose }) =
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5a46c2] focus:border-transparent transition-all outline-none"
             placeholder="Enter your email"
             required
           />
         </div>
       </div>
 
-      <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
+      <button type="submit" className="w-full btn-color py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
         Send Verification Code
       </button>
 

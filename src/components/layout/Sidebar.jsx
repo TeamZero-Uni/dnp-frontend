@@ -32,7 +32,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     {
       title: "Content",
       items: [
-        { label: "Image Gallery", icon: <FaImages size={18} />, path: "/dash/galleryimages" },
+        { label: "Image Gallery", icon: <FaImages size={18} />, path: "/dash/gallery" },
         { label: "Video Gallery", icon: <FaVideo size={18} />, path: "/dashboard/gallery/videos" },
         { label: "Contact Requests", icon: <FaEnvelope size={18} />, path: "/dashboard/contacts" },
         { label: "Feedback", icon: <FaComments size={18} />, path: "/dashboard/feedback" }

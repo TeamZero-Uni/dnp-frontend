@@ -99,7 +99,7 @@ const RegisterForm = ({ setActiveForm, setShowOtpPopup, setOtpPurpose }) => {
             type="password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5a46c2] focus:border-transparent transition-all outline-none"
             placeholder="Confirm your password"
             required
           />
@@ -107,16 +107,16 @@ const RegisterForm = ({ setActiveForm, setShowOtpPopup, setOtpPurpose }) => {
       </div>
 
       <div className="flex items-start">
-        <input id="terms" type="checkbox" className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" required />
+        <input id="terms" type="checkbox" className="mt-1 h-4 w-4 text-[#5a46c2] hover:text-[#4838a3] border-gray-300 rounded" required />
         <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
           I agree to the{' '}
-          <Link to="/terms" className="text-indigo-600 hover:text-indigo-700 font-medium">Terms and Conditions</Link>{' '}
+          <Link to="/terms" className="text-[#5a46c2] hover:text-[#4838a3] font-medium">Terms and Conditions</Link>{' '}
           and{' '}
-          <Link to="/privacy" className="text-indigo-600 hover:text-indigo-700 font-medium">Privacy Policy</Link>
+          <Link to="/privacy" className="text-[#5a46c2] hover:text-[#4838a3] font-medium">Privacy Policy</Link>
         </label>
       </div>
 
-      <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 transform hover:scale-[1.02]">
+      <button type="submit" className="w-full btn-color py-3 rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 transform hover:scale-[1.02]">
         Create Account
       </button>
 
@@ -137,7 +137,7 @@ const RegisterForm = ({ setActiveForm, setShowOtpPopup, setOtpPurpose }) => {
       <div className="text-center pt-4">
         <p className="text-gray-600">
           Already have an account?{' '}
-          <button type="button" onClick={() => setActiveForm('login')} className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+          <button type="button" onClick={() => setActiveForm('login')} className="text-[#5a46c2] hover:text-[#4838a3] font-semibold transition-colors">
             Sign in
           </button>
         </p>

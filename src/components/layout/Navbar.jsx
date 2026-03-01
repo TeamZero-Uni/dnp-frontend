@@ -186,7 +186,7 @@ function Navbar() {
 
             <button
               onClick={() => setIsOpen(false)}
-              className="w-full bg-linear-to-r from-[#5a46c2] to-[#4838a3] text-white py-4 rounded-2xl font-bold text-base shadow-xl shadow-purple-200 hover:shadow-2xl hover:shadow-purple-300 active:scale-[0.98] transition-all"
+              className="w-full btn-color py-4 rounded-2xl font-bold text-base shadow-xl shadow-purple-200 hover:shadow-2xl hover:shadow-purple-300 active:scale-[0.98] transition-all"
             >
               Get a Quote
             </button>

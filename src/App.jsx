@@ -15,7 +15,7 @@ import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
-
+import GalleryManagement from './pages/admin/GalleryManagement';
 
 function App() {
 
@@ -38,6 +38,7 @@ const router = createBrowserRouter(
         <Route index element={<Dashboard />} />
         <Route path='productManagement' element={<ProductManagement />} />
         <Route path='orders' element={<OrderManagement />} />
+        <Route path='gallery' element={<GalleryManagement />} />
       </Route>
     </>
   )
