@@ -171,7 +171,7 @@ function About() {
             </button>
           </div>
           {/* Hero Video Container */}
-          <div className="flex-1 relative rounded-3xl overflow-hidden min-h-[400px] lg:min-h-[584px] bg-primary">
+          <div className="flex-1 relative rounded-3xl overflow-hidden min-h-[400px] lg:min-h-[484px] bg-primary ">
             <VideoPlayer />
           </div>
         </div>
