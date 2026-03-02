@@ -14,8 +14,9 @@ import Product from './pages/Product';
 import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
-import OrderManagement from './pages/admin/OrderManagement';
+import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
+import CodOrderManagement from './pages/admin/CodOrderManagement';
 
 function App() {
 
@@ -37,8 +38,9 @@ const router = createBrowserRouter(
       <Route path="dash" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path='productManagement' element={<ProductManagement />} />
-        <Route path='orders' element={<OrderManagement />} />
+        <Route path='orders' element={<OnlineOrderManagement />} />
         <Route path='gallery' element={<GalleryManagement />} />
+        <Route path='cod-orders' element={<CodOrderManagement />} />
       </Route>
     </>
   )

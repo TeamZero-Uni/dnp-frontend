@@ -57,7 +57,7 @@ export default function ServiceSection() {
 
   return (
     <section className="py-10 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-widest mb-4 bg-[#5a46c2]/10 text-[#5a46c2] border border-[#5a46c2]/20">
             <span className="w-1.5 h-1.5 rounded-full inline-block bg-[#5a46c2]" />

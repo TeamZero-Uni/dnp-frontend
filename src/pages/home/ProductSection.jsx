@@ -44,7 +44,7 @@ function ProductSection() {
             <span className="w-1.5 h-1.5 rounded-full inline-block bg-[#5a46c2]" />
             Our Products
           </div>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-3">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">
             Featured <span className="text-[#5a46c2]">Products</span>
           </h2>
           <p className="text-gray-500 text-mb">Ready-made products available for immediate purchase</p>

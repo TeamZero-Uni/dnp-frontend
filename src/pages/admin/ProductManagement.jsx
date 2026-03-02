@@ -1,176 +1,133 @@
 import { useState, useMemo } from "react";
 import {
-  FiSearch, FiPlus, FiEye, FiEdit2, FiTrash2, FiPackage,
-  FiChevronLeft, FiChevronRight, FiFilter, FiShoppingBag,
-  FiChevronDown, FiChevronUp,
+  FiSearch,
+  FiPlus,
+  FiEye,
+  FiEdit2,
+  FiTrash2,
+  FiPackage,
+  FiChevronLeft,
+  FiChevronRight,
+  FiFilter,
 } from "react-icons/fi";
-import Modal from "../../model/Modal";
 import ProductForm from "../../components/forms/ProductForm";
-import DeleteProductView from "../../components/view/ProductView";
+import ProductView from "../../components/view/ProductView";
 import DeleteView from "../../components/view/DeleteView";
+import Modal from "../../model/Modal";
 
 const initialProducts = [
-  { id: "PRD-001", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100", name: "Premium Watch",       price: 299.99, status: "in_stock",  category: "Accessories", stock: 45 },
-  { id: "PRD-002", image: "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=100", name: "Wireless Headphones", price: 149.99, status: "in_stock",  category: "Electronics", stock: 12 },
-  { id: "PRD-003", image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=100", name: "Running Shoes",       price: 89.99,  status: "out_stock", category: "Footwear",    stock: 0  },
-  { id: "PRD-004", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100",    name: "Leather Wallet",      price: 49.99,  status: "in_stock",  category: "Accessories", stock: 78 },
-  { id: "PRD-005", image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=100", name: "Camera Lens",         price: 599.99, status: "in_stock",  category: "Electronics", stock: 8  },
-  { id: "PRD-006", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100",    name: "Sport Sneakers",      price: 120.00, status: "out_stock", category: "Footwear",    stock: 0  },
+  {
+    id: "PRD-005",
+    name: "Minimalist Desk Lamp",
+    description: "Adjustable LED desk lamp with touch-sensitive dimming and wireless charging base.",
+    price: 79.0,
+    status: "stock",
+    feature: "Wireless Charging",
+    image: "https://images.unsplash.com/photo-1534073828943-f801091bb18c?w=400",
+    colorTheme: "Matte Black",
+    material: "Aluminum",
+    tags: "home-office, lighting, tech",
+    category: "Furniture",
+    stock: 25,
+  },
+  {
+    id: "PRD-006",
+    name: "Ceramic Coffee Set",
+    description: "Hand-thrown stoneware set including two mugs and a matching pour-over dripper.",
+    price: 55.0,
+    status: "stock",
+    feature: "Handmade",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400",
+    colorTheme: "Sandstone",
+    material: "Ceramic",
+    tags: "kitchen, lifestyle, gift",
+    category: "Kitchenware",
+    stock: 15,
+  },
+  {
+    id: "PRD-007",
+    name: "Leather Journal",
+    description: "Refillable A5 journal with premium cream paper and a magnetic clasp.",
+    price: 35.0,
+    status: "out_of_stock",
+    feature: "Refillable",
+    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400",
+    colorTheme: "Cognac",
+    material: "Top-grain Leather",
+    tags: "stationery, office, creative",
+    category: "Accessories",
+    stock: 0,
+  },
 ];
 
-const STATUS_CONFIG = {
-  in_stock:  { label: "In Stock",     color: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
-  out_stock: { label: "Out of Stock", color: "bg-rose-100 text-rose-600",       dot: "bg-rose-500"    },
-};
-
-const CATEGORY_COLORS = {
-  Accessories: "bg-violet-100 text-violet-700",
-  Electronics: "bg-blue-100 text-blue-700",
-  Footwear:    "bg-amber-100 text-amber-700",
-};
-
-const PER_PAGE = 5;
-
-function Badge({ status }) {
-  const item = STATUS_CONFIG[status];
-  if (!item) return null;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase ${item.color}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
-      {item.label}
-    </span>
-  );
-}
-
-/* ─── Mobile Product Card ───────────────────────────── */
-function MobileProductCard({ product, onView, onEdit, onDelete }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-    
-      <div className="px-4 py-3 flex items-center gap-3">
-        <img src={product.image} alt="" className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-200 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-slate-900 truncate">{product.name}</p>
-          <p className="text-[10px] font-mono text-slate-400">{product.id}</p>
-        </div>
-        <div className="text-right shrink-0">
-          <p className="font-black text-slate-800">${product.price.toLocaleString()}</p>
-          <p className="text-xs text-slate-400">{product.category}</p>
-        </div>
-      </div>
-
-      <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
-        <Badge status={product.status} />
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${CATEGORY_COLORS[product.category] || "bg-slate-100 text-slate-600"}`}>
-          {product.category}
-        </span>
-        {product.status === "in_stock" && (
-          <span className="text-[11px] text-slate-400 font-medium">Stock: {product.stock}</span>
-        )}
-      </div>
-
-      {expanded && (
-        <div className="px-4 pb-3 border-t border-slate-100 pt-3 space-y-1.5">
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-400 text-xs font-medium uppercase tracking-wide">Product ID</span>
-            <span className="font-mono text-xs text-slate-700">{product.id}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-400 text-xs font-medium uppercase tracking-wide">Price</span>
-            <span className="font-black text-slate-800">${product.price.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-400 text-xs font-medium uppercase tracking-wide">Stock</span>
-            <span className="font-medium text-slate-700">{product.stock} units</span>
-          </div>
-        </div>
-      )}
-
-      <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors py-1"
-        >
-          {expanded ? <FiChevronUp size={13} /> : <FiChevronDown size={13} />}
-          {expanded ? "Less" : "Details"}
-        </button>
-        <div className="flex items-center gap-1">
-          {[
-            { icon: <FiEye size={15} />,   fn: onView,   hover: "hover:text-indigo-600 hover:bg-indigo-50" },
-            { icon: <FiEdit2 size={15} />, fn: onEdit,   hover: "hover:text-amber-500 hover:bg-amber-50"  },
-            { icon: <FiTrash2 size={15}/>, fn: onDelete, hover: "hover:text-rose-600 hover:bg-rose-50"    },
-          ].map((btn, i) => (
-            <button key={i} onClick={btn.fn} className={`p-2 text-slate-400 rounded-lg transition-colors ${btn.hover}`}>
-              {btn.icon}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+const COLUMNS = ["Product", "Category", "Price", "Quantity", "Status", "Actions"];
 
 export default function ProductManagement() {
-  const [products, setProducts] = useState(initialProducts);
-  const [search, setSearch]           = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [modal, setModal]             = useState(null);
-  const [page, setPage]               = useState(1);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-
-  const resetPage = (fn) => (val) => { fn(val); setPage(1); };
-
-  const categories = useMemo(() => [...new Set(initialProducts.map(p => p.category))], []);
-
-  const filtered = useMemo(() => products.filter(p =>
-    (p.name.toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase())) &&
-    (filterStatus   === "all" || p.status   === filterStatus) &&
-    (filterCategory === "all" || p.category === filterCategory)
-  ), [products, search, filterStatus, filterCategory]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const [products] = useState(initialProducts);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("");
+  const [modal, setModal] = useState(null);
+  const [page, setPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   const closeModal = () => setModal(null);
-  const handleEdit = (form) => { setProducts(prev => prev.map(p => p.id === form.id ? form : p)); closeModal(); };
 
-  const hasActiveFilters = filterStatus !== "all" || filterCategory !== "all";
-
-  const renderModalContent = () => {
+  const renderModal = () => {
     if (!modal) return null;
-    const map = {
-      add:    { title: "Add New Product",  Component: ProductForm,        props: { onSave: closeModal } },
-      edit:   { title: "Edit Product",     Component: ProductForm,        props: { product: modal.product, onSave: handleEdit } },
-      view:   { title: "Product Details",  Component: DeleteProductView,  props: { product: modal.product } },
-      delete: { title: "Delete Product",   Component: DeleteView,         props: { t: modal.product } },
+    const config = {
+      add: { title: "Add Product", Comp: ProductForm, props: { mode: "add" } },
+      edit: { title: "Edit Product", Comp: ProductForm, props: { mode: "edit", product: modal.product } },
+      view: { title: "Product Details", Comp: ProductView, props: { product: modal.product } },
+      delete: { title: "Delete Product", Comp: DeleteView, props: { t: modal.product, onConfirm: () => closeModal() } },
     };
-    const { title, Component, props } = map[modal.type];
+    const { title, Comp, props } = config[modal.type];
     return (
       <Modal title={title} onClose={closeModal}>
-        <Component {...props} onClose={closeModal} />
+        <Comp {...props} onClose={closeModal} />
       </Modal>
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900">
+  const filtered = useMemo(() => {
+    return products.filter((p) => {
+      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchCat = category ? p.category === category : true;
+      const matchStatus = status ? p.status === status : true;
+      return matchSearch && matchCat && matchStatus;
+    });
+  }, [products, search, category, status]);
 
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+  const totalPages = Math.ceil(filtered.length / 5);
+  const paginated = filtered.slice((page - 1) * 5, page * 5);
+  const activeFilters = [category, status].filter(Boolean).length;
+
+  return (
+    <div className="min-h-screen font-sans text-slate-900">
+
+      <header className="bg-white border-b border-[#e5e0ff] sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-200">
+            <div
+              className="p-2 rounded-lg shadow-lg shadow-indigo-200 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
+            >
               <FiPackage className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-none">Inventory Hub</h1>
-              <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wider">Management System</p>
+              <h1 className="text-base sm:text-lg font-bold leading-none text-[#1e1b4b]">Inventory Hub</h1>
+              <p className="text-[10px] text-slate-400 mt-0.5 font-semibold uppercase tracking-wider hidden sm:block">
+                Management System
+              </p>
             </div>
           </div>
           <button
             onClick={() => setModal({ type: "add" })}
-            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95"
+            className="inline-flex items-center gap-2 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5"
+            style={{
+              background: "linear-gradient(135deg,#5a46c2,#4838a3)",
+              boxShadow: "0 4px 12px rgba(90,70,194,0.35)",
+            }}
           >
             <FiPlus size={18} />
             <span className="hidden sm:inline">New Product</span>
@@ -178,217 +135,301 @@ export default function ProductManagement() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
 
-          <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-slate-100 space-y-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+          {[
+            { label: "Total Products", value: products.length, sub: "all categories", color: "#1e1b4b" },
+            { label: "In Stock", value: products.filter((p) => p.status === "stock").length, sub: "available", color: "#5a46c2" },
+            { label: "Out of Stock", value: products.filter((p) => p.status === "out_of_stock").length, sub: "restocking needed", color: "#e11d48" },
+            { label: "Total Units", value: products.reduce((s, p) => s + p.stock, 0), sub: "inventory count", color: "#1e1b4b" },
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              className="bg-white border border-[#e5e0ff] rounded-2xl p-3.5 sm:p-4 flex flex-col gap-1 shadow-sm hover:shadow-md hover:shadow-indigo-100 transition-shadow"
+            >
+              <span className="text-[9px] sm:text-[10px] font-bold text-[#9090b0] uppercase tracking-wider leading-none">
+                {stat.label}
+              </span>
+              <span className="text-2xl sm:text-[1.6rem] font-bold leading-none mt-1" style={{ color: stat.color }}>
+                {stat.value}
+              </span>
+              <span className="text-[10px] sm:text-xs text-[#6d6a8a]">{stat.sub}</span>
+            </div>
+          ))}
+        </div>
 
-            <div className="flex items-center gap-2">
+        <div className="bg-white border border-[#e5e0ff] rounded-2xl shadow-sm overflow-hidden">
+
+          <div className="p-4 sm:p-5 border-b border-[#f0eeff]">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative flex-1">
-                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9090b0]" size={14} />
                 <input
-                  type="text" placeholder="Search by name or ID…" value={search}
+                  className="w-full pl-9 pr-4 py-2 sm:py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-sm focus:border-[#5a46c2] focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-[#b0add0]"
+                  type="text"
+                  placeholder="Search products…"
+                  value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                 />
               </div>
+
+              <div className="hidden sm:flex items-center gap-2">
+                <FiFilter className="text-[#9090b0] shrink-0" size={14} />
+                <select
+                  className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none cursor-pointer focus:border-[#5a46c2] appearance-none"
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); setPage(1); }}
+                >
+                  <option value="">All Categories</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Footwear">Footwear</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Kitchenware">Kitchenware</option>
+                </select>
+                <select
+                  className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none cursor-pointer focus:border-[#5a46c2] appearance-none"
+                  value={status}
+                  onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+                >
+                  <option value="">All Status</option>
+                  <option value="stock">In Stock</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                </select>
+              </div>
+
               <button
-                onClick={() => setFiltersOpen(!filtersOpen)}
-                className="sm:hidden relative shrink-0 flex items-center gap-1.5 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-sm text-slate-600"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`sm:hidden relative flex items-center gap-1.5 px-3 py-2 rounded-xl border-[1.5px] text-xs font-semibold transition-all ${
+                  showFilters || activeFilters > 0
+                    ? "bg-indigo-50 border-[#5a46c2] text-[#5a46c2]"
+                    : "bg-[#f9f8ff] border-[#e5e0ff] text-[#6d6a8a]"
+                }`}
               >
-                <FiFilter size={14} />
+                <FiFilter size={13} />
                 <span>Filter</span>
-                {hasActiveFilters && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white" />
+                {activeFilters > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black text-white flex items-center justify-center"
+                    style={{ background: "#5a46c2" }}>
+                    {activeFilters}
+                  </span>
                 )}
               </button>
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
-                <FiFilter className="text-slate-400" size={13} />
+            {showFilters && (
+              <div className="sm:hidden mt-3 grid grid-cols-2 gap-2">
                 <select
-                  value={filterStatus}
-                  onChange={(e) => { resetPage(setFilterStatus)(e.target.value); }}
-                  className="bg-transparent text-sm font-bold text-slate-600 outline-none cursor-pointer"
+                  className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none focus:border-[#5a46c2] appearance-none"
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); setPage(1); }}
                 >
-                  <option value="all">All Status</option>
-                  <option value="in_stock">In Stock</option>
-                  <option value="out_stock">Out of Stock</option>
+                  <option value="">All Categories</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Footwear">Footwear</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Kitchenware">Kitchenware</option>
                 </select>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
                 <select
-                  value={filterCategory}
-                  onChange={(e) => { resetPage(setFilterCategory)(e.target.value); }}
-                  className="bg-transparent text-sm font-bold text-slate-600 outline-none cursor-pointer"
+                  className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none focus:border-[#5a46c2] appearance-none"
+                  value={status}
+                  onChange={(e) => { setStatus(e.target.value); setPage(1); }}
                 >
-                  <option value="all">All Categories</option>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="">All Status</option>
+                  <option value="stock">In Stock</option>
+                  <option value="out_of_stock">Out of Stock</option>
                 </select>
-              </div>
-              {hasActiveFilters && (
-                <button
-                  onClick={() => { resetPage(setFilterStatus)("all"); resetPage(setFilterCategory)("all"); }}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-1"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {filtersOpen && (
-              <div className="sm:hidden flex flex-col gap-2">
-                <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
-                  <FiFilter className="text-slate-400" size={13} />
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => resetPage(setFilterStatus)(e.target.value)}
-                    className="bg-transparent text-sm font-bold text-slate-600 outline-none cursor-pointer w-full"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="in_stock">In Stock</option>
-                    <option value="out_stock">Out of Stock</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50">
-                  <select
-                    value={filterCategory}
-                    onChange={(e) => resetPage(setFilterCategory)(e.target.value)}
-                    className="bg-transparent text-sm font-bold text-slate-600 outline-none cursor-pointer w-full"
-                  >
-                    <option value="all">All Categories</option>
-                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                {hasActiveFilters && (
+                {activeFilters > 0 && (
                   <button
-                    onClick={() => { resetPage(setFilterStatus)("all"); resetPage(setFilterCategory)("all"); }}
-                    className="self-start text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 border border-indigo-200 rounded-lg bg-indigo-50"
+                    onClick={() => { setCategory(""); setStatus(""); setPage(1); }}
+                    className="col-span-2 py-2 rounded-xl border border-[#fecdd3] text-[#e11d48] text-xs font-semibold hover:bg-[#ffe4e6] transition-all"
                   >
-                    Clear filters
+                    Clear Filters
                   </button>
                 )}
               </div>
             )}
           </div>
 
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  {["Product Details", "Category", "Pricing", "Stock", "Status", "Actions"].map(h => (
-                    <th key={h} className={`px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest ${h === "Actions" ? "text-center" : ""}`}>
-                      {h}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="bg-[#f9f8ff] border-b-2 border-[#eeeaff]">
+                <tr>
+                  {COLUMNS.map((col) => (
+                    <th key={col} className="px-5 py-3.5 text-[0.7rem] font-bold text-[#6d6a8a] uppercase tracking-wider whitespace-nowrap">
+                      {col}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#f0eeff]">
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-20 text-center text-slate-400">
-                      <FiShoppingBag size={28} className="mx-auto mb-2 opacity-30" />
-                      <p className="text-sm font-medium">No products found.</p>
+                    <td colSpan={6} className="text-center py-16 text-[#b0add0] text-sm">
+                      No products found.
                     </td>
                   </tr>
-                ) : paginated.map((product) => (
-                  <tr key={product.id} className="hover:bg-slate-50/80 transition-all group">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-4">
-                        <img src={product.image} alt="" className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-200" />
-                        <div>
-                          <div className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{product.name}</div>
-                          <div className="text-[10px] font-mono text-slate-400">{product.id}</div>
+                ) : (
+                  paginated.map((product) => (
+                    <tr key={product.id} className="hover:bg-[#faf9ff] transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={product.image}
+                            className="w-11 h-11 rounded-xl object-cover border-2 border-[#f0eeff] shrink-0"
+                            alt={product.name}
+                          />
+                          <div className="min-w-0">
+                            <div className="font-mono text-[0.68rem] text-[#b0add0] mb-0.5">{product.id}</div>
+                            <div className="font-semibold text-[#1e1b4b] truncate max-w-45">{product.name}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${CATEGORY_COLORS[product.category] || "bg-slate-100 text-slate-600"}`}>
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-black text-slate-800">${product.price.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600 font-medium">{product.stock} units</td>
-                    <td className="px-6 py-4"><Badge status={product.status} /></td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-1 group-hover:translate-x-0 translate-x-2 transition-all">
-                        {[
-                          { icon: <FiEye size={15}/>,   color: "hover:text-indigo-600 hover:bg-indigo-50",  type: "view"   },
-                          { icon: <FiEdit2 size={15}/>, color: "hover:text-amber-500 hover:bg-amber-50",    type: "edit"   },
-                          { icon: <FiTrash2 size={15}/>,color: "hover:text-rose-600 hover:bg-rose-50",      type: "delete" },
-                        ].map((btn, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setModal({ type: btn.type, product })}
-                            className={`p-2.5 rounded-xl text-slate-400 border border-transparent hover:border-slate-100 hover:shadow-sm transition-all ${btn.color}`}
-                          >
-                            {btn.icon}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="px-2.5 py-1 bg-[#ede9ff] text-[#5a46c2] border border-[#ddd6ff] rounded-full text-[0.7rem] font-bold uppercase whitespace-nowrap">
+                          {product.category}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="font-mono font-bold text-[#1e1b4b]">${product.price.toFixed(2)}</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-[#6d6a8a] font-medium">{product.stock} units</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {product.status === "stock" ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#d1fae5] text-[#065f46] border border-[#a7f3d0] rounded-full text-[0.68rem] font-bold uppercase tracking-wider whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" /> In Stock
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#ffe4e6] text-[#9f1239] border border-[#fecdd3] rounded-full text-[0.68rem] font-bold uppercase tracking-wider whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#f43f5e] shrink-0" /> Out of Stock
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => setModal({ type: "view", product })} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9090b0] hover:bg-[#f0eeff] hover:text-[#5a46c2] transition-all" title="View">
+                            <FiEye size={15} />
                           </button>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <button onClick={() => setModal({ type: "edit", product })} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9090b0] hover:bg-[#f0eeff] hover:text-[#5a46c2] transition-all" title="Edit">
+                            <FiEdit2 size={15} />
+                          </button>
+                          <button onClick={() => setModal({ type: "delete", product })} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9090b0] hover:bg-[#ffe4e6] hover:text-[#e11d48] transition-all" title="Delete">
+                            <FiTrash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          <div className="sm:hidden">
+          <div className="md:hidden divide-y divide-[#f0eeff]">
             {paginated.length === 0 ? (
-              <div className="text-center py-16 text-slate-400">
-                <FiShoppingBag size={28} className="mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-medium">No products found.</p>
-              </div>
+              <div className="text-center py-12 text-[#b0add0] text-sm">No products found.</div>
             ) : (
-              <div className="p-3 space-y-3">
-                {paginated.map((product) => (
-                  <MobileProductCard
-                    key={product.id}
-                    product={product}
-                    onView={()   => setModal({ type: "view",   product })}
-                    onEdit={()   => setModal({ type: "edit",   product })}
-                    onDelete={()=> setModal({ type: "delete",  product })}
-                  />
-                ))}
-              </div>
+              paginated.map((product) => (
+                <div key={product.id} className="p-4 hover:bg-[#faf9ff] transition-colors">
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={product.image}
+                      className="w-14 h-14 rounded-xl object-cover border-2 border-[#f0eeff] shrink-0"
+                      alt={product.name}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-mono text-[9px] text-[#b0add0] leading-none mb-1">{product.id}</p>
+                          <p className="font-semibold text-[#1e1b4b] text-sm leading-snug truncate">{product.name}</p>
+                        </div>
+                        {product.status === "stock" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#d1fae5] text-[#065f46] border border-[#a7f3d0] rounded-full text-[9px] font-bold uppercase shrink-0">
+                            <span className="w-1 h-1 rounded-full bg-[#10b981]" /> In Stock
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#ffe4e6] text-[#9f1239] border border-[#fecdd3] rounded-full text-[9px] font-bold uppercase shrink-0">
+                            <span className="w-1 h-1 rounded-full bg-[#f43f5e]" /> Out of Stock
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                        <span className="px-2 py-0.5 bg-[#ede9ff] text-[#5a46c2] border border-[#ddd6ff] rounded-full text-[9px] font-bold uppercase">
+                          {product.category}
+                        </span>
+                        <span className="font-mono font-bold text-[#1e1b4b] text-xs">${product.price.toFixed(2)}</span>
+                        <span className="text-[#6d6a8a] text-xs">{product.stock} units</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => setModal({ type: "view", product })}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[#e5e0ff] text-[#5a46c2] text-xs font-semibold hover:bg-[#f0eeff] transition-all active:scale-95"
+                    >
+                      <FiEye size={13} /> View
+                    </button>
+                    <button
+                      onClick={() => setModal({ type: "edit", product })}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[#e5e0ff] text-[#5a46c2] text-xs font-semibold hover:bg-[#f0eeff] transition-all active:scale-95"
+                    >
+                      <FiEdit2 size={13} /> Edit
+                    </button>
+                    <button
+                      onClick={() => setModal({ type: "delete", product })}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[#fecdd3] text-[#e11d48] text-xs font-semibold hover:bg-[#ffe4e6] transition-all active:scale-95"
+                    >
+                      <FiTrash2 size={13} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
-          <div className="px-4 sm:px-6 py-4 sm:py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Showing {paginated.length} of {filtered.length} products
+          <div className="flex flex-wrap justify-between items-center px-4 sm:px-5 py-4 border-t border-[#f0eeff] gap-3">
+            <span className="text-[0.75rem] text-[#9090b0] font-medium">
+              Showing {Math.min((page - 1) * 5 + 1, filtered.length)}–{Math.min(page * 5, filtered.length)} of {filtered.length} products
             </span>
             <div className="flex items-center gap-1.5">
               <button
+                className="w-8 h-8 flex items-center justify-center border-[1.5px] border-[#e5e0ff] rounded-lg text-[#6d6a8a] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#5a46c2] hover:text-[#5a46c2] transition-all"
                 disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                onClick={() => setPage((p) => p - 1)}
               >
-                <FiChevronLeft size={16} />
+                <FiChevronLeft size={14} />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
                 <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-9 h-9 rounded-xl text-xs font-bold transition-colors ${p === page ? "bg-slate-900 text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                  key={n}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-[0.8rem] font-bold transition-all ${
+                    page === n
+                      ? "text-white shadow-[0_2px_8px_rgba(90,70,194,0.3)]"
+                      : "bg-white border-[1.5px] border-[#e5e0ff] text-[#6d6a8a] hover:border-[#5a46c2] hover:text-[#5a46c2]"
+                  }`}
+                  style={page === n ? { background: "linear-gradient(135deg,#5a46c2,#4838a3)" } : {}}
+                  onClick={() => setPage(n)}
                 >
-                  {p}
+                  {n}
                 </button>
               ))}
               <button
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
-                className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 flex items-center justify-center border-[1.5px] border-[#e5e0ff] rounded-lg text-[#6d6a8a] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#5a46c2] hover:text-[#5a46c2] transition-all"
+                disabled={page === totalPages || totalPages === 0}
+                onClick={() => setPage((p) => p + 1)}
               >
-                <FiChevronRight size={16} />
+                <FiChevronRight size={14} />
               </button>
             </div>
           </div>
         </div>
       </main>
 
-      {renderModalContent()}
+      {renderModal()}
     </div>
   );
 }
