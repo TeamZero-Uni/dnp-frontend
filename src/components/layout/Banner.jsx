@@ -1,135 +1,98 @@
-import React from 'react';
-import { FaHome, FaChevronRight, FaCube, FaRocket, FaStar, FaHeart, FaLightbulb, FaPalette } from 'react-icons/fa';
-import { AiOutlineProduct } from "react-icons/ai";
+import { Link } from "react-router-dom";
+import React from "react";
+import { FiArrowRight, FiHome, FiChevronRight } from "react-icons/fi";
+import { MdPalette, MdTextFields, MdDraw } from "react-icons/md";
 
+{/* <Banner
+  path="About"
+  title={<>Engaging you with<br /><span className="text-[#5a46c2]">Creative Design</span></>}
+  description="Providing high-quality 3D rendering for various industries such as architecture, interior design, and product visualization."
+  tagLine="Welcome to Pixeluxe"
+  imageUrl={null}
+  buttonText="Discover More"
+  buttonLink="/"
+/> */}
 
-
-function Banner({ 
-  title, 
-  subtitle, 
-  breadcrumbs,
-  backgroundImage ,
-  icon 
+function Banner({
+  path,
+  title,
+  description,
+  imageUrl,
+  buttonText,
+  buttonLink,
 }) {
-  // Icon mapping
-  const iconComponents = {
-    cube: FaCube,
-    rocket: FaRocket,
-    star: FaStar,
-    heart: FaHeart,
-    lightbulb: FaLightbulb,
-    palette: FaPalette,
-    product: AiOutlineProduct
-  };
-
-  const IconComponent = iconComponents[icon] || FaCube;
-
   return (
-    <div className="relative w-full bg-linear-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden mt-18">
-      {backgroundImage ? (
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      ) : (
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-10 right-20 w-72 h-72 bg-purple-200 rounded-full blur-3xl opacity-40" />
-          <div className="absolute bottom-10 left-20 w-96 h-96 bg-indigo-200 rounded-full blur-3xl opacity-40" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-200 rounded-full blur-3xl opacity-30" />
-        </div>
-      )}
+    <div className="relative w-full bg-white">
+      <div className="absolute inset-0 z-0 bg-linear-to-t from-violet-600 via-violet-200 to-white" />
+      <div className="relative z-10  max-w-7xl mx-auto px-6 lg:px-16 flex flex-col lg:flex-row items-center justify-between min-h-140 py-14">
+        <div className="flex-1 max-w-xl">
+          <div className="flex items-center w-40 gap-2 mt-5 text-sm mb-5 text-violet-600 border border-violet-400 rounded-full px-3 py-1">
+            <Link
+              to="/home"
+              className="flex items-center gap-1 font-medium hover:text-violet-800"
+            >
+              <FiHome size={14} />
+              <span>Home</span>
+            </Link>
 
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `linear-gradient(to right, #6366f1 1px, transparent 1px), linear-gradient(to bottom, #6366f1 1px, transparent 1px)`,
-            backgroundSize: "40px 40px",
-          }}
-        />
-      </div>
+            <FiChevronRight size={13} className="opacity-60" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-        <div className="flex flex-col items-center text-center">
-          <nav className="flex items-center justify-center space-x-2 mb-4 sm:mb-6 text-sm sm:text-base">
-            {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={index}>
-                {index === 0 ? (
-                  <a
-                    href="/"
-                    className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-                  >
-                    <FaHome className="mr-2" />
-                    <span>{crumb}</span>
-                  </a>
-                ) : (
-                  <>
-                    <FaChevronRight className="text-gray-400 text-xs" />
-                    {index === breadcrumbs.length - 1 ? (
-                      <span className="text-indigo-700 font-semibold">
-                        {crumb}
-                      </span>
-                    ) : (
-                      <a
-                        href={`/${crumb.toLowerCase().replace(/\s+/g, "-")}`}
-                        className="text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-                      >
-                        {crumb}
-                      </a>
-                    )}
-                  </>
-                )}
-              </React.Fragment>
-            ))}
-          </nav>
-
-          <div className="mb-6 sm:mb-8">
-            <div className="relative inline-block">
-              <div className="absolute inset-0 bg-linear-to-r from-purple-400 to-indigo-500 rounded-full blur-xl opacity-40 animate-pulse"></div>
-
-              <div className="relative bg-linear-to-br from-purple-500 to-indigo-600 p-4 sm:p-5 lg:p-6 rounded-2xl shadow-2xl shadow-purple-300/50 transform hover:scale-110 transition-all duration-300 animate-bounce-slow">
-                <IconComponent className="text-white text-4xl sm:text-5xl lg:text-6xl" />
-              </div>
-
-              <div className="absolute -top-2 -right-2 w-3 h-3 bg-purple-400 rounded-full animate-ping"></div>
-              <div
-                className="absolute -bottom-2 -left-2 w-2 h-2 bg-indigo-400 rounded-full animate-ping"
-                style={{ animationDelay: "0.5s" }}
-              ></div>
-            </div>
+            <span className="opacity-70">{path}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-linear-to-r from-indigo-700 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
-            {title}
+          <h1 className="font-black leading-tight mb-5 text-4xl lg:text-5xl text-gray-900">
+            { title || (
+              <>
+                Engaging you with
+                <br />
+                <span className="text-violet-600">Creative Design</span>
+              </>
+            )}
           </h1>
 
-          <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-2xl leading-relaxed mx-auto">
-            {subtitle}
+          <p className="mb-8 leading-relaxed text-[1.05rem] text-violet-900 max-w-110">
+            {description || "Providing high-quality 3D rendering for various industries such as architecture, interior design, and product visualization."}
           </p>
 
-          <div className="mt-6 sm:mt-8 flex items-center justify-center space-x-3">
-            <div className="h-1 w-16 sm:w-20 bg-linear-to-r from-purple-500 to-indigo-500 rounded-full shadow-lg shadow-purple-200" />
-            <div className="h-1 w-8 sm:w-10 bg-linear-to-r from-indigo-500 to-purple-400 rounded-full opacity-60" />
-            <div className="h-1 w-4 sm:w-6 bg-purple-400 rounded-full opacity-40" />
+          <Link
+            to={buttonLink || "./"}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest btn-color text-white shadow-lg shadow-violet-400/40 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-violet-400/60 transition-all duration-200 no-underline"
+          >
+            {buttonText || "Discover More"}
+            <FiArrowRight size={16} />
+          </Link>
+        </div>
+
+        <div className="flex-1 flex justify-center items-center relative h-105 w-full lg:mt-0">
+          <img
+            src={imageUrl || "/assets/images/img11.png"}
+            alt="Creative Designer"
+            className="mt-45 z-10 w-130 max-w-full"
+          />
+
+          <div className="absolute top-8 left-4 z-20 flex items-center gap-2 rounded-xl px-3 py-2 bg-white shadow-lg shadow-violet-200/60 animate-[floatBadge1_4s_ease-in-out_infinite]">
+            <div className="rounded-lg p-1.5 bg-linear-to-br from-violet-600 to-violet-800">
+              <MdPalette size={18} className="text-white" />
+            </div>
+            <span className="text-xs font-bold text-gray-900">
+              Color Palette
+            </span>
+          </div>
+
+          <div className="absolute top-12 right-0 z-20 flex items-center gap-2 rounded-xl px-3 py-2 bg-white shadow-lg shadow-violet-200/60 animate-[floatBadge2_3.8s_ease-in-out_infinite]">
+            <div className="rounded-lg p-1.5 bg-linear-to-br from-amber-400 to-red-500">
+              <MdTextFields size={18} className="text-white" />
+            </div>
+            <span className="text-xs font-bold text-gray-900">Typography</span>
+          </div>
+
+          <div className="absolute bottom-10 right-4 z-20 flex items-center gap-2 rounded-xl px-3 py-2 bg-white shadow-lg shadow-violet-200/60 animate-[floatBadge3_4.2s_ease-in-out_infinite]">
+            <div className="rounded-lg p-1.5 bg-linear-to-br from-emerald-400 to-emerald-600">
+              <MdDraw size={18} className="text-white" />
+            </div>
+            <span className="text-xs font-bold text-gray-900">3D Design</span>
           </div>
         </div>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          className="w-full h-8 sm:h-12 lg:h-16"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0,0 C300,60 600,60 900,30 L900,0 L1200,0 L1200,120 L0,120 Z"
-            className="fill-white"
-          />
-        </svg>
       </div>
     </div>
   );

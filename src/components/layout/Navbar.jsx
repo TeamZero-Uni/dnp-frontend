@@ -40,14 +40,14 @@ function Navbar() {
               <img
                 src="/assets/images/logo.png"
                 alt="L"
-                className="h-8 w-auto"
+                className="h-9 w-auto"
               />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-xl font-semibold tracking-tight text-black">
+              <span className="text-2xl font-extrabold text-black">
                 DNP <span className="text-[#5a46c2]">3D</span>
               </span>
-              <span className="text-[9px] font-black text-gray-400 tracking-widest">
+              <span className="text-[9px] ml-0.5 font-black text-gray-500 tracking-widest">
                 HOBBY LOBBY
               </span>
             </div>
