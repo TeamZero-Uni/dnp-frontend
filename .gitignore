@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 .env
 res.txt
-
-QuotetionManagement.jsx
-TransactionManagement.jsx

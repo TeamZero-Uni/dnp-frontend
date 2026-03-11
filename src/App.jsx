@@ -17,6 +17,7 @@ import ProductManagement from './pages/admin/ProductManagement';
 import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
 import CodOrderManagement from './pages/admin/CodOrderManagement';
+import TransactionManagement from './pages/admin/TransactionManagement';
 
 function App() {
 
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
         <Route path='orders' element={<OnlineOrderManagement />} />
         <Route path='gallery' element={<GalleryManagement />} />
         <Route path='cod-orders' element={<CodOrderManagement />} />
+        <Route path='transactions' element={<TransactionManagement />} />
       </Route>
     </>
   )
