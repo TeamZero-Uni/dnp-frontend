@@ -45,37 +45,37 @@ function FeedbackSection() {
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentIndex]);
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  };
+  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  const prevSlide = () => setCurrentIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
-  };
-
-  const visibleFeedbacks =
-    testimonials.length >= 3
-      ? [
-          testimonials[currentIndex],
-          testimonials[(currentIndex + 1) % testimonials.length],
-          testimonials[(currentIndex + 2) % testimonials.length],
-        ]
-      : testimonials;
+  const visibleFeedbacks = testimonials.length >= 3
+    ? [
+        testimonials[currentIndex],
+        testimonials[(currentIndex + 1) % testimonials.length],
+        testimonials[(currentIndex + 2) % testimonials.length],
+      ]
+    : testimonials;
 
   return (
-    <section className="py-20 px-6 bg-[#F8FAFC] overflow-hidden">
+    <section className="py-10 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-[#0F172A] mb-4">What Our Clients Say</h2>
-          <p className="text-gray-500 text-lg">Trusted by businesses and creators worldwide</p>
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-widest mb-4 bg-[#5a46c2]/10 text-[#5a46c2] border border-[#5a46c2]/20">
+            <span className="w-1.5 h-1.5 rounded-full inline-block bg-[#5a46c2]" />
+            Client Testimonials
+          </div>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
+            What Our <span className="text-[#5a46c2]">Clients Say</span>
+          </h2>
+          <p className="text-gray-500 text-mb">Trusted by businesses and creators worldwide</p>
         </div>
 
         <div className="relative flex items-center justify-center">
           <button
             onClick={prevSlide}
-            className="absolute left-0 md:-left-4 z-20 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-3 md:p-4 rounded-full shadow-lg shadow-blue-500/50 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="absolute left-0 md:-left-4 z-20 p-3 md:p-4 rounded-full shadow-[0_6px_20px_rgba(90,70,194,0.35)] transition-all duration-300 hover:scale-110 focus:outline-none btn-color"
             aria-label="Previous testimonial"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -84,30 +84,36 @@ function FeedbackSection() {
           <div className="flex justify-center items-stretch gap-6 w-full overflow-hidden p-3 px-12 md:px-16">
             {visibleFeedbacks.map((testimonial, index) => (
               <div
-                key={index}
-                className={`bg-white p-8 rounded-2xl shadow-lg border border-gray-100 w-full min-w-[280px] transition-all duration-500 hover:border-blue-500/50 hover:shadow-blue-500/20 hover:scale-105 flex flex-col ${
-                  index === 1
-                    ? "md:scale-105 border-blue-500/30"
-                    : "hidden md:flex"
-                }`}
+                key={`${currentIndex}-${index}`}
+                className={`p-8 rounded-2xl w-full min-w-70 transition-all duration-500 flex flex-col bg-white
+                  ${index === 1 
+                    ? 'md:scale-105 border-[1.5px] border-[#5a46c2]/35 shadow-[0_12px_40px_rgba(90,70,194,0.15)]' 
+                    : 'hidden md:flex border-[1.5px] border-[#ede9fe] shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
+                  }`}
               >
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-700 italic mb-8 leading-relaxed flex-grow min-h-[100px]">
+
+                <p className="italic mb-8 leading-relaxed grow min-h-25 text-gray-700">
                   "{testimonial.quote}"
                 </p>
+
+                <div className="h-px mb-5 rounded bg-[#5a46c2]/10" />
+
                 <div className="flex items-center gap-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name} 
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <div className="p-0.5 rounded-full btn-color">
+                    <img
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="w-11 h-11 rounded-full object-cover block"
+                    />
+                  </div>
                   <div>
                     <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                    <p className="text-sm text-[#5a46c2]">{testimonial.role}</p>
                   </div>
                 </div>
               </div>
@@ -116,7 +122,7 @@ function FeedbackSection() {
 
           <button
             onClick={nextSlide}
-            className="absolute right-0 md:-right-4 z-20 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-3 md:p-4 rounded-full shadow-lg shadow-blue-500/50 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="absolute right-0 md:-right-4 z-20 p-3 md:p-4 rounded-full shadow-[0_6px_20px_rgba(90,70,194,0.35)] transition-all duration-300 hover:scale-110 focus:outline-none btn-color"
             aria-label="Next testimonial"
           >
             <ChevronRight className="w-5 h-5" />
@@ -129,9 +135,9 @@ function FeedbackSection() {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex
-                  ? "w-8 bg-gradient-to-r from-blue-600 to-indigo-600"
-                  : "w-2 bg-gray-300 hover:bg-gray-400"
+                index === currentIndex 
+                ? 'w-8 btn-color' 
+                : 'w-2 bg-gray-300'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
             />

@@ -52,7 +52,7 @@ const LoginForm = ({ setActiveForm }) => {
             type="password"
             value={formData.password}
             onChange={handleChange}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5a46c2] focus:border-transparent transition-all outline-none"
             placeholder="Enter your password"
             required
           />
@@ -60,12 +60,12 @@ const LoginForm = ({ setActiveForm }) => {
       </div>
 
       <div className="flex items-center justify-end">
-        <button type="button" onClick={() => setActiveForm('forgot')} className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+        <button type="button" onClick={() => setActiveForm('forgot')} className="text-sm text-[#5a46c2] hover:text-[#4838a3] font-medium transition-colors">
           Forgot password?
         </button>
       </div>
 
-      <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
+      <button type="submit" className="w-full btn-color  py-3 rounded-lg font-semibold focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
         Sign In
       </button>
 
@@ -86,7 +86,7 @@ const LoginForm = ({ setActiveForm }) => {
       <div className="text-center pt-4">
         <p className="text-gray-600">
           Don't have an account?{' '}
-          <button type="button" onClick={() => setActiveForm('register')} className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+          <button type="button" onClick={() => setActiveForm('register')} className="text-[#5a46c2] hover:text-[#4838a3] font-semibold transition-colors">
             Sign up
           </button>
         </p>

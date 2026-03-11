@@ -23,7 +23,6 @@ function Navbar() {
     { name: "Home", path: "/" },
     { name: "Service", path: "/service" },
     { name: "Shop", path: "/shop" },
-    { name: "Portfolio", path: "/portfolio" },
     { name: "Gallery", path: "/gallery" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
@@ -42,14 +41,18 @@ function Navbar() {
 
           <Link to="/" className="flex items-center gap-1 shrink-0 group">
             <div className="p-1 group-hover:rotate-12 transition-transform duration-300">
-              <img src="/assets/images/logo.png" alt="L" className="h-8 w-auto" />
+              <img
+                src="/assets/images/logo.png"
+                alt="L"
+                className="h-9 w-auto"
+              />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-xl font-extrabold tracking-tight text-gray-900">
+              <span className="text-2xl font-extrabold text-black">
                 DNP <span className="text-[#5a46c2]">3D</span>
               </span>
-              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                Hobby Lobby
+              <span className="text-[9px] ml-0.5 font-black text-gray-500 tracking-widest">
+                HOBBY LOBBY
               </span>
             </div>
           </Link>
@@ -59,7 +62,7 @@ function Navbar() {
               <Link
                 key={item.name}
                 to={item.path}
-                className="px-4 py-2 font-medium text-gray-700 hover:text-[#5a46c2] transition-colors relative group"
+                className="px-4 py-2 font-semibold text-black hover:text-[#5a46c2] transition-colors relative group"
               >
                 {item.name}
                 <span className="absolute inset-x-4 bottom-1 h-0.5 bg-[#5a46c2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
@@ -67,8 +70,9 @@ function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4"></div>
 
+          <div className="hidden md:flex items-center space-x-1">
             <Link
               to="/cart"
               className="relative p-2.5 text-gray-700 hover:bg-[#5a46c2]/10 hover:text-[#5a46c2] rounded-full transition-all"
@@ -93,9 +97,9 @@ function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="text-sm font-bold text-gray-700 hover:text-[#5a46c2] px-4 transition-colors"
+                className="text-sm font-bold text-black hover:text-[#5a46c2] px-4 transition-colors"
               >
-                Sign In
+                Sign In 
               </Link>
             )}
 
@@ -185,7 +189,7 @@ function Navbar() {
 
             <button
               onClick={() => setIsOpen(false)}
-              className="w-full bg-linear-to-r from-[#5a46c2] to-[#4838a3] text-white py-4 rounded-2xl font-bold text-base shadow-xl shadow-purple-200 hover:shadow-2xl hover:shadow-purple-300 active:scale-[0.98] transition-all"
+              className="w-full btn-color py-4 rounded-2xl font-bold text-base shadow-xl shadow-purple-200 hover:shadow-2xl hover:shadow-purple-300 active:scale-[0.98] transition-all"
             >
               Get a Quote
             </button>
