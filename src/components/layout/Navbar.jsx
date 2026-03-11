@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { useCart } from "../../context/CartContext";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [cartCount, setCartCount] = useState(3);
   const [scrolled, setScrolled] = useState(false);
+
+  const { cartItems } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,13 +39,10 @@ function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-18">
+
           <Link to="/" className="flex items-center gap-1 shrink-0 group">
             <div className="p-1 group-hover:rotate-12 transition-transform duration-300">
-              <img
-                src="/assets/images/logo.png"
-                alt="L"
-                className="h-8 w-auto"
-              />
+              <img src="/assets/images/logo.png" alt="L" className="h-8 w-auto" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-xl font-extrabold tracking-tight text-gray-900">
@@ -68,14 +68,15 @@ function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
+
             <Link
               to="/cart"
               className="relative p-2.5 text-gray-700 hover:bg-[#5a46c2]/10 hover:text-[#5a46c2] rounded-full transition-all"
             >
               <FiShoppingCart className="text-xl" />
-              {cartCount > 0 && (
+              {cartItems.length > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center ring-2 ring-white">
-                  {cartCount}
+                  {cartItems.length}
                 </span>
               )}
             </Link>
@@ -104,14 +105,16 @@ function Navbar() {
           </div>
 
           <div className="md:hidden flex items-center gap-4">
-            <Link to="/cart" className="relative text-gray-700">
+
+            <Link to="/cart" className="relative text-gray-700 p-1">
               <FiShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#5a46c2] text-white text-[10px] px-1 rounded-full">
-                  3
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#5a46c2] text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full font-bold">
+                  {cartItems.length}
                 </span>
               )}
             </Link>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg bg-gray-50 text-[#5a46c2]"
@@ -148,9 +151,7 @@ function Navbar() {
               >
                 <span className="text-xl font-bold text-gray-800 group-hover:text-[#5a46c2] transition-colors flex items-center justify-between">
                   {item.name}
-                  <span className="text-gray-400 group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                  <span className="text-gray-400 group-hover:translate-x-1 transition-transform">→</span>
                 </span>
               </Link>
             ))}
@@ -168,9 +169,7 @@ function Navbar() {
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-gray-900">My Account</p>
-                  <p className="text-xs text-gray-500">
-                    View profile & settings
-                  </p>
+                  <p className="text-xs text-gray-500">View profile & settings</p>
                 </div>
               </Link>
             ) : (
