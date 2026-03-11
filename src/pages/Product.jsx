@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Banner from '../components/layout/Banner'
 import ProductCard from '../components/cards/ProductCard';
-import FilterSection from '../components/layout/FilterSection';
+import { motion, AnimatePresence } from 'framer-motion';
+import FilterSection from '../components/sections/FilterSection';
+import { FaCheckCircle, FaTag, FaList, FaTags, FaDollarSign } from 'react-icons/fa';
 
 
   const categories = [
@@ -17,25 +19,28 @@ import FilterSection from '../components/layout/FilterSection';
 
   function Product() {
 
+  // In Product.jsx, update your products array:
   const [products] = useState([
-    { id: 1, name: 'Human Skull', price: 1990, image: '/assets/images/img7.jpg', category: '3D Printing', tags: ['Skull Collection'] },
-    { id: 2, name: '3D-printed human skeleton hand model', price: 1950, image: '/assets/images/img8.jpg', category: '3D Printing', tags: ['PLA+'] },
-    { id: 3, name: 'SlantedDesigns', price: 1200, image: '/assets/images/img9.jpg', category: '3D Resin Printing', tags: ['Resin'] },
-    { id: 4, name: '3D-printed or ceramic planter shaped like a puffer jacket', price: 2500, image: '/assets/images/img10.jpg', category: '3D Resin Printing', tags: ['PLA+'] },
-    { id: 5, name: '3D Printable Loki Mask KeyTag', price: 450, image: '/assets/images/img11.jpg', category: '3D Resin Printing', tags: ['Resin'] },
-    { id: 6, name: '3D-printed toy ship', price: 800, image: '/assets/images/img18.jpg', category: 'Injection Molding', tags: ['DNP Originals'] },
-    { id: 7, name: 'Rapid prototyping parts', price: 1500, image: '/assets/images/img19.jpg', category: 'Injection Molding', tags: ['Skull Collection'] },
-    { id: 8, name: 'Decorative wooden carving', price: 2200, image: '/assets/images/img14.jpg', category: 'Laser Cutting & Engraving', tags: ['Matte Finish'] },
-    { id: 9, name: 'Decorative wooden carving', price: 3000, image: '/assets/images/img15.jpg', category: 'Laser Cutting & Engraving', tags: ['PLA+'] },
-    { id: 10, name: 'custom 3D foam sign decoration', price: 1800, image: '/assets/images/img16.jpg', category: 'Light Letters', tags: ['Resin'] },
-    { id: 11, name: 'custom 3D foam sign decoration', price: 600, image: '/assets/images/img17.jpg', category: 'Light Letters', tags: ['DNP Originals'] },
-  ])
+    { id: 1, name: 'Human Skull', price: 1990, image: '/assets/images/img7.jpg', category: '3D Printing', tags: ['Skull Collection'], stock: 1, stockCount: 1 },
+    { id: 2, name: '3D-printed human skeleton hand model', price: 1950, image: '/assets/images/img8.jpg', category: '3D Printing', tags: ['PLA+'], stock: 4, stockCount: 4 },
+    { id: 3, name: 'SlantedDesigns', price: 1200, image: '/assets/images/img9.jpg', category: '3D Resin Printing', tags: ['Resin'], stock: 5, stockCount: null },
+    { id: 4, name: '3D-printed or ceramic planter shaped like a puffer jacket', price: 2500, image: '/assets/images/img10.jpg', category: '3D Resin Printing', tags: ['PLA+'], stock: 2, stockCount: 2 },
+    { id: 5, name: '3D Printable Loki Mask KeyTag', price: 450, image: '/assets/images/img11.jpg', category: '3D Resin Printing', tags: ['Resin'], stock: 0, stockCount: null },
+    { id: 6, name: '3D-printed toy ship', price: 800, image: '/assets/images/img18.jpg', category: 'Injection Molding', tags: ['DNP Originals'], stock: 3, stockCount: 2 },
+    { id: 7, name: 'Rapid prototyping parts', price: 1500, image: '/assets/images/img19.jpg', category: 'Injection Molding', tags: ['Skull Collection'], stock: 6, stockCount: 6 },
+    { id: 8, name: 'Decorative wooden carving', price: 2200, image: '/assets/images/img14.jpg', category: 'Laser Cutting & Engraving', tags: ['Matte Finish'], stock: 2, stockCount: 2 },
+    { id: 9, name: 'Decorative wooden carving', price: 3000, image: '/assets/images/img15.jpg', category: 'Laser Cutting & Engraving', tags: ['PLA+'], stock: 3, stockCount: 3 },
+    { id: 10, name: 'custom 3D foam sign decoration', price: 1800, image: '/assets/images/img16.jpg', category: 'Light Letters', tags: ['Resin'], stock: 5, stockCount: 4 },
+    { id: 11, name: 'custom 3D foam sign decoration', price: 600, image: '/assets/images/img17.jpg', category: 'Light Letters', tags: ['DNP Originals'], stock: 8, stockCount: null },
+  ]);
 
+  const [inStockOnly, setInStockOnly] = useState(true);
+  const [sortBy, setSortBy] = useState('default');
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState("")
-  const [openSections, setOpenSections] = useState({price: true,categories: true,tags: true});
+  const [openSections, setOpenSections] = useState({availability:true,price: false,categories: false,tags: false});
 
     // --- Handlers ---
   const toggleSection = (section) => {setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));};
@@ -44,15 +49,37 @@ import FilterSection from '../components/layout/FilterSection';
 
   const toggleTag = (tag) => {setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);};
 
+
+
   // --- Filter Logic ---
-  const filteredProducts = products.filter(product => {
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    const matchesTag = selectedTags.length === 0 || product.tags.some(tag => selectedTags.includes(tag));
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesPrice && matchesCategory && matchesTag && matchesSearch;
-  });
+const filteredProducts = products.filter(product => {
+  const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+  const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+  const matchesTag = selectedTags.length === 0 || product.tags.some(tag => selectedTags.includes(tag));
+  const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesStock = !inStockOnly || product.stock !== 0;
+  return matchesPrice && matchesCategory && matchesTag && matchesSearch && matchesStock;
+});
+
+const sortedProducts = [...filteredProducts].sort((a, b) => {
+  if (sortBy === 'price-asc') return a.price - b.price;
+  if (sortBy === 'price-desc') return b.price - a.price;
+  if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
+  return 0;
+});
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 }, 
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.03, 
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    })
+  };
 
    return (
     <>
@@ -60,15 +87,15 @@ import FilterSection from '../components/layout/FilterSection';
         title="Shop"
         subtitle="Explore our collection of premium 3D printed wall art, intricate miniatures, and unique home decor."
         breadcrumbs={["Home", "Shop"]}
-        backgroundImage="/assets/images/anime-8788959.jpg"
+        backgroundImage={null}
         icon="product"
       />
       
-      <div className="container mx-auto px-4 py-10">
+      <div className="container max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           
       <aside className="lg:w-1/4 w-full">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+        <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
           <h2 className="text-xl font-black text-[#5a46c2] mb-2 tracking-tight uppercase">Filter Results</h2>
 
           {/* SEARCH BAR */}
@@ -87,11 +114,34 @@ import FilterSection from '../components/layout/FilterSection';
                 </button>
               </div>
 
+          <FilterSection
+            title="Availability"
+            isOpen={openSections.availability}
+            toggle={() => toggleSection('availability')}
+            icon={<FaCheckCircle size={15} />}
+          >
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => setInStockOnly(!inStockOnly)}
+                  className={`w-12 h-6 rounded-full transition-colors duration-300 relative cursor-pointer ${inStockOnly ? 'bg-blue-500' : 'bg-gray-200'}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${inStockOnly ? 'left-7' : 'left-1'}`}></span>
+                </div>
+                <span className="text-sm text-gray-600">In Stock</span>
+              </label>
+              {inStockOnly && (
+                <button onClick={() => setInStockOnly(false)} className="text-xs text-blue-500 hover:underline">Clear</button>
+              )}
+            </div>
+          </FilterSection>
+
           {/* PRICE SECTION */}
           <FilterSection 
             title="Price" 
             isOpen={openSections.price} 
             toggle={() => toggleSection('price')}
+            icon={<FaDollarSign size={15} />}
           >
             <div className="px-1 pt-2">
               {/* Dual Range Slider Logic */}
@@ -153,6 +203,7 @@ import FilterSection from '../components/layout/FilterSection';
             title="Categories" 
             isOpen={openSections.categories} 
             toggle={() => toggleSection('categories')}
+            icon={<FaList size={15} />}
           >
             <div className="space-y-3">
               {categories.map(cat => (
@@ -175,6 +226,7 @@ import FilterSection from '../components/layout/FilterSection';
             title="Tags" 
             isOpen={openSections.tags} 
             toggle={() => toggleSection('tags')}
+            icon={<FaTags size={15} />}
           >
             <div className="flex flex-wrap gap-2">
               {tagsList.map(tag => (
@@ -198,15 +250,49 @@ import FilterSection from '../components/layout/FilterSection';
 
           {/* Product Grid Area */}
           <main className="lg:w-3/4 w-full">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredProducts.map(item => (
-                <ProductCard key={item.id} product={item} />
-              ))}
-            </div>
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-                <p className="text-gray-400 font-medium text-lg">No items match your criteria.</p>
+              {/* Sort Bar */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Products</h2>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-600 focus:ring-2 focus:ring-[#5a46c2] outline-none bg-white"
+                >
+                  <option value="default">Default sorting</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name-asc">Name: A to Z</option>
+                </select>
               </div>
+            <motion.div 
+              layout 
+              className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-5"
+            >
+              <AnimatePresence mode='popLayout'>
+                {sortedProducts.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    custom={index} 
+                    variants={cardVariants}
+                    initial="hidden"
+                    whileInView="visible" 
+                    viewport={{ once: true, amount: 0.2 }} 
+                    exit={{ opacity: 0, scale: 0.9 }} 
+                  >
+                    <ProductCard product={item} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {filteredProducts.length === 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300"
+              >
+                <p className="text-gray-400 font-medium text-lg">No items match your criteria.</p>
+              </motion.div>
             )}
           </main>
 
