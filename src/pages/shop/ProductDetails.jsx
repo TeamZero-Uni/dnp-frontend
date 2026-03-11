@@ -7,9 +7,11 @@ import {
 import { FiMessageSquare, FiInfo } from 'react-icons/fi';
 import ProductCard from '../../components/cards/ProductCard'; 
 import ReviewSection from '../../components/sections/ReviewSection'; 
+import { useCart } from '../../context/CartContext';
 
 function ProductDetails() {
   const { id } = useParams();
+  const { addToCart } = useCart();
   
   const allProducts = [
     { id: 1, name: 'Human Skull', price: 1990, image: '/assets/images/img7.jpg', category: '3D Printing' },
@@ -56,8 +58,17 @@ function ProductDetails() {
     shipping: "Standard shipping takes 3-5 business days."
   };
 
+  
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity, selectedColor);
+  };
+
+  
+    
+
   return (
-    <div className="container mx-auto px-4 py-8 bg-[#f8fafc] min-h-screen font-sans text-[#334155]">
+    <div className="container mx-auto pt-20 px-4 py-8 bg-[#f8fafc] min-h-screen font-sans text-[#334155]">
       
       <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
         
@@ -153,7 +164,7 @@ function ProductDetails() {
               </button>
             </div>
             <div className="flex gap-4">
-              <button className="flex-1 border-2 border-blue-600 text-blue-600 h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+              <button onClick={handleAddToCart} className="flex-1 border-2 border-blue-600 text-blue-600 h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
                 <FaShoppingCart /> ADD TO CART
               </button>
               <button className="w-12 h-12 flex items-center justify-center border-2 border-slate-100 rounded-2xl text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all group">

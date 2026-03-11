@@ -15,6 +15,8 @@ import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
+import { CartProvider } from './context/CartContext';
+import Cart from './pages/shop/Cart';
 
 
 function App() {
@@ -31,6 +33,7 @@ const router = createBrowserRouter(
          <Route path='/product/:id' element={<ProductDetails/>} />
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/cart" element={<Cart />} />
       </Route>
 
       {/* Admin layout */}
@@ -46,7 +49,10 @@ const router = createBrowserRouter(
 
   return (
     <>
+    <CartProvider>
       <RouterProvider router={router} />
+    </CartProvider>
+      
     </>
   )
 }
