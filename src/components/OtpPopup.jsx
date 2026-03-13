@@ -101,7 +101,7 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
-                className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5a46c2] focus:border-[#5a46c2] transition-all outline-none"
                 required
               />
             ))}
@@ -110,7 +110,7 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
           <button
             type="submit"
             disabled={isVerifying}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-color py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isVerifying ? 'Verifying...' : 'Verify Code'}
           </button>
@@ -119,7 +119,7 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
         <div className="text-center mt-6">
           <p className="text-gray-600 text-sm">
             Didn't receive the code?{' '}
-            <button type="button" onClick={handleResend} className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+            <button type="button" onClick={handleResend} className="text-[#5a46c2] font-semibold transition-colors">
               Resend
             </button>
           </p>

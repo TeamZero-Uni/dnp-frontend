@@ -14,8 +14,13 @@ import Product from './pages/Product';
 import ProductDetails from './pages/shop/ProductDetails';
 import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
-import OrderManagement from './pages/admin/OrderManagement';
+import { CartProvider } from './context/CartContext';
+import Cart from './pages/shop/Cart';
 
+import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
+import GalleryManagement from './pages/admin/GalleryManagement';
+import CodOrderManagement from './pages/admin/CodOrderManagement';
+import TransactionManagement from './pages/admin/TransactionManagement';
 
 function App() {
 
@@ -31,13 +36,17 @@ const router = createBrowserRouter(
          <Route path='/product/:id' element={<ProductDetails/>} />
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/cart" element={<Cart />} />
       </Route>
 
       {/* Admin layout */}
       <Route path="dash" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path='productManagement' element={<ProductManagement />} />
-        <Route path='orders' element={<OrderManagement />} />
+        <Route path='orders' element={<OnlineOrderManagement />} />
+        <Route path='gallery' element={<GalleryManagement />} />
+        <Route path='cod-orders' element={<CodOrderManagement />} />
+        <Route path='transactions' element={<TransactionManagement />} />
       </Route>
     </>
   )
@@ -46,7 +55,10 @@ const router = createBrowserRouter(
 
   return (
     <>
+    <CartProvider>
       <RouterProvider router={router} />
+    </CartProvider>
+      
     </>
   )
 }

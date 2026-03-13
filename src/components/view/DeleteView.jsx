@@ -1,6 +1,6 @@
 import { FiAlertTriangle } from "react-icons/fi";
 
-export default function DeleteProductView({ t, onClose, onConfirm }) {
+export default function DeleteView({ t, onClose, onConfirm }) {
   return (
     <div className="space-y-6">
       <div className="bg-rose-50 rounded-2xl p-4 flex items-start gap-4">
