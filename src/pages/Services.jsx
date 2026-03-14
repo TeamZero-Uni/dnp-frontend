@@ -3,10 +3,34 @@ import * as THREE from "three";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: "3d-printing", label: "3D Printing", icon: "🖨️", description: "From rapid prototyping to final production parts — the full range of additive manufacturing technologies." },
-  { id: "modeling-design", label: "Modeling & Design", icon: "🎨", description: "Digital design services that turn your ideas into precise, manufacturable 3D geometry." },
-  { id: "cutting-engraving", label: "Cutting & Engraving", icon: "⚡", description: "Precision subtractive and marking services for clean edges, fine detail, and branded surfaces." },
-  { id: "production-signage", label: "Production & Signage", icon: "🏭", description: "High-volume manufacturing and custom illuminated signage for businesses at any scale." },
+  {
+    id: "3d-printing",
+    label: "3D Printing",
+    icon: "🖨️",
+    description: "From rapid prototyping to final production parts — the full range of additive manufacturing technologies.",
+    photo: "/assets/images/Services/fdm-printing.jpg", // 👈 your category photo
+  },
+  {
+    id: "modeling-design",
+    label: "Modeling & Design",
+    icon: "🎨",
+    description: "Digital design services that turn your ideas into precise, manufacturable 3D geometry.",
+    photo: "/assets/images/Services/3d-modeling.jpg", // 👈 your category photo
+  },
+  {
+    id: "cutting-engraving",
+    label: "Cutting & Engraving",
+    icon: "⚡",
+    description: "Precision subtractive and marking services for clean edges, fine detail, and branded surfaces.",
+    photo: "/assets/images/Services/engraving.jpg", // 👈 your category photo
+  },
+  {
+    id: "production-signage",
+    label: "Production & Signage",
+    icon: "🏭",
+    description: "High-volume manufacturing and custom illuminated signage for businesses at any scale.",
+    photo: "/assets/images/Services/injection-molding.jpg", // 👈 your category photo
+  },
 ];
 
 const SERVICES = [
@@ -113,7 +137,6 @@ function ParticleBackground() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mount.appendChild(renderer.domElement);
 
-    // Particles
     const count = 120;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
@@ -130,24 +153,23 @@ function ParticleBackground() {
     geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
 
     const material = new THREE.PointsMaterial({
-      color: 0x894def,
-      size: 0.08,
-      transparent: true,
-      opacity: 0.5,
-      sizeAttenuation: true,
+      color: 0x894def, size: 0.08, transparent: true, opacity: 0.5, sizeAttenuation: true,
     });
 
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
 
-    // Floating wireframe spheres
-    const sphereGeo = new THREE.IcosahedronGeometry(1.2, 1);
-    const sphereMat = new THREE.MeshBasicMaterial({ color: 0x894def, wireframe: true, transparent: true, opacity: 0.08 });
-    const sphere1 = new THREE.Mesh(sphereGeo, sphereMat);
+    const sphere1 = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1.2, 1),
+      new THREE.MeshBasicMaterial({ color: 0x894def, wireframe: true, transparent: true, opacity: 0.08 })
+    );
     sphere1.position.set(-5, 2, -3);
     scene.add(sphere1);
 
-    const sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(0.8, 1), new THREE.MeshBasicMaterial({ color: 0x4838a3, wireframe: true, transparent: true, opacity: 0.08 }));
+    const sphere2 = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.8, 1),
+      new THREE.MeshBasicMaterial({ color: 0x4838a3, wireframe: true, transparent: true, opacity: 0.08 })
+    );
     sphere2.position.set(5, -2, -2);
     scene.add(sphere2);
 
@@ -262,14 +284,12 @@ function ServiceCard({ service, onLearnMore, index }) {
       }}
       className="group flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:border-accent/30 transition-shadow duration-300"
     >
-      {/* Image */}
       <div className="relative h-48 overflow-hidden flex-shrink-0">
         <img
           src={service.image}
           alt={service.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         />
-        {/* Shimmer overlay on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ background: "linear-gradient(120deg, transparent 30%, rgba(137,77,239,0.15) 50%, transparent 70%)", backgroundSize: "200% 100%", animation: "shimmer 1.5s infinite" }} />
         {service.highlight && (
@@ -277,11 +297,9 @@ function ServiceCard({ service, onLearnMore, index }) {
             {service.highlight}
           </span>
         )}
-        {/* Gradient fade at bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
       </div>
 
-      {/* Body */}
       <div className="flex flex-col flex-1 p-5">
         <div className="flex items-start flex-wrap gap-2 mb-3">
           <h3 className="text-base font-black text-secondary leading-tight">{service.title}</h3>
@@ -294,8 +312,7 @@ function ServiceCard({ service, onLearnMore, index }) {
         <p className="text-xs font-bold text-secondary mb-2">Key Features:</p>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-4">
           {service.features.map((f, i) => (
-            <div key={f} className="flex items-center gap-1.5 text-xs text-secondary/65"
-              style={{ animationDelay: `${i * 0.05}s` }}>
+            <div key={f} className="flex items-center gap-1.5 text-xs text-secondary/65" style={{ animationDelay: `${i * 0.05}s` }}>
               <span className="w-4 h-4 rounded-full bg-accent flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">✓</span>
               {f}
             </div>
@@ -320,7 +337,6 @@ function ServiceCard({ service, onLearnMore, index }) {
           <span className="relative z-10 flex items-center gap-2">
             Learn More <span className="text-base group-hover/btn:translate-x-1 transition-transform duration-200 inline-block">›</span>
           </span>
-          {/* Ripple bg */}
           <span className="absolute inset-0 bg-white/10 scale-x-0 group-hover/btn:scale-x-100 transition-transform duration-300 origin-left" />
         </button>
       </div>
@@ -332,7 +348,7 @@ function ServiceCard({ service, onLearnMore, index }) {
 export default function ServicesPage() {
   const [modalService, setModalService] = useState(null);
   const [openCategories, setOpenCategories] = useState(
-    () => Object.fromEntries(CATEGORIES.map((c) => [c.id, true]))
+    () => Object.fromEntries(CATEGORIES.map((c) => [c.id, false]))
   );
 
   const toggleCategory = (id) =>
@@ -347,7 +363,6 @@ export default function ServicesPage() {
 
   return (
     <>
-      {/* Global keyframes */}
       <style>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
@@ -384,8 +399,6 @@ export default function ServicesPage() {
         .hero-text-delay2 { animation: slideInUp 0.7s ease 0.3s both; }
         .modal-enter { animation: scaleIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
         .card-grid-enter { animation: fadeIn 0.4s ease both; }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #894def55; border-radius: 99px; }
@@ -393,25 +406,19 @@ export default function ServicesPage() {
 
       <div className="min-h-screen bg-[#f9f8ff]">
 
-        {/* ── NAVBAR ─────────────────────────────────────────────────────────── */}
-       
-
         {/* ── HERO ───────────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-gradient-to-br from-[#f0eeff] via-white to-[#eef4ff] border-b border-gray-100">
-          {/* Three.js canvas */}
           <ParticleBackground />
 
-          {/* Static ambient blobs */}
           <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/6 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-blue-400/5 blur-3xl" />
-
-          {/* Spinning decorative ring */}
           <div className="pointer-events-none absolute top-8 right-32 w-24 h-24 opacity-20 animate-spin-slow hidden lg:block"
             style={{ border: "1.5px dashed #894def", borderRadius: "50%" }} />
           <div className="pointer-events-none absolute bottom-12 left-24 w-16 h-16 opacity-15 animate-spin-slow hidden lg:block"
             style={{ border: "1.5px solid #894def44", borderRadius: "50%", animationDirection: "reverse", animationDuration: "8s" }} />
 
           <div className="relative max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" style={{ zIndex: 1 }}>
+
             {/* Left */}
             <div>
               <div className="hero-text inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-4 py-2 text-xs font-semibold text-secondary/50 mb-6 shadow-sm">
@@ -424,7 +431,6 @@ export default function ServicesPage() {
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center text-2xl shadow-lg animate-float-y">
                     ⚙️
                   </div>
-                  {/* Pulse ring */}
                   <div className="absolute inset-0 rounded-2xl bg-accent/30" style={{ animation: "pulse-ring 2s ease-out infinite" }} />
                 </div>
                 <h1 className="text-5xl font-black text-secondary leading-tight tracking-tight">Service</h1>
@@ -451,20 +457,39 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            {/* Right — category cards */}
+            {/* ── RIGHT — category cards WITH PHOTOS ── */}
             <div className="grid grid-cols-2 gap-4">
               {CATEGORIES.map((cat, i) => (
-                <button key={cat.id} onClick={() => scrollToCategory(cat.id)}
+                <button
+                  key={cat.id}
+                  onClick={() => scrollToCategory(cat.id)}
                   style={{ animationDelay: `${0.1 + i * 0.08}s`, animation: "slideInUp 0.6s ease both" }}
-                  className="group text-left bg-white/60 hover:bg-white backdrop-blur-sm border border-gray-200/80 hover:border-accent/30 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <span className="text-3xl mb-3 block group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
-                  <p className="font-black text-secondary text-sm leading-tight mb-1 group-hover:text-accent transition-colors">{cat.label}</p>
-                  <p className="text-secondary/35 text-xs">{getServicesFor(cat.id).length} services</p>
+                  className="group text-left bg-white/60 hover:bg-white backdrop-blur-sm border border-gray-200/80 hover:border-accent/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  {/* ✅ Photo area */}
+                  <div className="relative h-28 overflow-hidden">
+                    <img
+                      src={cat.photo}
+                      alt={cat.label}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                    {/* Dark gradient overlay at bottom */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  </div>
+                  {/* Text below photo */}
+                  <div className="p-4">
+                    <p className="font-black text-secondary text-sm leading-tight mb-1 group-hover:text-accent transition-colors duration-200">
+                      {cat.label}
+                    </p>
+                    <p className="text-secondary/35 text-xs">{getServicesFor(cat.id).length} services</p>
+                  </div>
                 </button>
               ))}
 
-              <div className="col-span-2 flex items-center gap-4 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-accent/20 transition-all duration-300"
-                style={{ animation: "slideInUp 0.6s ease 0.4s both" }}>
+              <div
+                className="col-span-2 flex items-center gap-4 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-accent/20 transition-all duration-300"
+                style={{ animation: "slideInUp 0.6s ease 0.4s both" }}
+              >
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-md">✓</div>
                 <div>
                   <p className="font-bold text-secondary text-sm">Quality Assured</p>
@@ -477,7 +502,6 @@ export default function ServicesPage() {
 
         {/* ── STATS BAR ──────────────────────────────────────────────────────── */}
         <div className="bg-secondary relative overflow-hidden">
-          {/* Subtle grid texture */}
           <div className="absolute inset-0 opacity-5"
             style={{ backgroundImage: "linear-gradient(rgba(137,77,239,1) 1px,transparent 1px),linear-gradient(90deg,rgba(137,77,239,1) 1px,transparent 1px)", backgroundSize: "40px 40px" }} />
           <div className="relative max-w-7xl mx-auto px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -502,13 +526,23 @@ export default function ServicesPage() {
 
               return (
                 <section key={cat.id} id={cat.id} className="scroll-mt-24">
-                  {/* Category header */}
-                  <button onClick={() => toggleCategory(cat.id)}
-                    className="w-full flex items-center justify-between gap-4 mb-5 group text-left focus:outline-none">
+
+                  {/* ── Category header WITH PHOTO thumbnail ── */}
+                  <button
+                    onClick={() => toggleCategory(cat.id)}
+                    className="w-full flex items-center justify-between gap-4 mb-5 group text-left focus:outline-none"
+                  >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-2xl flex-shrink-0 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
-                        {cat.icon}
+
+                      {/* ✅ Photo thumbnail replaces emoji icon */}
+                      <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 border border-accent/20 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                        <img
+                          src={cat.photo}
+                          alt={cat.label}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
                       </div>
+
                       <div>
                         <h2 className="text-2xl font-black text-secondary leading-tight group-hover:text-accent transition-colors duration-200">
                           {cat.label}
@@ -516,11 +550,12 @@ export default function ServicesPage() {
                         <p className="text-secondary/40 text-sm mt-0.5 hidden sm:block">{cat.description}</p>
                       </div>
                     </div>
+
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="bg-accent/10 text-accent text-xs font-bold border border-accent/20 rounded-full px-3 py-1">
                         {catServices.length} service{catServices.length !== 1 ? "s" : ""}
                       </span>
-                      <span className={`text-secondary/30 text-xl transition-transform duration-400 ${isOpen ? "rotate-180" : ""}`}>↓</span>
+                      <span className={`text-secondary/30 text-xl transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>↓</span>
                     </div>
                   </button>
 
@@ -570,7 +605,6 @@ export default function ServicesPage() {
             <div className="modal-enter relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
               <div className={`h-1.5 w-full bg-gradient-to-r ${modalService.gradient} flex-shrink-0`} />
 
-              {/* Modal header image strip */}
               <div className="relative h-32 overflow-hidden">
                 <img src={modalService.image} alt={modalService.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white" />
