@@ -145,6 +145,7 @@ function About() {
   }, []);
 
   return (
+    
     <div className="bg-primary min-h-screen">
       {/* 1. Header/Banner Area */}
       
@@ -237,17 +238,17 @@ function About() {
           <p className="font-medium text-base text-secondary/60">Our commitment to excellence in every layer.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-8 justify-center flex-wrap px-6 max-w-[1280px] mx-auto">
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">⚙</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Quality Assurance</h3>
             <p className="text-base leading-relaxed text-primary/70">Rigorous physical inspection and tolerance verification on every single part before it leaves our facility.</p>
           </div>
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">🤝</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Customer Trust</h3>
             <p className="text-base leading-relaxed text-primary/70">Building long-term partnerships through transparent communication and reliable project timelines.</p>
           </div>
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">🏆</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Industry Recognition</h3>
             <p className="text-base leading-relaxed text-primary/70">Leading the way with advanced DFM and additive manufacturing expertise across multiple industries.</p>
@@ -400,7 +401,7 @@ function About() {
       </section>
 
       {/* 7. CTA Section */}
-     <ReadyToStart />
+      <ReadyToStart/>
 
     </div>
   );
