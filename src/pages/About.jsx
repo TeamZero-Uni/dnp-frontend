@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Banner from "../components/layout/Banner";
+import ReadyToStart from "../components/ReadyToStart";
 
 const stats = [
   { value: 850, suffix: "+", label: "Projects Completed", icon: "🚀" },
@@ -182,7 +183,7 @@ function About() {
       </section>
 
       {/* 3. Stats Section */}
-      <section ref={statsRef} className="bg-secondary py-24 px-6 relative overflow-hidden">
+      <section ref={statsRef} className="bg-secondary/98 py-20 px-6 relative overflow-hidden ">
         <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[80px] pointer-events-none" />
         <div className="max-w-[1280px] mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-16 justify-center">
@@ -399,18 +400,8 @@ function About() {
       </section>
 
       {/* 7. CTA Section */}
-      <section ref={ctaRef} className={`bg-secondary py-24 px-6 relative overflow-hidden transition-all duration-1000 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <div className="absolute w-[427px] h-[492px] top-0 right-0 rounded-full bg-accent/20 blur-[120px] pointer-events-none"></div>
-        <div className="relative z-10 text-center max-w-[896px] mx-auto">
-          <h2 className="font-black text-4xl lg:text-5xl leading-none text-primary mb-8">Ready to build your next prototype?</h2>
-          <p className="text-xl leading-[1.4] text-primary/70 mb-12">Connect with us today and let's discuss your technical requirements. We're ready when you are.</p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center flex-wrap">
-            <a href="#" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-accent text-secondary shadow-xl hover:-translate-y-0.5 transition-transform">📤 Upload Files</a>
-            <a href="https://wa.me/your-number" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-[#25D366] text-white shadow-xl hover:-translate-y-0.5 transition-transform">💬 WhatsApp Chat</a>
-            <a href="#" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-primary text-secondary shadow-sm hover:-translate-y-0.5 transition-transform">✉ Email Us</a>
-          </div>
-        </div>
-      </section>
+     <ReadyToStart />
+
     </div>
   );
 }
