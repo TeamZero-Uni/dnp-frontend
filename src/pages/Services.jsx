@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
+import Banner from "../components/layout/Banner";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -8,28 +9,28 @@ const CATEGORIES = [
     label: "3D Printing",
     icon: "🖨️",
     description: "From rapid prototyping to final production parts — the full range of additive manufacturing technologies.",
-    photo: "/assets/images/Services/fdm-printing.jpg", // 👈 your category photo
+    photo: "/assets/images/Services/fdm-printing.jpg",
   },
   {
     id: "modeling-design",
     label: "Modeling & Design",
     icon: "🎨",
     description: "Digital design services that turn your ideas into precise, manufacturable 3D geometry.",
-    photo: "/assets/images/Services/3d-modeling.jpg", // 👈 your category photo
+    photo: "/assets/images/Services/3d-modeling.jpg",
   },
   {
     id: "cutting-engraving",
     label: "Cutting & Engraving",
     icon: "⚡",
     description: "Precision subtractive and marking services for clean edges, fine detail, and branded surfaces.",
-    photo: "/assets/images/Services/engraving.jpg", // 👈 your category photo
+    photo: "/assets/images/Services/engraving.jpg",
   },
   {
     id: "production-signage",
     label: "Production & Signage",
     icon: "🏭",
     description: "High-volume manufacturing and custom illuminated signage for businesses at any scale.",
-    photo: "/assets/images/Services/injection-molding.jpg", // 👈 your category photo
+    photo: "/assets/images/Services/injection-molding.jpg",
   },
 ];
 
@@ -37,7 +38,7 @@ const SERVICES = [
   {
     id: "fdm-printing", categoryId: "3d-printing", icon: "🖨️", title: "FDM 3D Printing",
     price: "Starting from Rs. 4,500", shortDesc: "High-quality 3D printing with various materials and finishes.",
-    fullDesc: "FDM (Fused Deposition Modeling) is the most widely-used 3D printing technology. We extrude thermoplastic filaments layer-by-layer to build strong, functional parts. Ideal for prototypes, jigs, fixtures, and end-use components with tight dimensional accuracy.",
+    fullDesc: "FDM (Fused Deposition Modeling) is the most widely-used 3D printing technology. We extrude thermoplastic filaments layer-by-layer to build strong, functional parts.",
     features: ["FDM Technology", "Multiple Materials", "SLA/SLS Options", "Fast Turnaround"],
     materials: ["PLA", "ABS", "PETG", "Nylon", "Resin"],
     highlight: "Most Popular", gradient: "from-violet-600 to-indigo-500",
@@ -46,7 +47,7 @@ const SERVICES = [
   {
     id: "sla-printing", categoryId: "3d-printing", icon: "💎", title: "SLA / Resin Printing",
     price: "Starting from Rs. 6,000", shortDesc: "Ultra-high detail resin printing for smooth, precise models.",
-    fullDesc: "Stereolithography (SLA) uses a UV laser to cure liquid resin, producing parts with exceptional surface finish and fine detail. Perfect for jewelry masters, dental models, miniatures, and any application where surface quality is paramount.",
+    fullDesc: "Stereolithography (SLA) uses a UV laser to cure liquid resin, producing parts with exceptional surface finish and fine detail.",
     features: ["Ultra Fine Detail", "Smooth Surface", "High Accuracy", "Transparent Options"],
     materials: ["Standard Resin", "ABS-Like", "Dental Resin", "Castable"],
     highlight: null, gradient: "from-blue-500 to-cyan-500",
@@ -55,7 +56,7 @@ const SERVICES = [
   {
     id: "3d-modeling", categoryId: "modeling-design", icon: "🎨", title: "3D Modeling",
     price: "Starting from Rs. 5,000", shortDesc: "Professional digital design for any concept, from art to engineering.",
-    fullDesc: "Our designers create detailed 3D models from scratch using industry-standard tools. Whether you have a sketch, a reference photo, or just an idea — we translate it into a print-ready or render-ready file. We specialise in both organic sculpting and hard-surface parametric design.",
+    fullDesc: "Our designers create detailed 3D models from scratch using industry-standard tools.",
     features: ["Organic Sculpting", "Rendering", "Parametric Design", "Reverse Engineering"],
     materials: ["STL", "OBJ", "STEP", "IGES"],
     highlight: null, gradient: "from-fuchsia-500 to-violet-600",
@@ -64,7 +65,7 @@ const SERVICES = [
   {
     id: "cad-design", categoryId: "modeling-design", icon: "📐", title: "CAD Design",
     price: "Starting from Rs. 8,000", shortDesc: "Precise Computer-Aided Design for engineering specifications and manufacturing.",
-    fullDesc: "We produce accurate 2D drawings and 3D CAD assemblies for manufacturing, tooling, and full documentation. Every file includes proper tolerances, GD&T annotations, and a Bill of Materials. Our engineers work to your specs or help you develop them from scratch.",
+    fullDesc: "We produce accurate 2D drawings and 3D CAD assemblies for manufacturing, tooling, and full documentation.",
     features: ["2D Drafting", "Tolerance Analysis", "3D Assemblies", "BOM Creation"],
     materials: ["Metal", "Plastic", "Sheet Metal", "Assemblies"],
     highlight: null, gradient: "from-sky-500 to-blue-600",
@@ -73,7 +74,7 @@ const SERVICES = [
   {
     id: "laser-cutting", categoryId: "cutting-engraving", icon: "⚡", title: "Laser Cutting",
     price: "Starting from Rs. 6,000", shortDesc: "Precision laser cutting for various materials with excellent edge quality.",
-    fullDesc: "Our CO₂ and fiber laser cutters handle everything from thin paper to thick metal with consistent, burr-free edges. We support complex nested layouts to minimise waste and offer same-day turnaround for urgent jobs. Ideal for signage blanks, enclosures, art pieces, and packaging.",
+    fullDesc: "Our CO₂ and fiber laser cutters handle everything from thin paper to thick metal with consistent, burr-free edges.",
     features: ["High Precision", "Complex Designs", "Multiple Materials", "Clean Edges"],
     materials: ["Acrylic", "Wood", "Metal", "Cardboard", "Foam"],
     highlight: null, gradient: "from-orange-500 to-rose-500",
@@ -82,7 +83,7 @@ const SERVICES = [
   {
     id: "engraving", categoryId: "cutting-engraving", icon: "✍️", title: "Engraving",
     price: "Starting from Rs. 3,000", shortDesc: "Professional engraving services for personalization and branding.",
-    fullDesc: "We offer both laser and CNC rotary engraving for permanent, high-contrast marking. From corporate gifts and trophies to industrial part identification — crisp, precise results on virtually any surface. Upload your artwork or logo and we handle the rest.",
+    fullDesc: "We offer both laser and CNC rotary engraving for permanent, high-contrast marking.",
     features: ["Laser Engraving", "CNC Engraving", "Multiple Materials", "Fine Details"],
     materials: ["Metal", "Wood", "Glass", "Acrylic", "Leather"],
     highlight: "Best Value", gradient: "from-emerald-500 to-teal-500",
@@ -91,7 +92,7 @@ const SERVICES = [
   {
     id: "injection-molding", categoryId: "production-signage", icon: "🏭", title: "Injection Molding",
     price: "Starting from Rs. 15,000", shortDesc: "High-volume mass production for plastic components with consistent quality.",
-    fullDesc: "Injection molding is the gold standard for high-volume plastic parts. Once the mould is made, per-unit costs drop dramatically. We offer rapid aluminium tooling for low-to-medium volumes and full steel tools for long production runs. Tight tolerances and excellent surface finishes guaranteed.",
+    fullDesc: "Injection molding is the gold standard for high-volume plastic parts.",
     features: ["High Volume", "Complex Geometries", "Low Unit Cost", "Rapid Tooling"],
     materials: ["ABS", "Polypropylene", "Nylon", "Polycarbonate"],
     highlight: null, gradient: "from-slate-500 to-zinc-600",
@@ -100,7 +101,7 @@ const SERVICES = [
   {
     id: "led-signage", categoryId: "production-signage", icon: "💡", title: "LED Signage",
     price: "Starting from Rs. 12,000", shortDesc: "Custom illuminated signs to enhance your business visibility and branding.",
-    fullDesc: "We design and fabricate custom LED signs — from neon-flex channel letters to backlit acrylic panels and full-colour RGB displays. All builds are weatherproof and engineered for 24/7 operation. Perfect for storefronts, trade show booths, reception areas, and event branding.",
+    fullDesc: "We design and fabricate custom LED signs — from neon-flex channel letters to backlit acrylic panels.",
     features: ["Custom Shapes", "RGB Options", "Neon Flex", "Weatherproof"],
     materials: ["Acrylic", "LED Flex", "ACP", "PVC"],
     highlight: null, gradient: "from-pink-500 to-fuchsia-600",
@@ -114,15 +115,17 @@ const HOW_IT_WORKS = [
   "We manufacture with precision & quality checks",
   "Your order is delivered to your doorstep",
 ];
+
 const STATS = [
-  { value: "7+", label: "Services Offered" },
-  { value: "500+", label: "Projects Delivered" },
-  { value: "5.0★", label: "Customer Rating" },
-  { value: "48hr", label: "Avg Turnaround" },
+  { value: "8+", label: "Services Offered" },
+  { value: "1000+", label: "Projects Delivered" },
+  { value: "4.9★", label: "Customer Rating" },
+  { value: "24hr", label: "Avg Turnaround" },
 ];
+
 const getServicesFor = (catId) => SERVICES.filter((s) => s.categoryId === catId);
 
-// ─── THREE.JS PARTICLE BACKGROUND ─────────────────────────────────────────────
+// ─── THREE.JS PARTICLE BACKGROUND WITH ENHANCED EFFECTS ─────────────────────────────────────────────
 function ParticleBackground() {
   const mountRef = useRef(null);
 
@@ -137,61 +140,128 @@ function ParticleBackground() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mount.appendChild(renderer.domElement);
 
-    const count = 120;
+    // INCREASED PARTICLE COUNT FOR MORE DENSITY
+    const count = 400;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3]     = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-      sizes[i] = Math.random() * 3 + 1;
+      positions[i * 3]     = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      sizes[i] = Math.random() * 4 + 0.5;
+      
+      // Color variation
+      const hue = Math.random() * 0.2 + 0.65; // Purple to violet range
+      colors[i * 3]     = Math.sin(hue) * 0.8 + 0.6;
+      colors[i * 3 + 1] = Math.cos(hue) * 0.5 + 0.4;
+      colors[i * 3 + 2] = Math.sin(hue + 1) * 0.9 + 0.7;
     }
 
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      color: 0x894def, size: 0.08, transparent: true, opacity: 0.5, sizeAttenuation: true,
+      size: 0.12, 
+      transparent: true, 
+      opacity: 0.7, 
+      sizeAttenuation: true,
+      vertexColors: true,
+      sizeRange: [0.5, 5]
     });
 
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
 
-    const sphere1 = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1.2, 1),
-      new THREE.MeshBasicMaterial({ color: 0x894def, wireframe: true, transparent: true, opacity: 0.08 })
-    );
-    sphere1.position.set(-5, 2, -3);
-    scene.add(sphere1);
+    // MULTIPLE SPHERES WITH DIFFERENT SIZES AND POSITIONS
+    const spheres = [
+      { size: 1.5, pos: [-8, 4, -5], color: 0x894def, speed: 0.5, rotSpeed: [0.4, 0.3, 0.2] },
+      { size: 1.0, pos: [8, -3, -3], color: 0x4838a3, speed: 0.4, rotSpeed: [-0.3, 0.5, 0.25] },
+      { size: 0.7, pos: [0, 6, -4], color: 0x6b5ba0, speed: 0.6, rotSpeed: [0.35, -0.4, 0.3] },
+      { size: 0.9, pos: [-5, -5, -2], color: 0x7f68d9, speed: 0.45, rotSpeed: [0.25, 0.35, -0.4] },
+      { size: 1.2, pos: [6, 2, -6], color: 0x5a46c2, speed: 0.55, rotSpeed: [-0.4, 0.3, 0.35] },
+    ];
 
-    const sphere2 = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.8, 1),
-      new THREE.MeshBasicMaterial({ color: 0x4838a3, wireframe: true, transparent: true, opacity: 0.08 })
-    );
-    sphere2.position.set(5, -2, -2);
-    scene.add(sphere2);
+    spheres.forEach((sphereConfig) => {
+      const sphere = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(sphereConfig.size, 2),
+        new THREE.MeshBasicMaterial({ 
+          color: sphereConfig.color, 
+          wireframe: true, 
+          transparent: true, 
+          opacity: 0.12 
+        })
+      );
+      sphere.position.set(...sphereConfig.pos);
+      sphere.userData = sphereConfig;
+      scene.add(sphere);
+    });
 
-    camera.position.z = 8;
+    // ADDITIONAL SMALLER FLOATING PARTICLES LAYER
+    const floatCount = 200;
+    const floatGeometry = new THREE.BufferGeometry();
+    const floatPositions = new Float32Array(floatCount * 3);
+    const floatSizes = new Float32Array(floatCount);
+
+    for (let i = 0; i < floatCount; i++) {
+      floatPositions[i * 3]     = (Math.random() - 0.5) * 25;
+      floatPositions[i * 3 + 1] = (Math.random() - 0.5) * 25;
+      floatPositions[i * 3 + 2] = (Math.random() - 0.5) * 15;
+      floatSizes[i] = Math.random() * 2 + 0.2;
+    }
+
+    floatGeometry.setAttribute("position", new THREE.BufferAttribute(floatPositions, 3));
+    floatGeometry.setAttribute("size", new THREE.BufferAttribute(floatSizes, 1));
+
+    const floatMaterial = new THREE.PointsMaterial({
+      color: 0xb89fff,
+      size: 0.06,
+      transparent: true,
+      opacity: 0.4,
+      sizeAttenuation: true,
+    });
+
+    const floatParticles = new THREE.Points(floatGeometry, floatMaterial);
+    scene.add(floatParticles);
+
+    camera.position.z = 10;
 
     let mouse = { x: 0, y: 0 };
     const onMouseMove = (e) => {
-      mouse.x = (e.clientX / window.innerWidth - 0.5) * 0.3;
-      mouse.y = -(e.clientY / window.innerHeight - 0.5) * 0.3;
+      mouse.x = (e.clientX / window.innerWidth - 0.5) * 0.5;
+      mouse.y = -(e.clientY / window.innerHeight - 0.5) * 0.5;
     };
     window.addEventListener("mousemove", onMouseMove);
 
     let frame;
     const animate = () => {
       frame = requestAnimationFrame(animate);
-      const t = Date.now() * 0.001;
-      particles.rotation.y = t * 0.03 + mouse.x;
-      particles.rotation.x = t * 0.015 + mouse.y;
-      sphere1.rotation.x = t * 0.4;
-      sphere1.rotation.y = t * 0.3;
-      sphere2.rotation.x = -t * 0.3;
-      sphere2.rotation.y = t * 0.5;
+      const t = Date.now() * 0.0005;
+
+      // MAIN PARTICLES ROTATION WITH MOUSE
+      particles.rotation.y = t * 0.08 + mouse.x * 0.5;
+      particles.rotation.x = t * 0.05 + mouse.y * 0.5;
+
+      // FLOATING PARTICLES SLOWER ROTATION
+      floatParticles.rotation.y = t * 0.03 + mouse.x * 0.2;
+      floatParticles.rotation.x = t * 0.02 + mouse.y * 0.2;
+
+      // ANIMATE ALL SPHERES WITH DIFFERENT SPEEDS
+      scene.children.forEach((child, index) => {
+        if (child.userData && child.userData.rotSpeed) {
+          child.rotation.x += child.userData.rotSpeed[0] * 0.01;
+          child.rotation.y += child.userData.rotSpeed[1] * 0.01;
+          child.rotation.z += child.userData.rotSpeed[2] * 0.01;
+          
+          // SUBTLE FLOATING MOVEMENT
+          child.position.y += Math.sin(t * child.userData.speed) * 0.02;
+          child.position.x += Math.cos(t * child.userData.speed) * 0.015;
+        }
+      });
+
       renderer.render(scene, camera);
     };
     animate();
@@ -216,7 +286,51 @@ function ParticleBackground() {
   return <div ref={mountRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
-// ─── ANIMATED COUNTER ─────────────────────────────────────────────────────────
+// ─── SCROLL REVEAL HOOK ─────────────────────────────────────────────────────
+function useScrollReveal(threshold = 0.15) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) observer.unobserve(ref.current);
+    };
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
+
+// ─── ANIMATED SECTION WRAPPER ─────────────────────────────────────────────────
+function AnimatedSection({ children, className = "" }) {
+  const { ref, isVisible } = useScrollReveal();
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ${
+        isVisible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-20"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 function AnimatedStat({ value, label }) {
   const ref = useRef(null);
   const [displayed, setDisplayed] = useState("0");
@@ -248,7 +362,7 @@ function AnimatedStat({ value, label }) {
   );
 }
 
-// ─── SERVICE CARD ─────────────────────────────────────────────────────────────
+// ─── SERVICE CARD ─────────────────────────────────────────────────────────
 function ServiceCard({ service, onLearnMore, index }) {
   const cardRef = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -312,7 +426,7 @@ function ServiceCard({ service, onLearnMore, index }) {
         <p className="text-xs font-bold text-secondary mb-2">Key Features:</p>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mb-4">
           {service.features.map((f, i) => (
-            <div key={f} className="flex items-center gap-1.5 text-xs text-secondary/65" style={{ animationDelay: `${i * 0.05}s` }}>
+            <div key={f} className="flex items-center gap-1.5 text-xs text-secondary/65">
               <span className="w-4 h-4 rounded-full bg-accent flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">✓</span>
               {f}
             </div>
@@ -350,15 +464,30 @@ export default function ServicesPage() {
   const [openCategories, setOpenCategories] = useState(
     () => Object.fromEntries(CATEGORIES.map((c) => [c.id, false]))
   );
+  const [pageLoaded, setPageLoaded] = useState(false);
+
+  // Welcome screen fade-out effect
+  useEffect(() => {
+    setPageLoaded(true);
+  }, []);
 
   const toggleCategory = (id) =>
     setOpenCategories((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const scrollToCategory = (id) => {
     setOpenCategories((prev) => ({ ...prev, [id]: true }));
-    setTimeout(() =>
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50
-    );
+    setTimeout(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Add highlight animation
+        element.style.animation = "categoryPulse 0.6s ease-out";
+      }
+    }, 100);
+  };
+
+  const handleLearnMore = (service) => {
+    setModalService(service);
   };
 
   return (
@@ -380,222 +509,376 @@ export default function ServicesPage() {
           from { opacity: 0; transform: scale(0.92); }
           to   { opacity: 1; transform: scale(1); }
         }
-        @keyframes floatY {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-8px); }
+        @keyframes welcomeFadeOut {
+          0% { opacity: 1; visibility: visible; }
+          95% { opacity: 0; visibility: visible; }
+          100% { opacity: 0; visibility: hidden; }
         }
-        @keyframes rotateSlow {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+        @keyframes welcomeSlideUp {
+          from { transform: translateY(0); opacity: 1; }
+          to { transform: translateY(-100%); opacity: 0; }
         }
-        @keyframes pulse-ring {
-          0%   { transform: scale(1);   opacity: 0.6; }
-          100% { transform: scale(1.6); opacity: 0; }
+        @keyframes categoryPulse {
+          0% { background-color: rgba(90, 70, 194, 0.05); }
+          50% { background-color: rgba(90, 70, 194, 0.15); }
+          100% { background-color: transparent; }
         }
-        .animate-float-y { animation: floatY 3s ease-in-out infinite; }
-        .animate-spin-slow { animation: rotateSlow 12s linear infinite; }
-        .hero-text { animation: slideInUp 0.7s ease both; }
-        .hero-text-delay { animation: slideInUp 0.7s ease 0.15s both; }
-        .hero-text-delay2 { animation: slideInUp 0.7s ease 0.3s both; }
-        .modal-enter { animation: scaleIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
-        .card-grid-enter { animation: fadeIn 0.4s ease both; }
-        ::-webkit-scrollbar { width: 5px; }
+        @keyframes smoothFadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(60px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        @keyframes serviceCardEntrance {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes sectionReveal {
+          from {
+            opacity: 0;
+            transform: translateY(80px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.85) translateY(40px);
+            backdrop-filter: blur(0px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            backdrop-filter: blur(8px);
+          }
+        }
+        @keyframes floatUp {
+          from { opacity: 0; transform: translateY(100px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        html {
+          scroll-behavior: smooth;
+          scroll-padding-top: 100px;
+        }
+        
+        .modal-enter { animation: modalSlideIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .card-grid-enter { animation: serviceCardEntrance 0.6s ease-out both; }
+        .section-reveal { animation: sectionReveal 0.8s ease-out both; }
+        .welcome-screen { animation: welcomeFadeOut 1.2s ease-in-out 3s forwards; }
+        .welcome-text { animation: slideInUp 0.8s ease-out 0.2s both; }
+        
+        /* Smooth scroll reveal for AnimatedSection */
+        .transition-all {
+          transition: opacity 0.7s cubic-bezier(0.4, 0.0, 0.2, 1),
+                      transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        /* Cursor pointer for clickable elements */
+        button {
+          cursor: pointer;
+        }
+        
+        /* Hand cursor for service cards and category buttons */
+        .group button,
+        button[class*="btn"],
+        [class*="button"] {
+          cursor: pointer;
+        }
+        
+        /* Hand cursor for interactive sections */
+        section button {
+          cursor: pointer;
+        }
+        
+        /* Hand cursor for modal interactions */
+        [role="button"] {
+          cursor: pointer;
+        }
+        
+        /* Change cursor for draggable items */
+        .cursor-pointer {
+          cursor: pointer;
+        }
+        
+        .cursor-default {
+          cursor: default;
+        }
+        
+        /* Specific cursor changes for hover states */
+        button:hover,
+        [role="button"]:hover {
+          cursor: pointer;
+        }
+        
+        ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #894def55; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb { 
+          background: linear-gradient(to bottom, #894def88, #5a46c288);
+          border-radius: 10px;
+          transition: background 0.3s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+          background: linear-gradient(to bottom, #894defbb, #5a46c2bb);
+          cursor: pointer;
+        }
       `}</style>
 
-      <div className="min-h-screen bg-[#f9f8ff]">
+      <div className="bg-primary min-h-screen">
+        
+        {/* ── WELCOME SCREEN ── */}
+        {!pageLoaded && (
+          <div className="welcome-screen fixed inset-0 z-[60] flex items-center justify-center bg-gradient-to-br from-primary via-[#f5f3ff] to-primary overflow-hidden">
+            {/* Background animated elements */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+            </div>
 
-        {/* ── HERO ───────────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[#f0eeff] via-white to-[#eef4ff] border-b border-gray-100">
-          <ParticleBackground />
-
-          <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/6 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-blue-400/5 blur-3xl" />
-          <div className="pointer-events-none absolute top-8 right-32 w-24 h-24 opacity-20 animate-spin-slow hidden lg:block"
-            style={{ border: "1.5px dashed #894def", borderRadius: "50%" }} />
-          <div className="pointer-events-none absolute bottom-12 left-24 w-16 h-16 opacity-15 animate-spin-slow hidden lg:block"
-            style={{ border: "1.5px solid #894def44", borderRadius: "50%", animationDirection: "reverse", animationDuration: "8s" }} />
-
-          <div className="relative max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" style={{ zIndex: 1 }}>
-
-            {/* Left */}
-            <div>
-              <div className="hero-text inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-4 py-2 text-xs font-semibold text-secondary/50 mb-6 shadow-sm">
-                🏠 Home <span className="text-gray-300">›</span>
-                <span className="text-secondary">Service</span>
-              </div>
-
-              <div className="hero-text-delay flex items-center gap-4 mb-4">
-                <div className="relative w-14 h-14 flex-shrink-0">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center text-2xl shadow-lg animate-float-y">
-                    ⚙️
+            <div className="text-center welcome-text relative z-10">
+              {/* Logo with animation */}
+              <div className="mb-8">
+                <div className="inline-block">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#5a46c2] via-[#894def] to-[#5a46c2] animate-pulse">
+                    DNP 3D
                   </div>
-                  <div className="absolute inset-0 rounded-2xl bg-accent/30" style={{ animation: "pulse-ring 2s ease-out infinite" }} />
+                  <div className="h-1 bg-gradient-to-r from-transparent via-[#5a46c2] to-transparent mt-2 rounded-full" style={{ animation: "slideInUp 0.8s ease-out 0.3s both" }} />
                 </div>
-                <h1 className="text-5xl font-black text-secondary leading-tight tracking-tight">Service</h1>
               </div>
 
-              <p className="hero-text-delay2 text-secondary/50 text-base leading-relaxed mb-6 max-w-md">
-                Learn more about our story and mission — precision manufacturing from digital design to physical production.
+              {/* Main text */}
+              <h1 className="text-5xl font-black text-secondary mb-3 leading-tight" style={{ animation: "slideInUp 0.8s ease-out 0.4s both" }}>
+                Manufacturing<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5a46c2] to-[#894def]">Solutions</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-secondary/70 text-lg max-w-md mx-auto leading-relaxed mb-8" style={{ animation: "slideInUp 0.8s ease-out 0.5s both" }}>
+                Explore our complete range of 3D printing and manufacturing services
               </p>
 
-              <div className="hero-text-delay flex items-center gap-2 mb-8">
-                <div className="w-10 h-1 rounded-full bg-accent" />
-                <div className="w-2.5 h-2.5 rounded-full bg-accent/40" />
-                <div className="w-2.5 h-2.5 rounded-full bg-accent/20" />
-              </div>
-
-              <div className="hero-text-delay2 flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-4 py-2.5 text-sm font-semibold text-secondary/65 shadow-sm hover:border-accent/30 hover:shadow-md transition-all duration-200 cursor-default">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                  Trusted Worldwide
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-4 py-2.5 text-sm font-semibold text-secondary/65 shadow-sm hover:border-accent/30 hover:shadow-md transition-all duration-200 cursor-default">
-                  ⭐ 5.0 Rating
+              {/* Animated loading dots */}
+              <div className="flex items-center justify-center gap-2" style={{ animation: "slideInUp 0.8s ease-out 0.6s both" }}>
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#5a46c2] animate-bounce" style={{ animationDelay: "0s" }} />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#894def] animate-bounce" style={{ animationDelay: "0.15s" }} />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#6b5ba0] animate-bounce" style={{ animationDelay: "0.3s" }} />
                 </div>
               </div>
-            </div>
 
-            {/* ── RIGHT — category cards WITH PHOTOS ── */}
-            <div className="grid grid-cols-2 gap-4">
-              {CATEGORIES.map((cat, i) => (
-                <button
-                  key={cat.id}
-                  onClick={() => scrollToCategory(cat.id)}
-                  style={{ animationDelay: `${0.1 + i * 0.08}s`, animation: "slideInUp 0.6s ease both" }}
-                  className="group text-left bg-white/60 hover:bg-white backdrop-blur-sm border border-gray-200/80 hover:border-accent/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                >
-                  {/* ✅ Photo area */}
-                  <div className="relative h-28 overflow-hidden">
-                    <img
-                      src={cat.photo}
-                      alt={cat.label}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                    />
-                    {/* Dark gradient overlay at bottom */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  </div>
-                  {/* Text below photo */}
-                  <div className="p-4">
-                    <p className="font-black text-secondary text-sm leading-tight mb-1 group-hover:text-accent transition-colors duration-200">
-                      {cat.label}
-                    </p>
-                    <p className="text-secondary/35 text-xs">{getServicesFor(cat.id).length} services</p>
-                  </div>
-                </button>
-              ))}
-
-              <div
-                className="col-span-2 flex items-center gap-4 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-accent/20 transition-all duration-300"
-                style={{ animation: "slideInUp 0.6s ease 0.4s both" }}
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-md">✓</div>
-                <div>
-                  <p className="font-bold text-secondary text-sm">Quality Assured</p>
-                  <p className="text-secondary/40 text-xs mt-0.5">Trusted by thousands of customers worldwide</p>
-                </div>
-              </div>
+              {/* Loading text */}
+              <p className="text-secondary/50 text-xs mt-6 tracking-widest" style={{ animation: "slideInUp 0.8s ease-out 0.7s both" }}>
+                Loading experience...
+              </p>
             </div>
           </div>
-        </section>
+        )}
+        
+        {/* ── 1. BANNER ── */}
+        <Banner
+          path="Services"
+          title={<>Explore Our<br /><span className="text-[#5a46c2]">Manufacturing Services</span></>}
+          description="From 3D printing and digital design to precision cutting and LED signage — we offer comprehensive manufacturing solutions for every project."
+          tagLine="What We Offer"
+          imageUrl={null}
+          buttonText="Browse Services"
+          buttonLink="/"
+        />
 
-        {/* ── STATS BAR ──────────────────────────────────────────────────────── */}
-        <div className="bg-secondary relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5"
-            style={{ backgroundImage: "linear-gradient(rgba(137,77,239,1) 1px,transparent 1px),linear-gradient(90deg,rgba(137,77,239,1) 1px,transparent 1px)", backgroundSize: "40px 40px" }} />
-          <div className="relative max-w-7xl mx-auto px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {STATS.map((s) => <AnimatedStat key={s.label} {...s} />)}
-          </div>
-        </div>
+        {/* ── 2. CATEGORY CARDS SECTION WITH THREE.JS ── */}
+        <AnimatedSection>
+          <section className="relative overflow-hidden bg-gradient-to-br from-[#f0eeff] via-white to-[#eef4ff]">
+            <ParticleBackground />
+            
+            <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/6 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-blue-400/5 blur-3xl" />
 
-        {/* ── SERVICES GRID ──────────────────────────────────────────────────── */}
-        <main className="max-w-7xl mx-auto px-6 py-14">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-black text-secondary mb-2">Services Grid</h2>
-            <p className="text-secondary/40 text-sm max-w-lg mx-auto">
-              Click a category header to expand or collapse it.
-              Click <strong className="text-secondary/60">Learn More</strong> on any card for full details and pricing.
-            </p>
-          </div>
-
-          <div className="space-y-14">
-            {CATEGORIES.map((cat) => {
-              const catServices = getServicesFor(cat.id);
-              const isOpen = openCategories[cat.id];
-
-              return (
-                <section key={cat.id} id={cat.id} className="scroll-mt-24">
-
-                  {/* ── Category header WITH PHOTO thumbnail ── */}
+            <div className="relative z-10 mx-[6%] py-12 mt-[50px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {CATEGORIES.map((cat, i) => (
                   <button
-                    onClick={() => toggleCategory(cat.id)}
-                    className="w-full flex items-center justify-between gap-4 mb-5 group text-left focus:outline-none"
+                    key={cat.id}
+                    onClick={() => scrollToCategory(cat.id)}
+                    style={{ animation: "slideInUp 0.6s ease both", animationDelay: `${0.1 + i * 0.08}s` }}
+                    className="group text-left bg-white/85 hover:bg-white backdrop-blur-md border border-gray-200/60 hover:border-accent/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                   >
-                    <div className="flex items-center gap-4">
-
-                      {/* ✅ Photo thumbnail replaces emoji icon */}
-                      <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 border border-accent/20 group-hover:scale-110 transition-all duration-300 shadow-sm">
-                        <img
-                          src={cat.photo}
-                          alt={cat.label}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                      </div>
-
-                      <div>
-                        <h2 className="text-2xl font-black text-secondary leading-tight group-hover:text-accent transition-colors duration-200">
-                          {cat.label}
-                        </h2>
-                        <p className="text-secondary/40 text-sm mt-0.5 hidden sm:block">{cat.description}</p>
-                      </div>
+                    {/* Photo area - Fixed */}
+                    <div className="relative h-36 overflow-hidden bg-gray-100">
+                      <img
+                        src={cat.photo}
+                        alt={cat.label}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
                     </div>
-
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="bg-accent/10 text-accent text-xs font-bold border border-accent/20 rounded-full px-3 py-1">
-                        {catServices.length} service{catServices.length !== 1 ? "s" : ""}
-                      </span>
-                      <span className={`text-secondary/30 text-xl transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>↓</span>
+                    {/* Text area - compact */}
+                    <div className="p-4">
+                      <h3 className="font-black text-secondary text-base leading-tight mb-1 group-hover:text-accent transition-colors duration-200">
+                        {cat.label}
+                      </h3>
+                      <p className="text-secondary/50 text-xs">{getServicesFor(cat.id).length} services</p>
                     </div>
                   </button>
+                ))}
+              </div>
 
-                  {/* Animated divider */}
-                  <div className="relative h-px bg-gray-100 mb-8 overflow-hidden">
-                    <div className={`absolute left-0 top-0 h-full bg-gradient-to-r from-accent to-violet-400 transition-all duration-700 ${isOpen ? "w-full" : "w-0"}`} />
-                  </div>
+              {/* Quality Assured Card - More Compact */}
+              <div
+                className="mt-6 flex items-center gap-3 bg-gradient-to-r from-accent/10 to-violet-500/10 backdrop-blur-md border border-accent/25 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-accent/40 transition-all duration-300"
+                style={{ animation: "slideInUp 0.6s ease 0.4s both" }}
+              >
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center text-white text-lg flex-shrink-0 shadow-md">✓</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-secondary text-sm">Quality Assured</p>
+                  <p className="text-secondary/60 text-xs mt-0.5">Trusted by thousands worldwide</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </AnimatedSection>
 
-                  {/* Cards */}
-                  {isOpen && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-4 card-grid-enter">
-                      {catServices.map((service, i) => (
-                        <ServiceCard key={service.id} service={service} onLearnMore={setModalService} index={i} />
-                      ))}
+
+
+        {/* ── 4. SERVICES GRID WITH THREE.JS ── */}
+        <AnimatedSection className="relative mx-[6%] rounded-3xl my-8">
+          <main className="relative overflow-hidden bg-gradient-to-br from-[#f9f8ff] via-[#faf9ff] to-[#f5f3ff] rounded-3xl">
+            <ParticleBackground />
+            
+            <div className="pointer-events-none absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-accent/5 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-violet-400/5 blur-3xl" />
+            
+            <div className="relative z-10 py-20 px-6">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-black text-secondary mb-3">Our Services</h2>
+                <p className="text-secondary/60 text-base max-w-2xl mx-auto leading-relaxed">
+                  Click a category to expand and see all available services.
+                  Click <strong className="text-secondary/70">Learn More</strong> on any card for full details and pricing.
+                </p>
+              </div>
+
+            <div className="space-y-16">
+              {CATEGORIES.map((cat) => {
+                const catServices = getServicesFor(cat.id);
+                const isOpen = openCategories[cat.id];
+
+                return (
+                  <section key={cat.id} id={cat.id} className="scroll-mt-24">
+
+                    {/* Category header */}
+                    <button
+                      onClick={() => toggleCategory(cat.id)}
+                      className="w-full flex items-center justify-between gap-6 mb-8 group text-left focus:outline-none transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-6 flex-1">
+                        {/* Photo thumbnail */}
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-accent/30 group-hover:border-accent group-hover:scale-110 transition-all duration-300 shadow-md">
+                          <img
+                            src={cat.photo}
+                            alt={cat.label}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <h2 className="text-3xl font-black text-secondary leading-tight group-hover:text-accent transition-colors duration-200 mb-2">
+                            {cat.label}
+                          </h2>
+                          <p className="text-secondary/50 text-sm hidden sm:block">{cat.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        <span className="bg-accent/15 text-accent text-sm font-bold border border-accent/40 rounded-full px-4 py-2 group-hover:bg-accent/25 transition-all duration-200">
+                          {catServices.length} service{catServices.length !== 1 ? "s" : ""}
+                        </span>
+                        <span className={`text-secondary/40 text-2xl transition-transform duration-300 group-hover:text-accent ${isOpen ? "rotate-180" : ""}`}>↓</span>
+                      </div>
+                    </button>
+
+                    {/* Animated divider */}
+                    <div className="relative h-0.5 bg-gray-200 mb-12 overflow-hidden rounded-full">
+                      <div className={`absolute left-0 top-0 h-full bg-gradient-to-r from-accent via-violet-500 to-accent transition-all duration-700 ${isOpen ? "w-full" : "w-0"}`} />
                     </div>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-        </main>
 
-        {/* ── FOOTER CTA ─────────────────────────────────────────────────────── */}
-        <section className="border-t border-gray-100 bg-gradient-to-br from-[#f0eeff] to-white py-16 relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+                    {/* Cards */}
+                    {isOpen && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8 card-grid-enter">
+                        {catServices.map((service, i) => (
+                          <ServiceCard 
+                            key={service.id} 
+                            service={service} 
+                            onLearnMore={setModalService} 
+                            index={i} 
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
           </div>
-          <div className="max-w-xl mx-auto px-6 text-center relative">
-            <h2 className="text-3xl font-black text-secondary mb-3">Ready to start your project?</h2>
-            <p className="text-secondary/45 text-sm leading-relaxed mb-8">
-              Tell us your idea and we'll handle everything — from design file to final delivery.
+          </main>
+        </AnimatedSection>
+
+        {/* ── 5. CTA SECTION ── */}
+        <AnimatedSection className="mx-[6%] mt-16 mb-8">
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#dbeafe] via-[#eff6ff] to-[#e0f2fe] py-20 text-center">
+          
+          <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-[#5a46c2]/10 blur-3xl" />
+          <div className="absolute -bottom-20 -left-10 h-80 w-80 rounded-full bg-[#4838a3]/10 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-40 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#5a46c2]/5 blur-3xl" />
+
+          <div className="relative z-10 mx-auto max-w-3xl px-6">
+            
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#5a46c2]/25 bg-[#5a46c2]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#4838a3] backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#5a46c2]" />
+              Ready To Begin
+            </div>
+
+            <h2 className="mb-5 font-black text-4xl leading-tight tracking-tight text-primary md:text-5xl">
+              Ready to Start <br />
+              <span className="text-[#5a46c2]">Your Project?</span>
+            </h2>
+
+            <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-primary/70">
+              Get an instant quote for your manufacturing needs — fast, accurate, and tailored to you.
             </p>
-            <button className="btn-color px-10 py-4 rounded-2xl font-bold text-base shadow-xl hover:opacity-90 hover:scale-105 transition-all duration-200 relative overflow-hidden group">
-              <span className="relative z-10">Get a Free Quote →</span>
-              <span className="absolute inset-0 bg-white/10 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-            </button>
+
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <button
+                className="group flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold bg-accent text-secondary shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+              >
+                Request Quote
+                <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+
+              <button
+                className="rounded-xl border border-accent/30 bg-accent/5 px-8 py-4 text-base font-bold text-accent backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:bg-accent/10"
+              >
+                Contact Us
+              </button>
+            </div>
           </div>
         </section>
+        </AnimatedSection>
 
-        {/* ── MODAL ──────────────────────────────────────────────────────────── */}
+        {/* ── MODAL ── */}
         {modalService && (
           <div
             onClick={(e) => { if (e.target === e.currentTarget) setModalService(null); }}

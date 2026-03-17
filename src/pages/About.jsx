@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Banner from "../components/layout/Banner";
+import ReadyToStart from "../components/ReadyToStart";
 
 const stats = [
   { value: 850, suffix: "+", label: "Projects Completed", icon: "🚀" },
@@ -144,15 +145,19 @@ function About() {
   }, []);
 
   return (
+    
     <div className="bg-primary min-h-screen">
       {/* 1. Header/Banner Area */}
+      
       <Banner
-        title="ABOUT US"
-        subtitle="Delivering high-quality 3D printing and digital fabrication solutions tailored to your creative needs"
-        breadcrumbs={["Home", "About"]}
-        backgroundImage={null}
-        icon="rocket"
-      />
+  path="About"
+  title={<>Engaging you with<br /><span className="text-[#5a46c2]">Creative Design</span></>}
+  description="Providing high-quality 3D rendering for various industries such as architecture, interior design, and product visualization."
+  tagLine="Welcome to Pixeluxe"
+  imageUrl={null}
+  buttonText="Discover More"
+  buttonLink="/"
+/>
 
       {/* 2. Hero Section */}
       <section ref={heroRef} className={`py-20 lg:py-32 transition-all duration-1000 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -160,10 +165,11 @@ function About() {
           <div className="flex-1 flex flex-col gap-6">
             <div className="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-accent/10 w-fit">
               <span className="w-2 h-2 rounded-full bg-accent"></span>
-              <span className="font-bold text-xs tracking-[0.1em] uppercase text-accent">Precision Engineering</span>
+              <span className="font-bold text-xs tracking-[0.1em] uppercase text-accent">Our Journey</span>
+
             </div>
-            <h1 className="font-black text-5xl lg:text-[72px] leading-tight tracking-tight text-secondary">About Us</h1>
-            <p className="text-lg leading-[1.625] text-secondary/70 max-w-[576px]">
+<h2 className="font-black text-5xl lg:text-[72px] leading-tight tracking-tight text-secondary">Built From Passion</h2>   
+         <p className="text-lg leading-[1.625] text-secondary/70 max-w-[576px]">
               We bridge the gap between digital imagination and physical production. Whether it's a single prototype or small-batch manufacturing, we make professional 3D design accessible to everyone.
             </p>
             <button className="inline-flex items-center gap-2 px-8 py-4 bg-secondary text-primary rounded-xl font-bold text-base mt-2 w-fit hover:bg-accent hover:text-secondary transition-colors">
@@ -178,7 +184,7 @@ function About() {
       </section>
 
       {/* 3. Stats Section */}
-      <section ref={statsRef} className="bg-secondary py-24 px-6 relative overflow-hidden">
+      <section ref={statsRef} className="bg-secondary/98 py-20 px-6 relative overflow-hidden ">
         <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-accent/10 blur-[80px] pointer-events-none" />
         <div className="max-w-[1280px] mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-16 justify-center">
@@ -232,17 +238,17 @@ function About() {
           <p className="font-medium text-base text-secondary/60">Our commitment to excellence in every layer.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-8 justify-center flex-wrap px-6 max-w-[1280px] mx-auto">
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">⚙</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Quality Assurance</h3>
             <p className="text-base leading-relaxed text-primary/70">Rigorous physical inspection and tolerance verification on every single part before it leaves our facility.</p>
           </div>
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">🤝</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Customer Trust</h3>
             <p className="text-base leading-relaxed text-primary/70">Building long-term partnerships through transparent communication and reliable project timelines.</p>
           </div>
-          <div className="w-full md:w-[389px] bg-secondary border border-secondary/5 rounded-2xl p-10 shadow-sm">
+          <div className="w-full md:w-[389px] bg-secondary/95 border border-secondary/5 rounded-2xl p-10 shadow-sm">
             <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center text-2xl mb-6">🏆</div>
             <h3 className="font-bold text-xl leading-[1.4] text-primary mb-4">Industry Recognition</h3>
             <p className="text-base leading-relaxed text-primary/70">Leading the way with advanced DFM and additive manufacturing expertise across multiple industries.</p>
@@ -395,18 +401,8 @@ function About() {
       </section>
 
       {/* 7. CTA Section */}
-      <section ref={ctaRef} className={`bg-secondary py-24 px-6 relative overflow-hidden transition-all duration-1000 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <div className="absolute w-[427px] h-[492px] top-0 right-0 rounded-full bg-accent/20 blur-[120px] pointer-events-none"></div>
-        <div className="relative z-10 text-center max-w-[896px] mx-auto">
-          <h2 className="font-black text-4xl lg:text-5xl leading-none text-primary mb-8">Ready to build your next prototype?</h2>
-          <p className="text-xl leading-[1.4] text-primary/70 mb-12">Connect with us today and let's discuss your technical requirements. We're ready when you are.</p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center flex-wrap">
-            <a href="#" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-accent text-secondary shadow-xl hover:-translate-y-0.5 transition-transform">📤 Upload Files</a>
-            <a href="https://wa.me/your-number" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-[#25D366] text-white shadow-xl hover:-translate-y-0.5 transition-transform">💬 WhatsApp Chat</a>
-            <a href="#" className="inline-flex items-center justify-center gap-3 py-5 px-10 rounded-2xl font-bold text-lg bg-primary text-secondary shadow-sm hover:-translate-y-0.5 transition-transform">✉ Email Us</a>
-          </div>
-        </div>
-      </section>
+      <ReadyToStart/>
+
     </div>
   );
 }
