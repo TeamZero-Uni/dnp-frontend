@@ -146,13 +146,16 @@ function About() {
   return (
     <div className="bg-primary min-h-screen">
       {/* 1. Header/Banner Area */}
+      
       <Banner
-        title="ABOUT US"
-        subtitle="Delivering high-quality 3D printing and digital fabrication solutions tailored to your creative needs"
-        breadcrumbs={["Home", "About"]}
-        backgroundImage={null}
-        icon="rocket"
-      />
+  path="About"
+  title={<>Engaging you with<br /><span className="text-[#5a46c2]">Creative Design</span></>}
+  description="Providing high-quality 3D rendering for various industries such as architecture, interior design, and product visualization."
+  tagLine="Welcome to Pixeluxe"
+  imageUrl={null}
+  buttonText="Discover More"
+  buttonLink="/"
+/>
 
       {/* 2. Hero Section */}
       <section ref={heroRef} className={`py-20 lg:py-32 transition-all duration-1000 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
