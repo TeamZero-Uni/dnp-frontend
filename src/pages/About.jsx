@@ -163,10 +163,11 @@ function About() {
           <div className="flex-1 flex flex-col gap-6">
             <div className="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-accent/10 w-fit">
               <span className="w-2 h-2 rounded-full bg-accent"></span>
-              <span className="font-bold text-xs tracking-[0.1em] uppercase text-accent">Precision Engineering</span>
+              <span className="font-bold text-xs tracking-[0.1em] uppercase text-accent">Our Journey</span>
+
             </div>
-            <h1 className="font-black text-5xl lg:text-[72px] leading-tight tracking-tight text-secondary">About Us</h1>
-            <p className="text-lg leading-[1.625] text-secondary/70 max-w-[576px]">
+<h2 className="font-black text-5xl lg:text-[72px] leading-tight tracking-tight text-secondary">Built From Passion</h2>   
+         <p className="text-lg leading-[1.625] text-secondary/70 max-w-[576px]">
               We bridge the gap between digital imagination and physical production. Whether it's a single prototype or small-batch manufacturing, we make professional 3D design accessible to everyone.
             </p>
             <button className="inline-flex items-center gap-2 px-8 py-4 bg-secondary text-primary rounded-xl font-bold text-base mt-2 w-fit hover:bg-accent hover:text-secondary transition-colors">
