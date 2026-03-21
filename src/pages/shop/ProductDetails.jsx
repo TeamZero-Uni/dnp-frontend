@@ -1,303 +1,364 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { 
-  FaRegHeart, FaShoppingCart, FaBolt, FaTruck, FaMapMarkerAlt,
-  FaMoneyBillAlt, FaUndo, FaShieldAlt, FaBox, FaCogs, FaCheckCircle
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  FaShoppingCart, FaBolt, FaTruck, FaMapMarkerAlt,
+  FaMoneyBillAlt, FaUndo, FaHeart, FaRegHeart, FaCheckCircle,
 } from 'react-icons/fa';
-import { FiMessageSquare, FiInfo } from 'react-icons/fi';
-import ProductCard from '../../components/cards/ProductCard'; 
-import ReviewSection from '../../components/sections/ReviewSection'; 
+import { FiPackage } from 'react-icons/fi';
+import ProductCard from '../../components/cards/ProductCard';
+import ReviewSection from '../../components/sections/ReviewSection';
 import { useCart } from '../../context/CartContext';
 
-function ProductDetails() {
-  const { id } = useParams();
+/* ─────────────── constants ──────────────────────────────────── */
+const MAX_QTY = 10;
+
+const allProducts = [
+  { id: 1,  name: 'Human Skull',                                               price: 1990, image: '/assets/images/img7.jpg',  category: '3D Printing',               stock: 4,  weight: '180g',  dimensions: '15×12×10 cm', layerHeight: '0.10mm', description: 'A highly detailed low-poly skull model, 3D printed with precision PLA+. Great for education, display, or artistic use.' },
+  { id: 2,  name: '3D-printed human skeleton hand model',                      price: 1950, image: '/assets/images/img8.jpg',  category: '3D Printing',               stock: 12, weight: '210g',  dimensions: '22×9×5 cm',   layerHeight: '0.12mm', description: 'Anatomically accurate skeleton hand model printed at 0.12mm resolution. Ideal for medical reference or collectors.' },
+  { id: 3,  name: 'SlantedDesigns',                                             price: 1200, image: '/assets/images/img9.jpg',  category: '3D Resin Printing',         stock: 0,  weight: '95g',   dimensions: '10×10×3 cm',  layerHeight: '0.05mm', description: 'Custom slanted design piece using high-detail resin printing. Perfect for modern decor and artistic displays.' },
+  { id: 4,  name: '3D-printed or ceramic planter shaped like a puffer jacket', price: 2500, image: '/assets/images/img10.jpg', category: '3D Resin Printing',         stock: 7,  weight: '320g',  dimensions: '18×14×14 cm', layerHeight: '0.05mm', description: 'Quirky puffer jacket-shaped planter, printed in durable resin. A stylish statement piece for any indoor plant.' },
+  { id: 5,  name: '3D Printable Loki Mask KeyTag',                             price:  450, image: '/assets/images/img11.jpg', category: '3D Resin Printing',         stock: 20, weight: '25g',   dimensions: '6×4×1 cm',    layerHeight: '0.05mm', description: 'Compact Loki-inspired mask keyring printed in fine resin detail. A fun, collectible everyday carry accessory.' },
+  { id: 6,  name: '3D-printed toy ship',                                       price:  800, image: '/assets/images/img18.jpg', category: 'Injection Molding',         stock: 3,  weight: '140g',  dimensions: '20×8×6 cm',   layerHeight: 'N/A',    description: 'Detailed toy ship model crafted via injection molding for durability. Smooth finish, safe for all ages.' },
+  { id: 7,  name: 'Rapid prototyping parts',                                   price: 1500, image: '/assets/images/img19.jpg', category: 'Injection Molding',         stock: 8,  weight: '260g',  dimensions: '25×15×10 cm', layerHeight: 'N/A',    description: 'High-tolerance rapid prototype components. Suitable for mechanical testing, fitment checks, and early-stage product development.' },
+  { id: 8,  name: 'Decorative wooden carving',                                 price: 2200, image: '/assets/images/img14.jpg', category: 'Laser Cutting & Engraving', stock: 5,  weight: '380g',  dimensions: '30×20×2 cm',  layerHeight: 'N/A',    description: 'Precision laser-cut decorative wood panel with intricate engraving. Ideal for wall art, gifting, or interior decor.' },
+  { id: 9,  name: 'Decorative wooden carving',                                 price: 3000, image: '/assets/images/img15.jpg', category: 'Laser Cutting & Engraving', stock: 2,  weight: '450g',  dimensions: '40×30×3 cm',  layerHeight: 'N/A',    description: 'Large-format laser-engraved wooden artwork with fine detail. A premium handcrafted piece for home or office spaces.' },
+  { id: 10, name: 'custom 3D foam sign decoration',                            price: 1800, image: '/assets/images/img16.jpg', category: 'Light Letters',              stock: 6,  weight: '200g',  dimensions: '35×15×5 cm',  layerHeight: 'N/A',    description: 'Bold custom foam light letters for events, storefronts, or home decor. Lightweight and easy to mount.' },
+  { id: 11, name: 'custom 3D foam sign decoration',                            price:  600, image: '/assets/images/img17.jpg', category: 'Light Letters',              stock: 15, weight: '120g',  dimensions: '20×10×5 cm',  layerHeight: 'N/A',    description: 'Compact custom foam sign letters, great for personalised gifts, desk decor, or small event signage.' },
+];
+
+const COLORS = [
+  { name: 'White', hex: '#FFFFFF', ring: '#cbd5e1' },
+  { name: 'Black', hex: '#1e293b', ring: '#1e293b' },
+];
+
+const SRI_LANKA_CITIES = [
+  'Colombo','Kandy','Galle','Jaffna','Matara',
+  'Negombo','Anuradhapura','Trincomalee','Batticaloa','Kurunegala',
+];
+
+/* ─────────────── Toast ──────────────────────────────────────── */
+function Toast({ message, type, visible }) {
+  const bg = type === 'wishlist' ? 'bg-violet-500' : type === 'error' ? 'bg-rose-500' : 'bg-emerald-500';
+  return (
+    <div className={`fixed top-5 right-5 z-[999] flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-xl transition-all duration-400 ${bg} ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3 pointer-events-none'}`}>
+      <FaCheckCircle size={12} /> {message}
+    </div>
+  );
+}
+
+/* ─────────────── LocationModal ──────────────────────────────── */
+function LocationModal({ current, onSelect, onClose }) {
+  const [search, setSearch] = useState('');
+  const filtered = SRI_LANKA_CITIES.filter(c => c.toLowerCase().includes(search.toLowerCase()));
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl p-5 w-72 space-y-3" onClick={e => e.stopPropagation()}>
+        <p className="font-black text-slate-800 text-sm">Select City</p>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-blue-400" />
+        <div className="max-h-44 overflow-y-auto space-y-0.5">
+          {filtered.map(city => (
+            <button key={city} onClick={() => { onSelect(city); onClose(); }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all ${city === current ? 'bg-blue-600 text-white' : 'hover:bg-slate-50 text-slate-600'}`}>
+              {city}
+            </button>
+          ))}
+        </div>
+        <button onClick={onClose} className="w-full text-center text-[10px] text-slate-400 hover:text-slate-500 font-bold">Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────── Spec Table Row ─────────────────────────────── */
+function SpecRow({ label, value, last, multiline }) {
+  return (
+    <tr className={!last ? 'border-b border-slate-100' : ''}>
+      <td className={`py-1.5 pl-3 pr-2 text-[10px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap w-[34%] ${multiline ? 'align-top pt-2' : ''}`}>
+        {label}
+      </td>
+      <td className={`py-1.5 pr-3 text-[11px] font-bold text-slate-700 ${multiline ? 'leading-relaxed' : ''}`}>
+        {value}
+      </td>
+    </tr>
+  );
+}
+
+/* ─────────────── Delivery Strip Tile ───────────────────────── */
+function DeliveryTile({ iconBg, icon, label, value, extra }) {
+  return (
+    <div className="flex items-start gap-2 bg-slate-50 rounded-xl px-3 py-2.5">
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${iconBg}`}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+        <p className="text-[11px] font-bold text-slate-700 leading-tight">{value}</p>
+        {extra}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────── Main Component ─────────────────────────────── */
+export default function ProductDetails() {
+  const { id }        = useParams();
+  const navigate      = useNavigate();
   const { addToCart } = useCart();
-  
-  const allProducts = [
-    { id: 1, name: 'Human Skull', price: 1990, image: '/assets/images/img7.jpg', category: '3D Printing' },
-    { id: 2, name: '3D-printed human skeleton hand model', price: 1950, image: '/assets/images/img8.jpg', category: '3D Printing'},
-    { id: 3, name: 'SlantedDesigns', price: 1200, image: '/assets/images/img9.jpg', category: '3D Resin Printing'},
-    { id: 4, name: '3D-printed or ceramic planter shaped like a puffer jacket', price: 2500, image: '/assets/images/img10.jpg', category: '3D Resin Printing' },
-    { id: 5, name: '3D Printable Loki Mask KeyTag', price: 450, image: '/assets/images/img11.jpg', category: '3D Resin Printing' },
-    { id: 6, name: '3D-printed toy ship', price: 800, image: '/assets/images/img18.jpg', category: 'Injection Molding'},
-    { id: 7, name: 'Rapid prototyping parts', price: 1500, image: '/assets/images/img19.jpg', category: 'Injection Molding' },
-    { id: 8, name: 'Decorative wooden carving', price: 2200, image: '/assets/images/img14.jpg', category: 'Laser Cutting & Engraving' },
-    { id: 9, name: 'Decorative wooden carving', price: 3000, image: '/assets/images/img15.jpg', category: 'Laser Cutting & Engraving' },
-    { id: 10, name: 'custom 3D foam sign decoration', price: 1800, image: '/assets/images/img16.jpg', category: 'Light Letters' },
-    { id: 11, name: 'custom 3D foam sign decoration', price: 600, image: '/assets/images/img17.jpg', category: 'Light Letters' },
-  ];
 
   const product = allProducts.find(p => p.id === parseInt(id)) || allProducts[0];
+  const inStock = product.stock > 0;
 
-  // --- States ---
-  const [activeImage, setActiveImage] = useState(product.image); 
-  const [quantity, setQuantity] = useState(1);
-  const [isExpanded, setIsExpanded] = useState(false); 
-  const [activeTab, setActiveTab] = useState('description');
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('White'); // Color Selection State
+  const galleryImages = [product.image, '/assets/images/img18.jpg', '/assets/images/img7.jpg'];
+  const [activeImage,   setActiveImage]   = useState(product.image);
+  const [isZoomed,      setIsZoomed]      = useState(false);
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+  const [quantity,      setQuantity]      = useState(1);
+  const [wishlisted,    setWishlisted]    = useState(false);
+  const [city,          setCity]          = useState('Colombo');
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [toast,         setToast]         = useState({ message: '', type: 'success', visible: false });
+  const toastTimer = useRef(null);
+
+  const maxQty = Math.min(MAX_QTY, product.stock);
 
   useEffect(() => {
     setActiveImage(product.image);
     setQuantity(1);
+    setSelectedColor(COLORS[0]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id, product.image]);
+  }, [id]);
+
+  const showToast = (message, type = 'success') => {
+    clearTimeout(toastTimer.current);
+    setToast({ message, type, visible: true });
+    toastTimer.current = setTimeout(() => setToast(t => ({ ...t, visible: false })), 2800);
+  };
+
+  const handleQty = dir =>
+    dir === 'plus'
+      ? setQuantity(q => Math.min(q + 1, maxQty))
+      : setQuantity(q => Math.max(q - 1, 1));
+
+  const handleAddToCart = () => {
+    if (!inStock) return;
+    addToCart(product, quantity, selectedColor.name);
+    showToast('Added to cart!');
+  };
+
+  // ── BUY IT NOW ───────────────────────────────────────────────
+  // 1. Adds this product (with chosen color & qty) to the cart
+  // 2. Navigates to /checkout
+  // Checkout.jsx reads cartItems from useCart() so the item
+  // will appear in the Order Summary automatically.
+  const handleBuyNow = () => {
+    if (!inStock) return;
+    addToCart(product, quantity, selectedColor.name);  // ← puts item in cart
+    navigate('/checkout');                              // ← goes to checkout
+  };
+  // ─────────────────────────────────────────────────────────────
+
+  const handleWishlist = () => {
+    setWishlisted(w => !w);
+    showToast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist ❤️', 'wishlist');
+  };
+
+  const stockBadge = () => {
+    if (!inStock)            return { label: 'Out of Stock',                cls: 'bg-rose-50 text-rose-500'       };
+    if (product.stock <= 3)  return { label: `Only ${product.stock} left!`, cls: 'bg-amber-50 text-amber-600'     };
+    return                          { label: 'In Stock',                    cls: 'bg-emerald-50 text-emerald-600' };
+  };
+  const { label: stockLabel, cls: stockCls } = stockBadge();
 
   const relatedProducts = allProducts
     .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4); 
-
-  const handleQuantity = (type) => {
-    if (type === 'plus') setQuantity(quantity + 1);
-    else if (type === 'minus' && quantity > 1) setQuantity(quantity - 1);
-  };
-
-  const extraDetails = {
-    description: "Inspired by low-poly art, this 3D printed wall mount is lightweight and easy to install. Crafted with precision using eco-friendly PLA+, it brings a modern look to your space.",
-    materialCare: "Made from High-Quality PLA+. Avoid extreme heat.",
-    shipping: "Standard shipping takes 3-5 business days."
-  };
-
-  
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity, selectedColor);
-  };
-
-  
-    
+    .slice(0, 4);
 
   return (
-    <div className="container mx-auto pt-20 px-4 py-8 bg-[#f8fafc] min-h-screen font-sans text-[#334155]">
-      
-      <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
-        
-        {/* Left Side: Gallery */}
-        <div className="w-full lg:w-[38%] space-y-4">
-          <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
-            <div 
-              className="w-full aspect-square flex items-center justify-center cursor-zoom-in"
-              onMouseEnter={() => setIsZoomed(true)}
-              onMouseLeave={() => setIsZoomed(false)}
-            >
-              <img 
-                src={activeImage} 
-                alt={product.name} 
-                className={`max-h-full object-contain transition-transform duration-700 ease-in-out ${isZoomed ? 'scale-150' : 'scale-100'}`} 
-              />
+    <div className="container mx-auto pt-20 px-4 py-6 bg-[#f8fafc] min-h-screen font-sans text-[#334155]">
+
+      <Toast {...toast} />
+      {showCityModal && <LocationModal current={city} onSelect={setCity} onClose={() => setShowCityModal(false)} />}
+
+      {/* ── Top Row ── */}
+      <div className="flex flex-col lg:flex-row gap-5 max-w-7xl mx-auto">
+
+        {/* ── Gallery ── */}
+        <div className="w-full lg:w-[36%] space-y-3 flex-shrink-0">
+          <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="w-full aspect-square flex items-center justify-center cursor-zoom-in"
+              onMouseEnter={() => setIsZoomed(true)} onMouseLeave={() => setIsZoomed(false)}>
+              <img src={activeImage} alt={product.name}
+                className={`max-h-full object-contain transition-transform duration-700 ${isZoomed ? 'scale-150' : 'scale-100'}`} />
             </div>
           </div>
-
-          <div className="flex gap-3 justify-center">
-            {[product.image, '/assets/images/img18.jpg', '/assets/images/img7.jpg'].map((img, index) => (
-              <div 
-                key={index} 
-                onMouseEnter={() => setActiveImage(img)}
-                className={`w-20 h-20 rounded-2xl border-2 overflow-hidden transition-all cursor-pointer shadow-sm ${activeImage === img ? 'border-blue-600 scale-105' : 'border-white hover:border-slate-200'}`}
-              >
-                <img src={img} className="w-full h-full object-cover" />
+          <div className="flex gap-2 justify-center">
+            {galleryImages.map((img, i) => (
+              <div key={i} onMouseEnter={() => setActiveImage(img)}
+                className={`w-16 h-16 rounded-xl overflow-hidden transition-all cursor-pointer ${activeImage === img ? 'ring-2 ring-accent ring-offset-1 scale-105' : 'opacity-70 hover:opacity-100'}`}>
+                <img src={img} alt="" className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Center: Details */}
-        <div className="w-full lg:w-[37%] space-y-6 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-          <div>
-            <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">{product.category}</span>
-            <h1 className="text-3xl font-extrabold text-slate-800 mt-3 leading-tight">{product.name}</h1>
-            <div className="flex items-center gap-4 mt-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-blue-600">Rs. {product.price}</span>
-                <span className="text-slate-400 line-through text-sm italic">Rs. 2,500</span>
-              </div>
-              <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-1 rounded-lg">22% OFF</span>
-            </div>
-          </div>
+        {/* ── Product Card ── */}
+        <div className="w-full lg:flex-1 bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 flex flex-col gap-4 flex-1">
 
-          {/* Color Selection */}
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-slate-700">Select Color: <span className="text-blue-600">{selectedColor}</span></p>
-            <div className="flex gap-3">
-              {['White', 'Black'].map((color) => (
+            {/* badges + title + price */}
+            <div>
+              <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                <span className="bg-blue-50 text-accent text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
+                  {product.category}
+                </span>
+                <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 ${stockCls}`}>
+                  <FiPackage size={8} /> {stockLabel}
+                </span>
+              </div>
+              <h1 className="text-xl font-extrabold text-slate-800 leading-snug mb-2">{product.name}</h1>
+              <span className="text-3xl font-black text-accent tracking-tight">
+                Rs. {product.price.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Color + Specs */}
+            <div className="flex gap-5">
+              <div className="space-y-2.5 flex-shrink-0">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Color</p>
+                <div className="flex flex-col gap-2.5">
+                  {COLORS.map(color => (
+                    <button key={color.name} onClick={() => setSelectedColor(color)}
+                      className={`flex items-center gap-5 px-5 py-2.5 rounded-xl border transition-all text-xs font-bold ${
+                        selectedColor.name === color.name
+                          ? 'border-accent bg-blue-50 text-slate-800 shadow-sm'
+                          : 'border-slate-100 text-slate-500 hover:border-slate-200'
+                      }`}>
+                      <span className="w-5 h-5 rounded-full flex-shrink-0"
+                        style={{ border: `1.5px solid ${color.ring}` }} />
+                      {color.name}
+                      {selectedColor.name === color.name && <FaCheckCircle className="text-accent" size={9} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-1.5">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Specifications</p>
+                <div className="rounded-xl overflow-hidden border border-slate-100">
+                  <table className="w-full">
+                    <tbody>
+                      <SpecRow label="Material"     value="Premium PLA+" />
+                      <SpecRow label="Resolution"   value="0.12mm (High)" />
+                      <SpecRow label="Layer Height" value={product.layerHeight} />
+                      <SpecRow label="Dimensions"   value={product.dimensions} />
+                      <SpecRow label="Weight"       value={product.weight} />
+                      <SpecRow label="Description"  value={product.description} multiline last />
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Qty + Buttons */}
+            <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end">
+              <div className="space-y-1">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Qty</p>
+                <div className="flex items-center rounded-xl overflow-hidden border border-slate-200 w-fit bg-slate-50">
+                  <button onClick={() => handleQty('minus')} disabled={quantity <= 1}
+                    className="px-3 py-3 text-slate-500 font-black text-base hover:bg-slate-100 disabled:opacity-30 transition-colors">−</button>
+                  <span className="w-15 text-center font-black text-slate-800 text-sm">{quantity}</span>
+                  <button onClick={() => handleQty('plus')} disabled={quantity >= maxQty || !inStock}
+                    className="px-3 py-3 text-slate-500 font-black text-base hover:bg-slate-100 disabled:opacity-30 transition-colors">+</button>
+                </div>
+                {inStock && <p className="text-[9px] text-slate-400 font-bold">Max {maxQty}</p>}
+              </div>
+
+              <div className="flex-1 flex flex-col gap-2 w-full">
+                {/* BUY IT NOW — adds to cart and navigates to /checkout */}
                 <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`group flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${selectedColor === color ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100 hover:border-slate-200'}`}
+                  onClick={handleBuyNow}
+                  disabled={!inStock}
+                  className="w-full h-10 rounded-xl btn-color text-xs font-black tracking-wide flex items-center justify-center gap-2 hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-200/60 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className={`w-5 h-5 rounded-full border border-slate-200 ${color === 'White' ? 'bg-white' : 'bg-black'}`}></span>
-                  <span className="text-sm font-bold">{color}</span>
-                  {selectedColor === color && <FaCheckCircle className="text-blue-600 text-xs" />}
+                  <FaBolt size={11} />
+                  {inStock ? 'BUY IT NOW' : 'OUT OF STOCK'}
                 </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Technical Specs */}
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-              <FaBox className="text-blue-500" />
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Material</p>
-                <p className="text-xs font-bold text-slate-700 italic">Premium PLA+</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-              <FaCogs className="text-blue-500" />
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase">Resolution</p>
-                <p className="text-xs font-bold text-slate-700 italic">0.12mm (High)</p>
-              </div>
-            </div>
-          </div>
+                <div className="flex gap-2">
+                  {/* ADD TO CART — adds to cart and stays on page */}
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!inStock}
+                    className="flex-1 h-9 rounded-xl border-2 border-accent text-accent text-xs font-black flex items-center justify-center gap-1.5 hover:bg-blue-50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaShoppingCart size={11} /> ADD TO CART
+                  </button>
 
-          {/* Action Buttons */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border-2 border-slate-100 rounded-2xl h-12 overflow-hidden bg-white shadow-sm">
-                <button onClick={() => handleQuantity('minus')} className="px-4 hover:bg-slate-50 text-slate-500 font-black">−</button>
-                <span className="w-12 text-center font-black text-slate-800">{quantity}</span>
-                <button onClick={() => handleQuantity('plus')} className="px-4 hover:bg-slate-50 text-slate-500 font-black">+</button>
-              </div>
-              <button className="flex-1 bg-blue-600 text-white h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-                <FaBolt /> BUY IT NOW
-              </button>
-            </div>
-            <div className="flex gap-4">
-              <button onClick={handleAddToCart} className="flex-1 border-2 border-blue-600 text-blue-600 h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
-                <FaShoppingCart /> ADD TO CART
-              </button>
-              <button className="w-12 h-12 flex items-center justify-center border-2 border-slate-100 rounded-2xl text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all group">
-                <FaRegHeart className="group-hover:fill-rose-500" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Professional Delivery Box */}
-        <div className="w-full lg:w-[25%] space-y-4">
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="p-5 space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Delivery & Service</h4>
-                <FiInfo className="text-slate-300 cursor-help" />
-              </div>
-
-              <div className="space-y-5">
-                <div className="flex gap-4 group">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <FaMapMarkerAlt size={18} />
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-bold text-slate-700 leading-tight">Colombo 01 - Fort, Western Province</p>
-                    <button className="text-blue-500 font-black mt-1 hover:underline uppercase text-[9px] tracking-wider">Change Location</button>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0 text-emerald-600">
-                    <FaTruck size={18} />
-                  </div>
-                  <div className="text-xs font-bold text-slate-600">Ships from Overseas (5-8 days)</div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0 text-orange-600">
-                    <FaMoneyBillAlt size={20} />
-                  </div>
-                  <div className="text-xs font-bold text-slate-600 italic">Cash on Delivery Available</div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-50 space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
-                      <FaUndo size={16} />
-                    </div>
-                    <div className="text-xs">
-                      <p className="font-bold text-slate-700">14 Days Easy Return</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Change of mind not applicable</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0 text-slate-400">
-                      <FaShieldAlt size={18} />
-                    </div>
-                    <p className="text-xs font-bold text-slate-500 italic">Warranty Not Available</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Support Section */}
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-4 rounded-2xl text-white shadow-lg shadow-indigo-100 cursor-pointer hover:brightness-110 transition-all flex items-center gap-4">
-                <div className="bg-white/20 p-2 rounded-lg">
-                  <FiMessageSquare size={20} />
-                </div>
-                <div className="text-xs">
-                  <p className="font-black uppercase tracking-widest">Live Support</p>
-                  <p className="opacity-80 text-[10px]">Chat with our designers</p>
+                  <button onClick={handleWishlist}
+                    className={`w-12 h-9 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                      wishlisted
+                        ? 'border-rose-300 bg-rose-50 text-rose-500 scale-105'
+                        : 'border-slate-200 text-slate-400 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-400'
+                    }`}>
+                    {wishlisted ? <FaHeart size={13} className="animate-bounce" /> : <FaRegHeart size={13} />}
+                  </button>
                 </div>
               </div>
             </div>
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Delivery Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <DeliveryTile
+                iconBg="bg-blue-100" icon={<FaMapMarkerAlt size={11} className="text-blue-600" />}
+                label="Location" value={city}
+                extra={
+                  <button onClick={() => setShowCityModal(true)}
+                    className="text-[9px] font-black text-accent hover:underline uppercase tracking-wider">
+                    Change
+                  </button>
+                }
+              />
+              <DeliveryTile
+                iconBg="bg-emerald-100" icon={<FaTruck size={11} className="text-emerald-600" />}
+                label="Shipping" value="5–8 days"
+              />
+              <DeliveryTile
+                iconBg="bg-orange-100" icon={<FaMoneyBillAlt size={11} className="text-orange-500" />}
+                label="Payment" value="Cash on delivery"
+              />
+              <DeliveryTile
+                iconBg="bg-slate-200" icon={<FaUndo size={10} className="text-slate-500" />}
+                label="Returns" value="14-day return"
+              />
+            </div>
+
           </div>
         </div>
       </div>
 
-      {/* Product Details Tabs */}
-      <div className="max-w-7xl mx-auto mt-12 bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-100">
-        <div className="flex bg-slate-50/50">
-          {['description', 'materialCare', 'shipping'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-8 py-5 text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === tab ? 'text-blue-600 bg-white border-b-4 border-blue-600' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              {tab.replace(/([A-Z])/g, ' $1')}
-            </button>
-          ))}
-        </div>
-
-        <div className="p-8 relative">
-          <div className={`transition-all duration-700 overflow-hidden ${isExpanded ? 'max-h-[1000px]' : 'max-h-28'}`}>
-            <p className="text-slate-600 text-sm leading-relaxed font-medium">
-              {activeTab === 'description' && extraDetails.description}
-              {activeTab === 'materialCare' && extraDetails.materialCare}
-              {activeTab === 'shipping' && extraDetails.shipping}
-            </p>
-            {!isExpanded && <div className="absolute bottom-16 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent"></div>}
-          </div>
-          <div className="mt-6 flex justify-center border-t border-slate-50 pt-6">
-            <button onClick={() => setIsExpanded(!isExpanded)} className="px-8 py-2.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black hover:bg-blue-600 hover:text-white transition-all shadow-sm uppercase tracking-widest">
-              {isExpanded ? 'Show Less ▲' : 'Read Full Specs ▼'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      
       <ReviewSection />
 
-      {/* Related Products */}
-      <div className="max-w-7xl mx-auto mt-20 border-t border-slate-100 pt-12">
-        <div className="flex items-center justify-between mb-10">
-           <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase tracking-tighter">
-             <span className="w-2.5 h-10 bg-blue-600 rounded-full shadow-lg shadow-blue-100"></span> 
-             Recommended For You
-           </h3>
-           <button className="text-blue-600 font-black text-xs hover:underline uppercase tracking-widest">View All Items</button>
+      {relatedProducts.length > 0 && (
+        <div className="max-w-7xl mx-auto mt-16 border-t border-slate-100 pt-10">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3 uppercase tracking-tighter">
+              <span className="w-2 h-8 bg-accent rounded-full" />
+              Recommended For You
+            </h3>
+            <button className="text-accent font-black text-[10px] hover:underline uppercase tracking-widest">View All</button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {relatedProducts.map(item => <ProductCard key={item.id} product={item} />)}
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {relatedProducts.map(item => (
-            <ProductCard key={item.id} product={item} />
-          ))}
-        </div>
-      </div>
-
+      )}
     </div>
   );
 }
-
-export default ProductDetails;

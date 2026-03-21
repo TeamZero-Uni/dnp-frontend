@@ -16,11 +16,13 @@ import Login from './pages/Login';
 import ProductManagement from './pages/admin/ProductManagement';
 import { CartProvider } from './context/CartContext';
 import Cart from './pages/shop/Cart';
+import Checkout from './pages/shop/Checkout';
 
 import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
 import CodOrderManagement from './pages/admin/CodOrderManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
+import Payment from './pages/shop/Payment';
 
 function App() {
 
@@ -37,6 +39,8 @@ const router = createBrowserRouter(
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path='/checkout' element={<Checkout /> } />
+        <Route path='order-success' element={<Payment />} />  
       </Route>
 
       {/* Admin layout */}

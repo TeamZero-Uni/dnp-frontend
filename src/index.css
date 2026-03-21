@@ -1,8 +1,28 @@
 @import "tailwindcss";
 @theme {
+  /* ── Core palette ── */
   --color-primary: #fbfbfb;
   --color-secondary: #06021d;
   --color-accent: #894def;
+
+  /* ── Cart use pallet ── */
+  --color-charm-bg:      #f5f0ff;
+  --color-charm-card:    #ffffff;
+  --color-charm-border:  #e4d9ff;
+  --color-charm-subtle:  #ede8ff;
+  --color-charm-mid:     #c4b5fd;
+  --color-charm-text:    #3b1f7a;
+  --color-charm-accent2: #a78bfa;
+  --color-charm-green:   #059669;
+ 
+  /* ── Checkout specific ── */
+  --color-field-border: #e4e0f0;
+  --color-field-bg:     #faf9ff;
+  --color-selected-bg:  #f3f0ff;
+  --color-summary-border: #ddd6fe;
+  --color-item-bg:      #f3f0ff;
+  --color-item-border:  #ede9fe;
+  --color-divider:      #ede9fe;
 }
 
 body {
@@ -57,6 +77,7 @@ input[type="range"]::-webkit-slider-thumb {
   background: linear-gradient(to right, #5a46c2, #4838a3);
   color: white;
 }
+
 @keyframes float {
   from {
     transform: translateY(0px);
