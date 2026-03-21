@@ -21,13 +21,13 @@ import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
 import CodOrderManagement from './pages/admin/CodOrderManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
+import Contact from './pages/Contact';
 
 function App() {
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      {/* Public layout */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -37,9 +37,9 @@ const router = createBrowserRouter(
         <Route path="/shop" element={<Product />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/contact" element={<Contact />} />
       </Route>
 
-      {/* Admin layout */}
       <Route path="dash" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path='productManagement' element={<ProductManagement />} />

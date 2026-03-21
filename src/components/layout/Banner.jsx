@@ -23,7 +23,7 @@ function Banner({
 }) {
   return (
     <div className="relative w-full bg-white">
-      <div className="absolute inset-0 z-0 bg-linear-to-t from-violet-600 via-violet-200 to-white" />
+      <div className="absolute inset-0 z-0" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 100%, #7c3aed 0%, #c4b5fd 45%, white 72%)" }} />
       <div className="relative z-10  max-w-7xl mx-auto px-6 lg:px-16 flex flex-col lg:flex-row items-center justify-between min-h-140 py-14">
         <div className="flex-1 max-w-xl">
           <div className="flex items-center w-40 gap-2 mt-5 text-sm mb-5 text-violet-600 border border-violet-400 rounded-full px-3 py-1">
@@ -37,7 +37,7 @@ function Banner({
 
             <FiChevronRight size={13} className="opacity-60" />
 
-            <span className="opacity-70">{path}</span>
+            <span className="opacity-70 font-medium">{path}</span>
           </div>
 
           <h1 className="font-black leading-tight mb-5 text-4xl lg:text-5xl text-gray-900">
@@ -67,7 +67,7 @@ function Banner({
           <img
             src={imageUrl || "/assets/images/img11.png"}
             alt="Creative Designer"
-            className="mt-45 z-10 w-130 max-w-full"
+            className="mt-35 z-10 w-130 max-w-full"
           />
 
           <div className="absolute top-8 left-4 z-20 flex items-center gap-2 rounded-xl px-3 py-2 bg-white shadow-lg shadow-violet-200/60 animate-[floatBadge1_4s_ease-in-out_infinite]">

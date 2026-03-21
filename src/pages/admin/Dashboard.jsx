@@ -165,13 +165,13 @@ export default function Dashboard() {
           <p className="text-sm text-indigo-100">Generate a new invoice for customers</p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+        <div className="bg-linear-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
           <FaBoxes className="text-3xl mb-3 opacity-80" />
           <h3 className="font-bold text-lg mb-1">Add Product</h3>
           <p className="text-sm text-blue-100">Add new products to your inventory</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+        <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
           <BiSolidQuoteAltLeft className="text-3xl mb-3 opacity-80" />
           <h3 className="font-bold text-lg mb-1">Send Quote</h3>
           <p className="text-sm text-green-100">Create and send customer quotes</p>
