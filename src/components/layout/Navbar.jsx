@@ -1,19 +1,24 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  FiShoppingCart, FiUser, FiMenu, FiX, FiChevronDown,
+  FiShoppingCart,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiChevronDown,
 } from "react-icons/fi";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../hooks/useAuth";
 
 const NAV = [
   { label: "Home", path: "/" },
-  { label: "Services", path: "/service"},
+  { label: "Services", path: "/service" },
 
   {
     label: "Works",
     links: [
-      { label: "Gallery",   path: "/gallery"   },
-      { label: "Innovation",    path: "/inovation"},
+      { label: "Gallery", path: "/gallery" },
+      { label: "Innovation", path: "/inovation" },
       { label: "Portfolio", path: "/portfolio" },
     ],
   },
@@ -21,8 +26,8 @@ const NAV = [
   {
     label: "About",
     links: [
-      { label: "About US", path: "/about"   },
-      { label: "Contact",  path: "/contact" },
+      { label: "About US", path: "/about" },
+      { label: "Contact", path: "/contact" },
     ],
   },
 
@@ -30,13 +35,14 @@ const NAV = [
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled]     = useState(false);
-  const [active, setActive]         = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileExp, setMobileExp]   = useState(null);
-  const [isLoggedIn]                = useState(false);
-  const navRef                      = useRef(null);
-  const { cartItems }               = useCart();
+  const [mobileExp, setMobileExp] = useState(null);
+  const navRef = useRef(null);
+  const { cartItems } = useCart();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -49,10 +55,14 @@ export default function Navbar() {
       if (navRef.current && !navRef.current.contains(e.target)) setActive(null);
     };
     document.addEventListener("mousedown", fn);
-    return () => document.removeEventListener("mousedown", fn); 
+    return () => document.removeEventListener("mousedown", fn);
   }, []);
 
-  const closeAll = () => { setActive(null); setMobileOpen(false); setMobileExp(null); };
+  const closeAll = () => {
+    setActive(null);
+    setMobileOpen(false);
+    setMobileExp(null);
+  };
 
   return (
     <>
@@ -77,10 +87,17 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-18">
-
-            <Link to="/" onClick={closeAll} className="flex items-center gap-1.5 group shrink-0">
+            <Link
+              to="/"
+              onClick={closeAll}
+              className="flex items-center gap-1.5 group shrink-0"
+            >
               <div className="group-hover:rotate-12 transition-transform duration-300">
-                <img src="/assets/images/logo.png" alt="Logo" className="h-9 w-auto" />
+                <img
+                  src="/assets/images/logo.png"
+                  alt="Logo"
+                  className="h-9 w-auto"
+                />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-[22px] font-extrabold text-black tracking-tight">
@@ -112,7 +129,9 @@ export default function Navbar() {
                   >
                     <button
                       className={`flex items-center gap-1 px-4 py-2 text-[14.5px] font-semibold transition-colors ${
-                        active === item.label ? "text-[#5743be]" : "text-slate-800 hover:text-[#5743be]"
+                        active === item.label
+                          ? "text-[#5743be]"
+                          : "text-slate-800 hover:text-[#5743be]"
                       }`}
                     >
                       {item.label}
@@ -127,12 +146,19 @@ export default function Navbar() {
                         className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-white rounded-xl overflow-hidden"
                         style={{
                           minWidth: 180,
-                          boxShadow: "0 8px 30px rgba(90,70,194,.13), 0 1px 4px rgba(0,0,0,.07)",
+                          boxShadow:
+                            "0 8px 30px rgba(90,70,194,.13), 0 1px 4px rgba(0,0,0,.07)",
                           animation: "fadeDown .15s ease both",
                           border: "1px solid rgba(90,70,194,.12)",
                         }}
                       >
-                        <div className="h-0.75" style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }} />
+                        <div
+                          className="h-0.75"
+                          style={{
+                            background:
+                              "linear-gradient(90deg,#5a46c2,#7c66e3)",
+                          }}
+                        />
                         <div className="py-1.5">
                           {item.links.map((link, i) => (
                             <Link
@@ -140,7 +166,9 @@ export default function Navbar() {
                               to={link.path}
                               onClick={() => setActive(null)}
                               className="flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-[#5743be] hover:bg-violet-50 transition-colors group/link"
-                              style={{ animation: `slideRight .2s ease ${i * 0.04}s both` }}
+                              style={{
+                                animation: `slideRight .2s ease ${i * 0.04}s both`,
+                              }}
                             >
                               {link.label}
                               <span className="w-1 h-1 rounded-full bg-[#5a46c2] opacity-0 group-hover/link:opacity-100 transition-opacity" />
@@ -150,11 +178,11 @@ export default function Navbar() {
                       </div>
                     )}
                   </div>
-                )
+                ),
               )}
             </div>
 
-            <div className="hidden md:flex items-center gap-0.5">
+            <div className="hidden md:flex items-center gap-1.5">
               <Link
                 to="/cart"
                 className="relative p-2.5 rounded-full text-slate-600 hover:text-[#5a46c2] hover:bg-violet-50 transition-all"
@@ -167,12 +195,18 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {isLoggedIn ? (
-                <Link to="/profile" className="p-1 ml-0.5 hover:ring-2 ring-[#5a46c2] ring-offset-2 rounded-full transition-all">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    if (user?.role === "ADMIN") navigate("/dash");
+                    else navigate("/customer-profile");
+                  }}
+                  className="p-1 ml-0.5 hover:ring-2 ring-[#5a46c2] ring-offset-2 rounded-full transition-all"
+                >
                   <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
                     <FiUser size={17} />
                   </div>
-                </Link>
+                </button>
               ) : (
                 <Link
                   to="/login"
@@ -209,7 +243,6 @@ export default function Navbar() {
                 {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
               </button>
             </div>
-
           </div>
         </div>
 
@@ -219,9 +252,16 @@ export default function Navbar() {
               ? "opacity-100 translate-y-0 pointer-events-auto"
               : "opacity-0 -translate-y-3 pointer-events-none"
           }`}
-          style={{ zIndex: 40, maxHeight: "calc(100vh - 72px)", boxShadow: "0 12px 40px rgba(0,0,0,.08)" }}
+          style={{
+            zIndex: 40,
+            maxHeight: "calc(100vh - 72px)",
+            boxShadow: "0 12px 40px rgba(0,0,0,.08)",
+          }}
         >
-          <div className="h-0.75" style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }} />
+          <div
+            className="h-0.75"
+            style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }}
+          />
 
           <div className="px-4 py-3 space-y-0.5">
             {NAV.map((item, idx) =>
@@ -231,7 +271,11 @@ export default function Navbar() {
                   to={item.path}
                   onClick={closeAll}
                   className="flex items-center justify-between px-4 py-3.5 rounded-xl text-[15.5px] font-bold text-slate-700 hover:text-[#5a46c2] hover:bg-violet-50 transition-colors"
-                  style={{ animation: mobileOpen ? `slideRight .3s ease ${idx * 0.04}s both` : "none" }}
+                  style={{
+                    animation: mobileOpen
+                      ? `slideRight .3s ease ${idx * 0.04}s both`
+                      : "none",
+                  }}
                 >
                   {item.label}
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
@@ -239,10 +283,16 @@ export default function Navbar() {
               ) : (
                 <div
                   key={item.label}
-                  style={{ animation: mobileOpen ? `slideRight .3s ease ${idx * 0.04}s both` : "none" }}
+                  style={{
+                    animation: mobileOpen
+                      ? `slideRight .3s ease ${idx * 0.04}s both`
+                      : "none",
+                  }}
                 >
                   <button
-                    onClick={() => setMobileExp(mobileExp === item.label ? null : item.label)}
+                    onClick={() =>
+                      setMobileExp(mobileExp === item.label ? null : item.label)
+                    }
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[15.5px] font-bold transition-colors ${
                       mobileExp === item.label
                         ? "text-[#5a46c2] bg-violet-50"
@@ -275,25 +325,31 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              )
+              ),
             )}
 
             <div className="pt-3 mt-1 border-t border-slate-100 space-y-2">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <Link
-                  to="/profile"
+                  to={user?.role === "ADMIN" ? "/dash" : "/customer-profile"}
                   onClick={closeAll}
                   className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
                 >
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0"
-                    style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
+                    style={{
+                      background: "linear-gradient(135deg,#5a46c2,#4838a3)",
+                    }}
                   >
                     <FiUser size={16} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900 leading-none">My Account</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Profile & settings</p>
+                    <p className="text-sm font-bold text-slate-900 leading-none">
+                      My Account
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Profile & settings
+                    </p>
                   </div>
                 </Link>
               ) : (
@@ -319,7 +375,6 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-
       </nav>
     </>
   );

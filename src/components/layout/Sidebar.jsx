@@ -10,8 +10,10 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { BiSolidQuoteAltLeft } from "react-icons/bi";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
+  const { logoutUser } = useAuth();
   const menuSections = [
     {
       title: "Dashboard",
@@ -178,7 +180,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         </nav>
 
         <div className="p-4 border-t border-slate-100">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all duration-200 group">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all duration-200 group"
+            onClick={logoutUser}
+          >
             <FaSignOutAlt className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-bold text-sm">Logout</span>
           </button>

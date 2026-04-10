@@ -1,40 +1,61 @@
-import { useState } from 'react';
-import { FaLock } from 'react-icons/fa';
+import { useState } from "react";
+import { FaLock } from "react-icons/fa";
+import { resetPassword } from "../../api/api";
 
-const ChangePasswordForm = ({ setActiveForm }) => {
+const ChangePasswordForm = ({ setActiveForm, email }) => {
   const [formData, setFormData] = useState({
-    newPassword: '',
-    confirmPassword: ''
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      alert("Passwords do not match!");
       return;
     }
-    console.log('Password changed successfully');
-    alert('Password changed successfully! Please login with your new password.');
-    setActiveForm('login');
+    try {
+      await resetPassword({
+        email: email, 
+        newPassword: formData.newPassword,
+      });
+      alert(
+        "Password changed successfully! Please login with your new password.",
+      );
+      setActiveForm({ type: "login" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      alert(
+        error?.response?.data?.message ||
+          "Failed to change password. Please try again.",
+      );
+      return;
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-green-800">
-          Create a strong password with at least 8 characters, including uppercase, lowercase, and numbers.
+          Create a strong password with at least 8 characters, including
+          uppercase, lowercase, and numbers.
         </p>
       </div>
 
       <div>
-        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+        <label
+          htmlFor="newPassword"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          New Password
+        </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <FaLock className="text-gray-400" />
@@ -54,7 +75,12 @@ const ChangePasswordForm = ({ setActiveForm }) => {
       </div>
 
       <div>
-        <label htmlFor="change-confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+        <label
+          htmlFor="change-confirmPassword"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Confirm New Password
+        </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <FaLock className="text-gray-400" />
@@ -73,12 +99,19 @@ const ChangePasswordForm = ({ setActiveForm }) => {
         </div>
       </div>
 
-      <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02]">
+      <button
+        type="submit"
+        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02]"
+      >
         Change Password
       </button>
 
       <div className="text-center pt-4">
-        <button type="button" onClick={() => setActiveForm('login')} className="text-gray-600 hover:text-gray-800 font-medium transition-colors flex items-center justify-center gap-2 mx-auto">
+        <button
+          type="button"
+          onClick={() => setActiveForm("login")}
+          className="text-gray-600 hover:text-gray-800 font-medium transition-colors flex items-center justify-center gap-2 mx-auto"
+        >
           <span>←</span> Back to Sign In
         </button>
       </div>
@@ -86,4 +119,4 @@ const ChangePasswordForm = ({ setActiveForm }) => {
   );
 };
 
-export default ChangePasswordForm
+export default ChangePasswordForm;

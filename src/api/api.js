@@ -1,26 +1,47 @@
 import axios from "axios";
+import { log } from "three";
 
 const api = axios.create({
     baseURL: "http://localhost:3000/api/v1",
     withCredentials: true,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-export const login = (credentials) => api.post("/auth/login", credentials);
-export const logout = () => api.post("/auth/logout");
-export const me = () => api.get("/auth/me");
-export const register = (userData) => api.post("/auth/register", userData);
-export const verifyEmail = (otp) => api.post("/auth/verify-otp", { otp });
-export const resendOTP = (email) => api.post("/auth/generate-otp", { email });
-export const forgotPassword = (email) => api.post("/auth/change-password", { email });
-export const googleLogin = () => api.get("/auth/google");
-export const GoogleCallback = () => api.get(`/auth/google/callback`);
-
-export const uploadImage = (formData) => api.post("/upload/img", formData);
-
-export const getProducts = () => api.get("/products");
-export const getProductById = (id) => api.get(`/products/${id}`);
-export const createProduct = (productData) => api.post("/products", productData);
-export const updateProduct = (id, productData) => api.put(`/products/${id}`, productData);
-export const deleteProduct = (id) => api.delete(`/products/${id}`);
-
 export default api;
+
+export const googleLogin = () => {
+    window.location.href = "http://localhost:3000/api/v1/auth/google";
+};
+
+export const register = async (credential) => {
+    const response = await api.post("/auth/register", credential);
+    return response.data.data;
+};
+
+export const logout = async () => {
+    await api.post("/auth/logout");
+    window.location.href = "/";
+};
+
+export const resetPassword = async (email) => {
+    const response = await api.post("/auth/forgot-password",  email );
+    return response;
+};
+
+export const getOtp = async (email) => {
+    const response = await api.post("/auth/generate-otp",  {email} );
+    return response.data;
+}
+
+export const verifyOtp = async (data) => {
+    const response = await api.post("/auth/verify-otp", data);
+    return response;
+}
+
+export const getAllProduct = async () => {
+    const response = await api.get("/products");
+    return response.data;
+}
+
