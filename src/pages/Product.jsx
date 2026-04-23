@@ -3,6 +3,7 @@ import Banner from "../components/layout/Banner";
 import ProductCard from "../components/cards/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import FilterSection from "../components/sections/FilterSection";
+import ReadyToStart from "../components/ReadyToStart"
 import {
   FaCheckCircle,
   FaTag,
@@ -225,7 +226,7 @@ function Product() {
         icon="product"
       />
 
-      <div className="container max-w-7xl mx-auto px-4 py-10">
+      <div className="container max-w-7xl mx-[6%] px-4 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="lg:w-1/4 w-full">
             <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
@@ -465,6 +466,7 @@ function Product() {
           </main>
         </div>
       </div>
+      <ReadyToStart />
     </>
   );
 }
