@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FaLock, FaCheckCircle, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaLock, FaCheckCircle, FaCreditCard, FaMoneyBillWave, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
-/* ─────────────── reusable input ─────────────────────────────── */
+/* ─────────────── Reusable Input Component ─────────────────────────────── */
 function Field({ label, placeholder, value, onChange, type = 'text', required }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -32,7 +32,7 @@ function Field({ label, placeholder, value, onChange, type = 'text', required })
   );
 }
 
-/* ─────────────── Section heading ────────────────────────────── */
+/* ─────────────── Section Heading Component ────────────────────────────── */
 function SectionTitle({ children }) {
   return (
     <div className="flex items-center gap-3 mb-4">
@@ -44,11 +44,15 @@ function SectionTitle({ children }) {
   );
 }
 
-/* ─────────────── Checkout ───────────────────────────────────── */
+/* ─────────────── Main Checkout Component ───────────────────────────────────── */
 export default function Checkout() {
   const { cartItems, clearCart } = useCart();
   const navigate = useNavigate();
 
+  /* ── Multi-step State ── */
+  const [step, setStep] = useState(1);
+
+  /* ── Form States ── */
   const [form, setForm] = useState({
     email: '', firstName: '', lastName: '',
     address: '', city: '', postalCode: '', phone: '',
@@ -62,11 +66,13 @@ export default function Checkout() {
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
+  /* ── Calculations ── */
   const subtotal = cartItems.reduce((a, i) => a + i.price * i.quantity, 0);
   const shipping = 350;
   const total    = subtotal + shipping;
 
-  const validate = () => {
+  /* ── Validation for Step 1 (Shipping Details) ── */
+  const validateStep1 = () => {
     const e = {};
     if (!form.email.trim())     e.email     = 'Required';
     if (!form.firstName.trim()) e.firstName = 'Required';
@@ -74,6 +80,19 @@ export default function Checkout() {
     if (!form.address.trim())   e.address   = 'Required';
     if (!form.city.trim())      e.city      = 'Required';
     if (!form.phone.trim())     e.phone     = 'Required';
+    
+    setErrors(e);
+    
+    // If no errors, proceed to Step 2 and scroll to top smoothly
+    if (Object.keys(e).length === 0) {
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  /* ── Validation for Step 2 (Payment Details) ── */
+  const validateStep2 = () => {
+    const e = {};
     if (paymentMethod === 'card') {
       if (!cardNumber.trim()) e.cardNumber = 'Required';
       if (!cardExpiry.trim()) e.cardExpiry = 'Required';
@@ -83,40 +102,34 @@ export default function Checkout() {
     return Object.keys(e).length === 0;
   };
 
-  // ── UPDATED handleSubmit ──────────────────────────────────────
-  // Generates order number + delivery date, clears the cart,
-  // then navigates to /order-success and passes all data as state
-  // so the Payment.jsx page can display it.
+  /* ── Handle Final Submission ── */
   const handleSubmit = () => {
-    if (!validate()) return;
+    if (!validateStep2()) return;
     setSubmitted(true);
 
-    // Generate order number e.g. "DNP-88502"
+    // Generate mock order data
     const orderNumber = 'DNP-' + Math.floor(10000 + Math.random() * 90000);
-
-    // Calculate estimated delivery date (7 days from today)
     const d = new Date();
     d.setDate(d.getDate() + 7);
     const deliveryDate = d.toLocaleDateString('en-US', {
       weekday: 'long', year: 'numeric', month: 'short', day: 'numeric',
     });
 
+    // Simulate API call delay
     setTimeout(() => {
       clearCart?.();
-      // ── Navigate to /order-success and pass order data as state ──
       navigate('/order-success', {
         state: {
-          cartItems,    // array of ordered items
-          total,        // final total amount
-          orderNumber,  // e.g. "DNP-88502"
-          deliveryDate, // e.g. "Friday, Oct 27, 2023"
+          cartItems,
+          total,
+          orderNumber,
+          deliveryDate,
         },
       });
     }, 1500);
   };
-  // ─────────────────────────────────────────────────────────────
 
-  /* ── Submitting overlay ── */
+  /* ── Submitting Overlay Screen ── */
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary">
@@ -139,199 +152,267 @@ export default function Checkout() {
     <div className="min-h-screen pt-24 pb-20 px-4 font-sans bg-primary text-secondary">
       <div className="max-w-6xl mx-auto">
 
-        {/* Page title */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        {/* Page Title */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center lg:text-left">
           <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-accent">
             DNP 3D Hobby & Lobby
           </p>
-          <h1 className="text-2xl font-black tracking-tight text-secondary">Checkout</h1>
+          <h1 className="text-2xl font-black tracking-tight text-secondary">Secure Checkout</h1>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* ── Progress Indicator (Wizard Steps) ── */}
+        <div className="flex items-center justify-center mb-10 max-w-md mx-auto lg:mx-0">
+          <div className={`text-[10px] uppercase tracking-widest font-black transition-colors ${step >= 1 ? 'text-accent' : 'text-slate-300'}`}>
+            1. Shipping
+          </div>
+          <div className="flex-1 h-1.5 mx-4 bg-slate-200 rounded-full overflow-hidden">
+            <div className={`h-full bg-accent transition-all duration-500 ease-in-out ${step === 2 ? 'w-full' : 'w-0'}`}></div>
+          </div>
+          <div className={`text-[10px] uppercase tracking-widest font-black transition-colors ${step === 2 ? 'text-accent' : 'text-slate-300'}`}>
+            2. Payment
+          </div>
+        </div>
 
-          {/* ════ LEFT — Form ════ */}
-          <motion.div
-            initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.06 }}
-            className="flex-1 min-w-0 space-y-6"
-          >
-            {/* Customer Information */}
-            <div className="rounded-2xl border border-field-border bg-white p-5">
-              <SectionTitle>Customer Information</SectionTitle>
-              <div className="space-y-3">
-                <Field label="Email" placeholder="Email" value={form.email} onChange={set('email')} type="email" required />
-                {errors.email && <p className="text-[10px] text-rose-400 font-bold -mt-2">{errors.email}</p>}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Field label="First Name" placeholder="First Name" value={form.firstName} onChange={set('firstName')} required />
-                    {errors.firstName && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.firstName}</p>}
-                  </div>
-                  <div>
-                    <Field label="Last Name" placeholder="Last Name" value={form.lastName} onChange={set('lastName')} required />
-                    {errors.lastName && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.lastName}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-            {/* Shipping Address */}
-            <div className="rounded-2xl border border-field-border bg-white p-5">
-              <SectionTitle>Shipping Address</SectionTitle>
-              <div className="space-y-3">
-                <div>
-                  <Field label="Address" placeholder="Street address" value={form.address} onChange={set('address')} required />
-                  {errors.address && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.address}</p>}
-                </div>
-                <div>
-                  <Field label="City" placeholder="City" value={form.city} onChange={set('city')} required />
-                  {errors.city && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.city}</p>}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Postal Code" placeholder="Postal Code" value={form.postalCode} onChange={set('postalCode')} />
-                  <div>
-                    <Field label="Phone" placeholder="Phone" value={form.phone} onChange={set('phone')} type="tel" required />
-                    {errors.phone && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.phone}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="rounded-2xl border border-field-border bg-white p-5">
-              <SectionTitle>Payment Method</SectionTitle>
-              <div className="space-y-2">
-
-                {/* Card option */}
-                <label
-                  onClick={() => setPaymentMethod('card')}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all
-                    ${paymentMethod === 'card'
-                      ? 'border-accent bg-selected-bg'
-                      : 'border-field-border bg-field-bg'
-                    }`}
+          {/* ════ LEFT COLUMN — Dynamic Form Steps ════ */}
+          <div className="flex-1 min-w-0 w-full relative">
+            <AnimatePresence mode="wait">
+              
+              {/* ── STEP 1: Shipping Information ── */}
+              {step === 1 && (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
                 >
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                    ${paymentMethod === 'card' ? 'border-accent' : 'border-charm-mid'}`}>
-                    {paymentMethod === 'card' && <div className="w-2 h-2 rounded-full bg-accent" />}
-                  </div>
-                  <FaCreditCard size={13} className={paymentMethod === 'card' ? 'text-accent' : 'text-charm-mid'} />
-                  <span className="text-xs font-black text-secondary">Credit / Debit Card</span>
-                </label>
-
-                {paymentMethod === 'card' && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-3 px-2 pt-1">
-                    <div>
-                      <Field label="Card Number" placeholder="1234 5678 9012 3456" value={cardNumber} onChange={e => setCardNumber(e.target.value)} required />
-                      {errors.cardNumber && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardNumber}</p>}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                  {/* Customer Information Panel */}
+                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                    <SectionTitle>Customer Information</SectionTitle>
+                    <div className="space-y-4">
                       <div>
-                        <Field label="Expiry" placeholder="MM / YY" value={cardExpiry} onChange={e => setCardExpiry(e.target.value)} required />
-                        {errors.cardExpiry && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardExpiry}</p>}
+                        <Field label="Email Address" placeholder="hello@example.com" value={form.email} onChange={set('email')} type="email" required />
+                        {errors.email && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.email}</p>}
                       </div>
-                      <div>
-                        <Field label="CVV" placeholder="•••" value={cardCVV} onChange={e => setCardCVV(e.target.value)} required />
-                        {errors.cardCVV && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardCVV}</p>}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Field label="First Name" placeholder="John" value={form.firstName} onChange={set('firstName')} required />
+                          {errors.firstName && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.firstName}</p>}
+                        </div>
+                        <div>
+                          <Field label="Last Name" placeholder="Doe" value={form.lastName} onChange={set('lastName')} required />
+                          {errors.lastName && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.lastName}</p>}
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                )}
-
-                {/* COD option */}
-                <label
-                  onClick={() => setPaymentMethod('cod')}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all
-                    ${paymentMethod === 'cod'
-                      ? 'border-accent bg-selected-bg'
-                      : 'border-field-border bg-field-bg'
-                    }`}
-                >
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                    ${paymentMethod === 'cod' ? 'border-accent' : 'border-charm-mid'}`}>
-                    {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-accent" />}
                   </div>
-                  <FaMoneyBillWave size={13} className={paymentMethod === 'cod' ? 'text-accent' : 'text-charm-mid'} />
-                  <span className="text-xs font-black text-secondary">Cash on Delivery</span>
-                </label>
-              </div>
-            </div>
-          </motion.div>
 
-          {/* ════ RIGHT — Order Summary ════ */}
+                  {/* Shipping Address Panel */}
+                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                    <SectionTitle>Shipping Address</SectionTitle>
+                    <div className="space-y-4">
+                      <div>
+                        <Field label="Street Address" placeholder="123 Main St, Apartment 4B" value={form.address} onChange={set('address')} required />
+                        {errors.address && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.address}</p>}
+                      </div>
+                      <div>
+                        <Field label="City / District" placeholder="Colombo" value={form.city} onChange={set('city')} required />
+                        {errors.city && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.city}</p>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field label="Postal Code (Optional)" placeholder="00100" value={form.postalCode} onChange={set('postalCode')} />
+                        <div>
+                          <Field label="Phone Number" placeholder="+94 77 123 4567" value={form.phone} onChange={set('phone')} type="tel" required />
+                          {errors.phone && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.phone}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ── STEP 2: Payment Information ── */}
+              {step === 2 && (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                    <SectionTitle>Select Payment Method</SectionTitle>
+                    <div className="space-y-3 mt-4">
+
+                      {/* Credit/Debit Card Option */}
+                      <label
+                        onClick={() => setPaymentMethod('card')}
+                        className={`flex items-center gap-4 px-5 py-4 rounded-xl border cursor-pointer transition-all duration-200
+                          ${paymentMethod === 'card'
+                            ? 'border-accent bg-selected-bg shadow-sm'
+                            : 'border-field-border bg-field-bg hover:border-slate-300'
+                          }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                          ${paymentMethod === 'card' ? 'border-accent' : 'border-charm-mid'}`}>
+                          {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
+                        </div>
+                        <FaCreditCard size={16} className={paymentMethod === 'card' ? 'text-accent' : 'text-charm-mid'} />
+                        <span className="text-sm font-black text-secondary">Credit / Debit Card</span>
+                      </label>
+
+                      {/* Expandable Card Details Form */}
+                      <AnimatePresence>
+                        {paymentMethod === 'card' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }} 
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="space-y-4 px-2 pt-2 pb-4 overflow-hidden"
+                          >
+                            <div>
+                              <Field label="Card Number" placeholder="1234 5678 9012 3456" value={cardNumber} onChange={e => setCardNumber(e.target.value)} required />
+                              {errors.cardNumber && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardNumber}</p>}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Field label="Expiry Date" placeholder="MM / YY" value={cardExpiry} onChange={e => setCardExpiry(e.target.value)} required />
+                                {errors.cardExpiry && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardExpiry}</p>}
+                              </div>
+                              <div>
+                                <Field label="Security Code (CVV)" placeholder="•••" value={cardCVV} onChange={e => setCardCVV(e.target.value)} required />
+                                {errors.cardCVV && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.cardCVV}</p>}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Cash on Delivery Option */}
+                      <label
+                        onClick={() => setPaymentMethod('cod')}
+                        className={`flex items-center gap-4 px-5 py-4 rounded-xl border cursor-pointer transition-all duration-200
+                          ${paymentMethod === 'cod'
+                            ? 'border-accent bg-selected-bg shadow-sm'
+                            : 'border-field-border bg-field-bg hover:border-slate-300'
+                          }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                          ${paymentMethod === 'cod' ? 'border-accent' : 'border-charm-mid'}`}>
+                          {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
+                        </div>
+                        <FaMoneyBillWave size={16} className={paymentMethod === 'cod' ? 'text-accent' : 'text-charm-mid'} />
+                        <span className="text-sm font-black text-secondary">Cash on Delivery (COD)</span>
+                      </label>
+
+                    </div>
+                  </div>
+
+                  {/* Back Navigation Button */}
+                  <button 
+                    onClick={() => {
+                      setStep(1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }} 
+                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-accent transition-colors pt-4 pl-2"
+                  >
+                    <FaArrowLeft size={10} /> Back to Shipping
+                  </button>
+
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ════ RIGHT COLUMN — Order Summary ════ */}
           <motion.div
             initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
-            className="w-full lg:w-[340px] flex-shrink-0 sticky top-24"
+            className="w-full lg:w-[360px] flex-shrink-0 sticky top-28"
           >
-            <div className="rounded-2xl overflow-hidden border border-summary-border shadow-[0_8px_40px_#894def22]">
+            <div className="rounded-3xl overflow-hidden border border-summary-border shadow-[0_8px_40px_#894def22] bg-white">
 
-              {/* header */}
-              <div className="px-5 py-4 flex items-center gap-3 checkout-summary-header">
-                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <FaLock size={13} className="text-white" />
+              {/* Summary Header */}
+              <div className="px-6 py-5 flex items-center gap-4 checkout-summary-header bg-slate-50/50 border-b border-slate-100">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <FaLock size={14} className="text-white" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-black text-white leading-none">Order Summary</h2>
-                  <p className="text-[10px] text-white/70 mt-0.5 font-bold">
-                    {cartItems.reduce((a, i) => a + i.quantity, 0)} items
+                  <h2 className="text-base font-black leading-none text-secondary">Order Summary</h2>
+                  <p className="text-xs text-accent mt-1.5 font-bold uppercase tracking-widest">
+                    {cartItems.reduce((a, i) => a + i.quantity, 0)} items in cart
                   </p>
                 </div>
               </div>
 
-              {/* cart items */}
-              <div className="px-5 pt-4 pb-2 space-y-3 bg-white">
+              {/* Cart Items List */}
+              <div className="px-6 pt-5 pb-2 space-y-4">
                 {cartItems.map(item => (
-                  <div key={`${item.id}-${item.color}`} className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-item-border bg-item-bg">
+                  <div key={`${item.id}-${item.color}`} className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-item-border bg-item-bg">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black truncate text-secondary">{item.name}</p>
-                      <p className="text-[10px] font-bold text-accent/60">
+                      <p className="text-sm font-black truncate text-secondary">{item.name}</p>
+                      <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest">
                         Qty: {item.quantity} · {item.color}
                       </p>
-                      <p className="text-[10px] font-bold text-accent/60">
-                        Price: Rs. {item.price.toLocaleString()}
-                      </p>
                     </div>
-                    <span className="text-xs font-black flex-shrink-0 text-secondary">
+                    <span className="text-sm font-black flex-shrink-0 text-secondary">
                       Rs. {(item.price * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mx-5 h-px bg-divider" />
+              <div className="mx-6 my-4 h-px bg-slate-100" />
 
-              {/* price breakdown */}
-              <div className="px-5 py-4 space-y-2 bg-white">
+              {/* Price Breakdown */}
+              <div className="px-6 pb-6 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-accent/60">Subtotal</span>
-                  <span className="text-[11px] font-black text-secondary">Rs. {subtotal.toLocaleString()}</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Subtotal</span>
+                  <span className="text-xs font-black text-secondary">Rs. {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-accent/60">Shipping</span>
-                  <span className="text-[11px] font-black text-secondary">Calculated Rs. {shipping.toLocaleString()}</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipping</span>
+                  <span className="text-xs font-black text-secondary">Rs. {shipping.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center rounded-xl px-4 py-3 mt-1 checkout-total-row">
-                  <span className="text-xs font-black uppercase tracking-wider text-accent">Total</span>
-                  <span className="text-base font-black text-btn-from">Rs. {total.toLocaleString()}</span>
+                
+                <div className="flex justify-between items-center rounded-2xl px-5 py-4 mt-4 bg-slate-50 border border-slate-100">
+                  <span className="text-sm font-black uppercase tracking-widest text-accent">Total</span>
+                  <span className="text-xl font-black text-accent">Rs. {total.toLocaleString()}</span>
                 </div>
               </div>
 
-              {/* checkout button */}
-              <div className="px-5 pb-5 bg-white">
-                <button
-                  onClick={handleSubmit}
-                  className="w-full h-11 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md btn-color"
-                >
-                  <FaLock size={10} /> Complete Order
-                </button>
-                <div className="flex justify-center gap-5 mt-3">
-                  {['🔒 Secure', '✦ Trusted', '🚚 Fast'].map(b => (
-                    <span key={b} className="text-[9px] font-bold text-accent/50">{b}</span>
+              {/* ── Dynamic Action Button based on Current Step ── */}
+              <div className="px-6 pb-6">
+                {step === 1 ? (
+                  <button
+                    onClick={validateStep1}
+                    className="w-full h-14 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg active:scale-[0.98] btn-color text-white bg-blue-600 hover:bg-blue-700 hover:shadow-blue-200"
+                  >
+                    Continue to Payment <FaArrowRight size={12} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    className="w-full h-14 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg active:scale-[0.98] btn-color text-white bg-blue-600 hover:bg-blue-700 hover:shadow-blue-200"
+                  >
+                    <FaLock size={12} /> Complete Order
+                  </button>
+                )}
+
+                {/* Trust Badges */}
+                <div className="flex justify-center gap-6 mt-4">
+                  {['🔒 Secure Data', '✦ Trusted', '🚚 Fast Delivery'].map(badge => (
+                    <span key={badge} className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{badge}</span>
                   ))}
                 </div>
               </div>
+
             </div>
           </motion.div>
 

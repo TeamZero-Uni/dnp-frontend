@@ -8,6 +8,7 @@ import { FiPackage } from 'react-icons/fi';
 import ProductCard from '../../components/cards/ProductCard';
 import ReviewSection from '../../components/sections/ReviewSection';
 import { useCart } from '../../context/CartContext';
+import ReadyToStart from "../../components/ReadyToStart";
 
 /* ─────────────── constants ──────────────────────────────────── */
 const MAX_QTY = 10;
@@ -147,14 +148,12 @@ export default function ProductDetails() {
   };
 
   // ── BUY IT NOW ───────────────────────────────────────────────
-  // 1. Adds this product (with chosen color & qty) to the cart
-  // 2. Navigates to /checkout
-  // Checkout.jsx reads cartItems from useCart() so the item
-  // will appear in the Order Summary automatically.
-  const handleBuyNow = () => {
-    if (!inStock) return;
-    addToCart(product, quantity, selectedColor.name);  // ← puts item in cart
-    navigate('/checkout');                              // ← goes to checkout
+ const handleBuyNow = () => {
+    navigate('/checkout', { 
+      state: { 
+        buyNowItem: { ...product, quantity, selectedColor } 
+      } 
+    });
   };
   // ─────────────────────────────────────────────────────────────
 
@@ -237,7 +236,7 @@ export default function ProductDetails() {
                           : 'border-slate-100 text-slate-500 hover:border-slate-200'
                       }`}>
                       <span className="w-5 h-5 rounded-full flex-shrink-0"
-                        style={{ border: `1.5px solid ${color.ring}` }} />
+                        style={{ background: color.hex, border: `1.5px solid ${color.ring}` }} />
                       {color.name}
                       {selectedColor.name === color.name && <FaCheckCircle className="text-accent" size={9} />}
                     </button>
@@ -359,6 +358,9 @@ export default function ProductDetails() {
           </div>
         </div>
       )}
+      <ReadyToStart />
     </div>
+
+    
   );
 }
