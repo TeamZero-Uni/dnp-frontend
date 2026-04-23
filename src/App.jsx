@@ -34,6 +34,9 @@ import PortfolioManagemet from "./pages/admin/PortfolioManagemet";
 import Loader from "./components/Loader";
 import { useEffect, useState } from "react";
 import QuotetionManagement from "./pages/admin/QuotetionManagement";
+import RequestQuote from './pages/RequestQuote';
+import Gallery from './pages/Gallery';
+import Innovation from './pages/Innovation';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -48,6 +51,9 @@ const router = createBrowserRouter(
       <Route path="contact" element={<Contact />} />
       <Route path='/checkout' element={<Checkout /> } />
       <Route path='/portfolio' element={<Portfolio /> } />
+       <Route path="quote" element={<RequestQuote />} />
+        <Route path="gallery" element={<Gallery />} />
+        <Route path="innovation" element={<Innovation />} />
 
       <Route path="login" element={<Login />} />
 
