@@ -18,11 +18,15 @@ import { CartProvider } from './context/CartContext';
 import Cart from './pages/shop/Cart';
 import Checkout from './pages/shop/Checkout';
 
+
 import OnlineOrderManagement from './pages/admin/OnlineOrderManagement';
 import GalleryManagement from './pages/admin/GalleryManagement';
 import CodOrderManagement from './pages/admin/CodOrderManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
 import Payment from './pages/shop/Payment';
+import RequestQuote from './pages/RequestQuote';
+import Gallery from './pages/Gallery';
+import Innovation from './pages/Innovation';
 
 function App() {
 
@@ -40,7 +44,11 @@ const router = createBrowserRouter(
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />
         <Route path='/checkout' element={<Checkout /> } />
-        <Route path='order-success' element={<Payment />} />  
+        <Route path='order-success' element={<Payment />} />
+        <Route path="quote" element={<RequestQuote />} />
+        <Route path="gallery" element={<Gallery />} />
+        <Route path="innovation" element={<Innovation />} />
+          
       </Route>
 
       {/* Admin layout */}
