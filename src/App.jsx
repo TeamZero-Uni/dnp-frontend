@@ -29,6 +29,11 @@ import TransactionManagement from "./pages/admin/TransactionManagement";
 
 import ProtectedRoute from "./routers/ProtectedRoute";
 import { useAuth } from "./hooks/useAuth";
+import Portfolio from "./pages/Portfolio";
+import PortfolioManagemet from "./pages/admin/PortfolioManagemet";
+import Loader from "./components/Loader";
+import { useEffect, useState } from "react";
+import QuotetionManagement from "./pages/admin/QuotetionManagement";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -41,6 +46,8 @@ const router = createBrowserRouter(
       <Route path="cart" element={<Cart />} />
       <Route path="order-success" element={<Payment />} />
       <Route path="contact" element={<Contact />} />
+      <Route path='/checkout' element={<Checkout /> } />
+      <Route path='/portfolio' element={<Portfolio /> } />
 
       <Route path="login" element={<Login />} />
 
@@ -56,6 +63,8 @@ const router = createBrowserRouter(
           <Route path="gallery" element={<GalleryManagement />} />
           <Route path="cod-orders" element={<CodOrderManagement />} />
           <Route path="transactions" element={<TransactionManagement />} />
+          <Route path="portfolio" element={<PortfolioManagemet />} /> 
+          <Route path="quotes" element={<QuotetionManagement />} />
         </Route>
       </Route>
     </Route>,
@@ -64,9 +73,18 @@ const router = createBrowserRouter(
 
 function App() {
   const { loading } = useAuth();
+  const [minTimeDone, setMinTimeDone] = useState(false);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinTimeDone(true);
+    }, 3000); // ⏱️ CHANGE THIS (e.g., 2000, 5000)
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading || !minTimeDone) {
+    return  <Loader />;
   }
 
   return <RouterProvider router={router} />;
