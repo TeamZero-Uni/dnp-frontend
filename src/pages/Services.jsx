@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import Banner from "../components/layout/Banner";
-
+import ReadyToStart from "../components/ReadyToStart";
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
   {
@@ -464,12 +464,6 @@ export default function ServicesPage() {
   const [openCategories, setOpenCategories] = useState(
     () => Object.fromEntries(CATEGORIES.map((c) => [c.id, false]))
   );
-  const [pageLoaded, setPageLoaded] = useState(false);
-
-  // Welcome screen fade-out effect
-  useEffect(() => {
-    setPageLoaded(true);
-  }, []);
 
   const toggleCategory = (id) =>
     setOpenCategories((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -508,15 +502,6 @@ export default function ServicesPage() {
         @keyframes scaleIn {
           from { opacity: 0; transform: scale(0.92); }
           to   { opacity: 1; transform: scale(1); }
-        }
-        @keyframes welcomeFadeOut {
-          0% { opacity: 1; visibility: visible; }
-          95% { opacity: 0; visibility: visible; }
-          100% { opacity: 0; visibility: hidden; }
-        }
-        @keyframes welcomeSlideUp {
-          from { transform: translateY(0); opacity: 1; }
-          to { transform: translateY(-100%); opacity: 0; }
         }
         @keyframes categoryPulse {
           0% { background-color: rgba(90, 70, 194, 0.05); }
@@ -578,8 +563,6 @@ export default function ServicesPage() {
         .modal-enter { animation: modalSlideIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
         .card-grid-enter { animation: serviceCardEntrance 0.6s ease-out both; }
         .section-reveal { animation: sectionReveal 0.8s ease-out both; }
-        .welcome-screen { animation: welcomeFadeOut 1.2s ease-in-out 3s forwards; }
-        .welcome-text { animation: slideInUp 0.8s ease-out 0.2s both; }
         
         /* Smooth scroll reveal for AnimatedSection */
         .transition-all {
@@ -639,54 +622,6 @@ export default function ServicesPage() {
 
       <div className="bg-primary min-h-screen">
         
-        {/* ── WELCOME SCREEN ── */}
-        {!pageLoaded && (
-          <div className="welcome-screen fixed inset-0 z-[60] flex items-center justify-center bg-gradient-to-br from-primary via-[#f5f3ff] to-primary overflow-hidden">
-            {/* Background animated elements */}
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-            </div>
-
-            <div className="text-center welcome-text relative z-10">
-              {/* Logo with animation */}
-              <div className="mb-8">
-                <div className="inline-block">
-                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#5a46c2] via-[#894def] to-[#5a46c2] animate-pulse">
-                    DNP 3D
-                  </div>
-                  <div className="h-1 bg-gradient-to-r from-transparent via-[#5a46c2] to-transparent mt-2 rounded-full" style={{ animation: "slideInUp 0.8s ease-out 0.3s both" }} />
-                </div>
-              </div>
-
-              {/* Main text */}
-              <h1 className="text-5xl font-black text-secondary mb-3 leading-tight" style={{ animation: "slideInUp 0.8s ease-out 0.4s both" }}>
-                Manufacturing<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5a46c2] to-[#894def]">Solutions</span>
-              </h1>
-
-              {/* Subtitle */}
-              <p className="text-secondary/70 text-lg max-w-md mx-auto leading-relaxed mb-8" style={{ animation: "slideInUp 0.8s ease-out 0.5s both" }}>
-                Explore our complete range of 3D printing and manufacturing services
-              </p>
-
-              {/* Animated loading dots */}
-              <div className="flex items-center justify-center gap-2" style={{ animation: "slideInUp 0.8s ease-out 0.6s both" }}>
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#5a46c2] animate-bounce" style={{ animationDelay: "0s" }} />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#894def] animate-bounce" style={{ animationDelay: "0.15s" }} />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#6b5ba0] animate-bounce" style={{ animationDelay: "0.3s" }} />
-                </div>
-              </div>
-
-              {/* Loading text */}
-              <p className="text-secondary/50 text-xs mt-6 tracking-widest" style={{ animation: "slideInUp 0.8s ease-out 0.7s both" }}>
-                Loading experience...
-              </p>
-            </div>
-          </div>
-        )}
-        
         {/* ── 1. BANNER ── */}
         <Banner
           path="Services"
@@ -706,7 +641,7 @@ export default function ServicesPage() {
             <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/6 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-blue-400/5 blur-3xl" />
 
-            <div className="relative z-10 mx-[6%] py-12 mt-[50px]">
+            <div className="relative z-10 mx-[6%] py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {CATEGORIES.map((cat, i) => (
                   <button
@@ -834,49 +769,8 @@ export default function ServicesPage() {
           </main>
         </AnimatedSection>
 
-        {/* ── 5. CTA SECTION ── */}
-        <AnimatedSection className="mx-[6%] mt-16 mb-8">
-          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#dbeafe] via-[#eff6ff] to-[#e0f2fe] py-20 text-center">
-          
-          <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-[#5a46c2]/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-10 h-80 w-80 rounded-full bg-[#4838a3]/10 blur-3xl" />
-          <div className="absolute left-1/2 top-1/2 h-40 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#5a46c2]/5 blur-3xl" />
-
-          <div className="relative z-10 mx-auto max-w-3xl px-6">
-            
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#5a46c2]/25 bg-[#5a46c2]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#4838a3] backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5a46c2]" />
-              Ready To Begin
-            </div>
-
-            <h2 className="mb-5 font-black text-4xl leading-tight tracking-tight text-primary md:text-5xl">
-              Ready to Start <br />
-              <span className="text-[#5a46c2]">Your Project?</span>
-            </h2>
-
-            <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-primary/70">
-              Get an instant quote for your manufacturing needs — fast, accurate, and tailored to you.
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <button
-                className="group flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold bg-accent text-secondary shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
-              >
-                Request Quote
-                <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
-
-              <button
-                className="rounded-xl border border-accent/30 bg-accent/5 px-8 py-4 text-base font-bold text-accent backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:bg-accent/10"
-              >
-                Contact Us
-              </button>
-            </div>
-          </div>
-        </section>
-        </AnimatedSection>
+        {/* ── 5. CUSTOM CTA SECTION ── */}
+        <ReadyToStart/>
 
         {/* ── MODAL ── */}
         {modalService && (

@@ -1,6 +1,7 @@
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { useLocation, Outlet } from "react-router-dom";
+import ChatBot from "../components/Chatbot/Chatbot";
 import ScrollToTop from "../utils/ScrollToTop";
 
 function MainLayout() {
@@ -21,6 +22,7 @@ function MainLayout() {
           <Outlet />
         </main>
         {!shouldHide && <Footer />}
+        {!shouldHide && <ChatBot />}               
       </div>
     </>
   );
