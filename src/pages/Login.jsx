@@ -8,7 +8,7 @@ import ChangePasswordForm from '../components/forms/ChangePasswordForm';
 import OtpPopup from '../components/OtpPopup';
 
 export default function Login() {
-  const [activeForm, setActiveForm] = useState('login'); 
+  const [activeForm, setActiveForm] = useState({ type: 'login' }); 
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [otpPurpose, setOtpPurpose] = useState(''); 
 
@@ -28,16 +28,16 @@ export default function Login() {
              <span className="bg-yellow-500 text-black px-3 py-1 text-xs font-bold uppercase tracking-tighter rounded">DNP 3D Hobby Lobby</span>
           </div>
           <h1 className="text-5xl font-extrabold text-white mb-6 leading-tight">
-            {activeForm === 'login' && 'Shaping Ideas into Reality.'}
-            {activeForm === 'register' && 'Start Your 3D Journey.'}
-            {activeForm === 'forgot' && 'Secure Your Workshop.'}
-            {activeForm === 'change' && 'Reinforce Security.'}
+            {activeForm.type === 'login' && 'Shaping Ideas into Reality.'}
+            {activeForm.type === 'register' && 'Start Your 3D Journey.'}
+            {activeForm.type === 'forgot' && 'Secure Your Workshop.'}
+            {activeForm.type === 'change' && 'Reinforce Security.'}
           </h1>
           <p className="text-gray-400 text-lg mb-12 max-w-md">
-            {activeForm === 'login' && 'Sign in to manage your 3D printing projects, track orders, and access your custom 3D models.'}
-            {activeForm === 'register' && 'Join Sri Lanka’s premier 3D innovation hub. Unlock professional modeling tools and bulk printing discounts.'}
-            {activeForm === 'forgot' && 'Lost your access key? No problem. Provide your email to reset your account credentials.'}
-            {activeForm === 'change' && 'Update your account security parameters to keep your proprietary designs safe.'}
+            {activeForm.type === 'login' && 'Sign in to manage your 3D printing projects, track orders, and access your custom 3D models.'}
+            {activeForm.type === 'register' && 'Join Sri Lanka’s premier 3D innovation hub. Unlock professional modeling tools and bulk printing discounts.'}
+            {activeForm.type === 'forgot' && 'Lost your access key? No problem. Provide your email to reset your account credentials.'}
+            {activeForm.type === 'change' && 'Update your account security parameters to keep your proprietary designs safe.'}
           </p>
 
           <div className="space-y-6">
@@ -61,25 +61,25 @@ export default function Login() {
 
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">
-              {activeForm === 'login' && 'Sign In'}
-              {activeForm === 'register' && 'Create Account'}
-              {activeForm === 'forgot' && 'Reset Link'}
-              {activeForm === 'change' && 'New Password'}
+              {activeForm.type === 'login' && 'Sign In'}
+              {activeForm.type === 'register' && 'Create Account'}
+              {activeForm.type === 'forgot' && 'Reset Link'}
+              {activeForm.type === 'change' && 'New Password'}
             </h2>
             <div className="h-1 w-12 bg-yellow-500 mx-auto mb-4"></div>
             <p className="text-gray-500 font-medium">
-              {activeForm === 'login' && 'Enter your credentials to access your dashboard'}
-              {activeForm === 'register' && 'Fill in your details to start your first project'}
-              {activeForm === 'forgot' && 'We will send a recovery code to your inbox'}
-              {activeForm === 'change' && 'Define a secure new password for your account'}
+              {activeForm.type === 'login' && 'Enter your credentials to access your dashboard'}
+              {activeForm.type === 'register' && 'Fill in your details to start your first project'}
+              {activeForm.type === 'forgot' && 'We will send a recovery code to your inbox'}
+              {activeForm.type === 'change' && 'Define a secure new password for your account'}
             </p>
           </div>
 
           <div className="bg-white p-2 rounded-xl">
-            {activeForm === 'login' && <LoginForm setActiveForm={setActiveForm} />}
-            {activeForm === 'register' && <RegisterForm setActiveForm={setActiveForm} setShowOtpPopup={setShowOtpPopup} setOtpPurpose={setOtpPurpose} />}
-            {activeForm === 'forgot' && <ForgotPasswordForm setActiveForm={setActiveForm} setShowOtpPopup={setShowOtpPopup} setOtpPurpose={setOtpPurpose} />}
-            {activeForm === 'change' && <ChangePasswordForm setActiveForm={setActiveForm} />}
+            {activeForm.type === 'login' && <LoginForm setActiveForm={setActiveForm} />}
+            {activeForm.type === 'register' && <RegisterForm setActiveForm={setActiveForm} setShowOtpPopup={setShowOtpPopup} setOtpPurpose={setOtpPurpose} />}
+            {activeForm.type === 'forgot' && <ForgotPasswordForm setActiveForm={setActiveForm} setShowOtpPopup={setShowOtpPopup} setOtpPurpose={setOtpPurpose} />}
+            {activeForm.type === 'change' && <ChangePasswordForm setActiveForm={setActiveForm} email={activeForm.email} />}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaTimes, FaKey } from 'react-icons/fa';
+import { verifyOtp, getOtp } from '../api/api';
 
 const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -37,36 +38,50 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
     document.getElementById(`otp-${lastIndex}`).focus();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
     const otpValue = otp.join('');
+
     if (otpValue.length !== 6) {
       alert('Please enter all 6 digits');
       return;
     }
 
-    setIsVerifying(true);
-    console.log('OTP submitted:', otpValue);
-
-    setTimeout(() => {
-      setIsVerifying(false);
+    try {
+      setIsVerifying(true);
+      await verifyOtp({
+        otp: otpValue,
+        email: purpose.email,   // ✅ important
+      }); 
       alert('OTP verified successfully!');
-      onClose();
-      
-      if (purpose === 'forgot') {
-        setActiveForm('change');
-      } else if (purpose === 'register') {
-        setActiveForm('login');
+      if(purpose.type === 'forgot') {
+        setActiveForm({ type: 'change', email: purpose.email });
+      } else if(purpose.type === 'register') {
+        setActiveForm({type:'login'});
       }
-    }, 1500);
+      onClose();
+    } catch (error) {
+      console.error('OTP verification failed:', error);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
-  const handleResend = () => {
-    console.log('Resending OTP...');
-    alert('OTP has been resent to your email!');
+  const handleResend = async () => {
+  try {
+    
+    await getOtp(purpose.email);
+    
+    
+    alert("OTP resent successfully!");
     setOtp(['', '', '', '', '', '']);
     document.getElementById('otp-0').focus();
-  };
+
+  } catch (err) {
+    alert(err?.response?.data?.message || "Failed to resend OTP");
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

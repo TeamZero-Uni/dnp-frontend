@@ -2,6 +2,7 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { useLocation, Outlet } from "react-router-dom";
 import ChatBot from "../components/Chatbot/Chatbot";
+import ScrollToTop from "../utils/ScrollToTop";
 
 function MainLayout() {
   const location = useLocation();
@@ -14,6 +15,7 @@ function MainLayout() {
 
   return (
     <>
+    <ScrollToTop />
       <div className="text-white min-h-screen flex flex-col">
         {!shouldHide && <Navbar />}
         <main className="grow min-h-screen text-black">

@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaGoogle, FaLock, FaEnvelope } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ setActiveForm }) => {
+  
+  const { loginUser } = useAuth();
+  const [error, setError] = useState(null);
+  const navaigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -14,10 +21,18 @@ const LoginForm = ({ setActiveForm }) => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login submitted', formData);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await loginUser(formData);
+    if(res.role === "ADMIN") navaigate("/dash");
+    else navaigate("/customer-profile");
+  } catch (err) {
+    console.log(err.message); 
+    setError(err.message);    
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -60,7 +75,7 @@ const LoginForm = ({ setActiveForm }) => {
       </div>
 
       <div className="flex items-center justify-end">
-        <button type="button" onClick={() => setActiveForm('forgot')} className="text-sm text-[#5a46c2] hover:text-[#4838a3] font-medium transition-colors">
+        <button type="button" onClick={() => setActiveForm({ type: 'forgot' })} className="text-sm text-[#5a46c2] hover:text-[#4838a3] font-medium transition-colors">
           Forgot password?
         </button>
       </div>
@@ -68,6 +83,8 @@ const LoginForm = ({ setActiveForm }) => {
       <button type="submit" className="w-full btn-color  py-3 rounded-lg font-semibold focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
         Sign In
       </button>
+
+      {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -78,7 +95,9 @@ const LoginForm = ({ setActiveForm }) => {
         </div>
       </div>
 
-      <button type="button" className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 transition-all duration-200 flex items-center justify-center gap-3">
+      <button 
+        type="button"
+        className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 transition-all duration-200 flex items-center justify-center gap-3">
         <FaGoogle className="text-red-500 text-xl" />
         Sign in with Google
       </button>
@@ -86,7 +105,7 @@ const LoginForm = ({ setActiveForm }) => {
       <div className="text-center pt-4">
         <p className="text-gray-600">
           Don't have an account?{' '}
-          <button type="button" onClick={() => setActiveForm('register')} className="text-[#5a46c2] hover:text-[#4838a3] font-semibold transition-colors">
+          <button type="button" onClick={() => setActiveForm({ type: 'register' })} className="text-[#5a46c2] hover:text-[#4838a3] font-semibold transition-colors">
             Sign up
           </button>
         </p>
