@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   FiCheck, FiChevronRight, FiChevronLeft, FiUpload,
   FiX, FiMinus, FiPlus, FiSend, FiUser, FiMail, FiPhone,
@@ -12,8 +12,6 @@ import ReadyToStart from "../components/ReadyToStart";
 
 /* ─────────────────────────────────────────────
    SERVICE DEFINITIONS
-   Each service has its own Step 3 fields.
-   Add/edit services here freely.
 ───────────────────────────────────────────── */
 const SERVICES = [
   {
@@ -101,13 +99,13 @@ const SERVICES = [
     bg: "bg-emerald-50",
     border: "border-emerald-200",
     fields: [
-      { key: "software",   label: "Preferred Software", type: "select",
+      { key: "software",    label: "Preferred Software", type: "select",
         options: ["Fusion 360", "SolidWorks", "Blender", "Rhino", "No Preference"] },
       { key: "deliverable", label: "Deliverable Format", type: "select",
         options: ["STL", "STEP", "OBJ", "IGES", "Native File", "All Formats"] },
-      { key: "complexity", label: "Model Complexity", type: "select",
+      { key: "complexity",  label: "Model Complexity", type: "select",
         options: ["Simple (basic shapes)", "Medium (mechanical parts)", "Complex (organic/detailed)", "Very Complex"] },
-      { key: "notes",      label: "Describe Your Model", type: "textarea" },
+      { key: "notes",       label: "Describe Your Model", type: "textarea" },
     ],
   },
   {
@@ -119,14 +117,14 @@ const SERVICES = [
     bg: "bg-indigo-50",
     border: "border-indigo-200",
     fields: [
-      { key: "material",   label: "Material", type: "select",
+      { key: "material",  label: "Material", type: "select",
         options: ["ABS", "PP", "PE", "Nylon", "PC", "POM"] },
-      { key: "color",      label: "Color", type: "color" },
-      { key: "quantity",   label: "Production Quantity", type: "select",
+      { key: "color",     label: "Color", type: "color" },
+      { key: "quantity",  label: "Production Quantity", type: "select",
         options: ["100–500", "500–1,000", "1,000–5,000", "5,000–10,000", "10,000+"] },
-      { key: "moldType",   label: "Mold Type", type: "select",
+      { key: "moldType",  label: "Mold Type", type: "select",
         options: ["Single Cavity", "Multi Cavity", "Family Mold"] },
-      { key: "notes",      label: "Additional Requirements", type: "textarea" },
+      { key: "notes",     label: "Additional Requirements", type: "textarea" },
     ],
   },
 ];
@@ -146,6 +144,7 @@ const STEPS = ["Select Service", "Upload Files", "Project Details", "Review & Su
 
 /* ─────────────────────────────────────────────
    STEP INDICATOR
+   Defined outside main component — stable reference
 ───────────────────────────────────────────── */
 function StepBar({ current }) {
   return (
@@ -183,6 +182,8 @@ function StepBar({ current }) {
 
 /* ─────────────────────────────────────────────
    DYNAMIC FIELD RENDERER
+   Defined outside main component — stable reference,
+   no remounting on parent state change
 ───────────────────────────────────────────── */
 function DynamicField({ field, value, onChange }) {
   if (field.type === "select") return (
@@ -256,42 +257,14 @@ function DynamicField({ field, value, onChange }) {
 }
 
 /* ─────────────────────────────────────────────
-   MAIN COMPONENT
+   STEP CONTENT COMPONENTS
+   All defined OUTSIDE the main component so
+   React never recreates them on state changes.
+   Props are passed in explicitly.
 ───────────────────────────────────────────── */
-export default function RequestQuote() {
-  const [step, setStep]           = useState(0);
-  const [service, setService]     = useState(null);
-  const [files, setFiles]         = useState([]);
-  const [dragging, setDragging]   = useState(false);
-  const [details, setDetails]     = useState({});
-  const [contact, setContact]     = useState({ name: "", email: "", phone: "" });
-  const [submitted, setSubmitted] = useState(false);
 
-  const selectedService = SERVICES.find((s) => s.id === service);
-
-  /* file handlers */
-  const addFiles = (newFiles) => {
-    const arr = Array.from(newFiles).filter((f) => f.size <= 50 * 1024 * 1024);
-    setFiles((prev) => [...prev, ...arr].slice(0, 5));
-  };
-  const removeFile = (i) => setFiles((f) => f.filter((_, idx) => idx !== i));
-
-  const setDetail = (key, val) => setDetails((d) => ({ ...d, [key]: val }));
-
-  const canNext = () => {
-    if (step === 0) return !!service;
-    if (step === 2) {
-      const required = selectedService.fields.filter((f) => f.type !== "textarea");
-      return required.every((f) => details[f.key] !== undefined && details[f.key] !== "");
-    }
-    if (step === 3) return contact.name && contact.email;
-    return true;
-  };
-
-  const handleSubmit = () => setSubmitted(true);
-
-  /* ── STEP 0: Select Service ── */
-  const Step0 = () => (
+function StepSelectService({ service, onSelect }) {
+  return (
     <div>
       <h2 className="text-lg font-black text-slate-900 mb-1">Select a Service</h2>
       <p className="text-sm text-slate-400 mb-5">Choose the service that best fits your project needs</p>
@@ -302,7 +275,7 @@ export default function RequestQuote() {
           return (
             <button
               key={s.id}
-              onClick={() => setService(s.id)}
+              onClick={() => onSelect(s.id)}
               className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${
                 isSelected
                   ? "border-[#5a46c2] bg-violet-50 shadow-md shadow-violet-100"
@@ -329,31 +302,31 @@ export default function RequestQuote() {
       </div>
     </div>
   );
+}
 
-  /* ── STEP 1: Upload Files ── */
-  const Step1 = () => (
+function StepUploadFiles({ files, dragging, onDragOver, onDragLeave, onDrop, onBrowseClick, onFileChange, onRemoveFile }) {
+  return (
     <div>
       <h2 className="text-lg font-black text-slate-900 mb-1">Upload Your Files</h2>
       <p className="text-sm text-slate-400 mb-5">STL, STEP, OBJ, DXF, AI, PDF — max 50MB each (up to 5 files)</p>
 
-      {/* drop zone */}
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
         className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer mb-4 ${
           dragging
             ? "border-[#5a46c2] bg-violet-50"
             : "border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-violet-50/40"
         }`}
-        onClick={() => document.getElementById("file-input").click()}
+        onClick={onBrowseClick}
       >
         <input
           id="file-input"
           type="file"
           multiple
           className="hidden"
-          onChange={(e) => addFiles(e.target.files)}
+          onChange={onFileChange}
           accept=".stl,.step,.stp,.obj,.dxf,.ai,.pdf,.igs,.iges"
         />
         <div className="w-14 h-14 rounded-2xl bg-violet-100 border border-violet-200 flex items-center justify-center mx-auto mb-3">
@@ -369,7 +342,6 @@ export default function RequestQuote() {
         </span>
       </div>
 
-      {/* file list */}
       {files.length > 0 && (
         <div className="space-y-2">
           {files.map((file, i) => (
@@ -381,7 +353,10 @@ export default function RequestQuote() {
                 <p className="text-xs font-bold text-slate-800 truncate">{file.name}</p>
                 <p className="text-[10px] text-slate-400">{(file.size / 1024).toFixed(0)} KB</p>
               </div>
-              <button onClick={() => removeFile(i)} className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors shrink-0">
+              <button
+                onClick={() => onRemoveFile(i)}
+                className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors shrink-0"
+              >
                 <FiX size={13} />
               </button>
             </div>
@@ -396,9 +371,10 @@ export default function RequestQuote() {
       )}
     </div>
   );
+}
 
-  /* ── STEP 2: Project Details (service-specific) ── */
-  const Step2 = () => (
+function StepProjectDetails({ selectedService, details, onDetailChange }) {
+  return (
     <div>
       <div className="flex items-center gap-3 mb-5">
         {selectedService && (
@@ -416,15 +392,16 @@ export default function RequestQuote() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {selectedService?.fields.map((field) => (
           <div key={field.key} className={field.type === "textarea" || field.type === "color" ? "sm:col-span-2" : ""}>
-            <DynamicField field={field} value={details[field.key]} onChange={setDetail} />
+            <DynamicField field={field} value={details[field.key]} onChange={onDetailChange} />
           </div>
         ))}
       </div>
     </div>
   );
+}
 
-  /* ── STEP 3: Review & Submit ── */
-  const Step3 = () => (
+function StepReviewSubmit({ selectedService, files, details, contact, onContactChange }) {
+  return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* order summary */}
       <div>
@@ -493,7 +470,7 @@ export default function RequestQuote() {
               <input
                 type={type}
                 value={contact[key]}
-                onChange={(e) => setContact((c) => ({ ...c, [key]: e.target.value }))}
+                onChange={(e) => onContactChange(key, e.target.value)}
                 placeholder={placeholder}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors"
               />
@@ -508,6 +485,81 @@ export default function RequestQuote() {
       </div>
     </div>
   );
+}
+
+/* ─────────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────────── */
+export default function RequestQuote() {
+  const [step, setStep]           = useState(0);
+  const [service, setService]     = useState(null);
+  const [files, setFiles]         = useState([]);
+  const [dragging, setDragging]   = useState(false);
+  const [details, setDetails]     = useState({});
+  const [contact, setContact]     = useState({ name: "", email: "", phone: "" });
+  const [submitted, setSubmitted] = useState(false);
+
+  const selectedService = SERVICES.find((s) => s.id === service);
+
+  /* file handlers */
+  const addFiles = useCallback((newFiles) => {
+    const arr = Array.from(newFiles).filter((f) => f.size <= 50 * 1024 * 1024);
+    setFiles((prev) => [...prev, ...arr].slice(0, 5));
+  }, []);
+
+  const removeFile = useCallback((i) => {
+    setFiles((f) => f.filter((_, idx) => idx !== i));
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => setDragging(false), []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragging(false);
+    addFiles(e.dataTransfer.files);
+  }, [addFiles]);
+
+  const handleBrowseClick = useCallback(() => {
+    document.getElementById("file-input").click();
+  }, []);
+
+  const handleFileChange = useCallback((e) => {
+    addFiles(e.target.files);
+  }, [addFiles]);
+
+  const setDetail = useCallback((key, val) => {
+    setDetails((d) => ({ ...d, [key]: val }));
+  }, []);
+
+  const handleContactChange = useCallback((key, val) => {
+    setContact((c) => ({ ...c, [key]: val }));
+  }, []);
+
+  const canNext = () => {
+    if (step === 0) return !!service;
+    if (step === 2) {
+      const required = selectedService.fields.filter((f) => f.type !== "textarea");
+      return required.every((f) => details[f.key] !== undefined && details[f.key] !== "");
+    }
+    if (step === 3) return contact.name && contact.email;
+    return true;
+  };
+
+  const handleSubmit = () => setSubmitted(true);
+
+  const handleNewRequest = useCallback(() => {
+    setStep(0);
+    setService(null);
+    setFiles([]);
+    setDetails({});
+    setContact({ name: "", email: "", phone: "" });
+    setSubmitted(false);
+  }, []);
 
   /* ── SUCCESS ── */
   if (submitted) return (
@@ -533,7 +585,7 @@ export default function RequestQuote() {
             Go Home
           </a>
           <button
-            onClick={() => { setStep(0); setService(null); setFiles([]); setDetails({}); setContact({ name:"",email:"",phone:"" }); setSubmitted(false); }}
+            onClick={handleNewRequest}
             className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95"
             style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
           >
@@ -555,27 +607,58 @@ export default function RequestQuote() {
       `}</style>
 
       <Banner
-  path="Quote"
-  title={<>Build Something<br /><span className="text-[#5a46c2]">Extraordinary</span></>}
-  description="Tell us about your project — we'll review your files and send a detailed quote within 24 hours."
-  tagLine="Free Quote · No Commitment"
-  imageUrl={null}
-  buttonText="Get Started"
-  buttonLink="#quote"
-/>
+        path="Quote"
+        title={<>Build Something<br /><span className="text-[#5a46c2]">Extraordinary</span></>}
+        description="Tell us about your project — we'll review your files and send a detailed quote within 24 hours."
+        tagLine="Free Quote · No Commitment"
+        imageUrl={null}
+        buttonText="Get Started"
+        buttonLink="#quote"
+      />
 
       {/* card */}
-      <div className="max-w-3xl mx-auto mt-20 bg-white rounded-3xl border border-violet-100 p-6 sm:p-8"
-        style={{ boxShadow: "0 8px 40px rgba(90,70,194,.1)" }}>
-
+      <div
+        className="max-w-3xl mx-auto mt-20 bg-white rounded-3xl border border-violet-100 p-6 sm:p-8"
+        style={{ boxShadow: "0 8px 40px rgba(90,70,194,.1)" }}
+      >
         <StepBar current={step} />
 
-        {/* step content */}
+        {/* step content — inline JSX, not component definitions */}
         <div style={{ animation: "stepIn .25s ease both" }} key={step}>
-          {step === 0 && <Step0 />}
-          {step === 1 && <Step1 />}
-          {step === 2 && <Step2 />}
-          {step === 3 && <Step3 />}
+          {step === 0 && (
+            <StepSelectService
+              service={service}
+              onSelect={setService}
+            />
+          )}
+          {step === 1 && (
+            <StepUploadFiles
+              files={files}
+              dragging={dragging}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onBrowseClick={handleBrowseClick}
+              onFileChange={handleFileChange}
+              onRemoveFile={removeFile}
+            />
+          )}
+          {step === 2 && (
+            <StepProjectDetails
+              selectedService={selectedService}
+              details={details}
+              onDetailChange={setDetail}
+            />
+          )}
+          {step === 3 && (
+            <StepReviewSubmit
+              selectedService={selectedService}
+              files={files}
+              details={details}
+              contact={contact}
+              onContactChange={handleContactChange}
+            />
+          )}
         </div>
 
         {/* navigation */}
