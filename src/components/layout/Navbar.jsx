@@ -18,7 +18,7 @@ const NAV = [
     label: "Works",
     links: [
       { label: "Gallery", path: "/gallery" },
-      { label: "Innovation", path: "/inovation" },
+      { label: "Innovation", path: "/innovation" },
       { label: "Portfolio", path: "/portfolio" },
     ],
   },
@@ -217,6 +217,7 @@ export default function Navbar() {
               )}
 
               <button
+              onClick={() => {navigate('/quote')}}
                 className="ml-1 px-5 py-2.5 rounded-full text-[13px] font-bold text-white transition-all active:scale-95"
                 style={{
                   background: "linear-gradient(135deg,#5a46c2,#4838a3)",
@@ -363,7 +364,7 @@ export default function Navbar() {
                 </Link>
               )}
               <button
-                onClick={closeAll}
+                onClick={() => {navigate('/quote'); closeAll();}}
                 className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg,#5a46c2,#4838a3)",
