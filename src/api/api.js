@@ -2,7 +2,7 @@ import axios from "axios";
 import { log } from "three";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000/api/v1",
+    baseURL: "http://localhost:5000/api/v1",
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",
@@ -12,7 +12,7 @@ const api = axios.create({
 export default api;
 
 export const googleLogin = () => {
-    window.location.href = "http://localhost:3000/api/v1/auth/google";
+    window.location.href = "http://localhost:5000/api/v1/auth/google";
 };
 
 export const register = async (credential) => {
@@ -45,3 +45,36 @@ export const getAllProduct = async () => {
     return response.data;
 }
 
+export const createProduct = async (product) => {
+    const response = await api.post("/products", product);
+    return response.data;
+}
+
+export const uploadMultipleImages = async (formData) => {
+    const response = await api.post("/upload/multiple", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+}
+
+export const getAllCategories = async () => {
+    const response = await api.get("/categories");
+    return response.data;
+}
+
+export const updateProduct = async (id, productData) => {
+    const response = await api.put(`/products/${id}`, productData);
+    return response.data;
+}
+
+export const deleteProduct = async (id) => {
+    const response = await api.delete(`/products/${id}`);
+    return response.data;
+}
+
+export const getProductById = async (id) => {
+    const response = await api.get(`/products/${id}`);
+    return response.data;
+}
