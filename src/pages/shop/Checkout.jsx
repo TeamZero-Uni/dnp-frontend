@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLock, FaCheckCircle, FaCreditCard, FaMoneyBillWave, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import { FaLock, FaCheckCircle, FaCreditCard, FaMoneyBillWave, FaArrowRight, FaArrowLeft, FaShoppingBag, FaChevronDown } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 /* ─────────────── Reusable Input Component ─────────────────────────────── */
 function Field({ label, placeholder, value, onChange, type = 'text', required }) {
@@ -44,10 +44,65 @@ function SectionTitle({ children }) {
   );
 }
 
+const PHONE_COUNTRIES = [
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', flagUrl: 'https://flagcdn.com/w40/lk.png', placeholder: '77 123 4567' },
+  { code: 'IN', name: 'India', dialCode: '+91', flagUrl: 'https://flagcdn.com/w40/in.png', placeholder: '98765 43210' },
+  { code: 'US', name: 'United States', dialCode: '+1', flagUrl: 'https://flagcdn.com/w40/us.png', placeholder: '(555) 123-4567' },
+  { code: 'GB', name: 'United Kingdom', dialCode: '+44', flagUrl: 'https://flagcdn.com/w40/gb.png', placeholder: '7700 900123' },
+  { code: 'AU', name: 'Australia', dialCode: '+61', flagUrl: 'https://flagcdn.com/w40/au.png', placeholder: '412 345 678' },
+];
+
+const PHONE_RULES = {
+  LK: {
+    name: 'Sri Lanka',
+    dialCode: '+94',
+    regex: /^(?:0?7\d{8}|7\d{8})$/,
+    normalize: value => value.replace(/[^\d]/g, ''),
+    example: '77 123 4567',
+  },
+  IN: {
+    name: 'India',
+    dialCode: '+91',
+    regex: /^[6-9]\d{9}$/,
+    normalize: value => value.replace(/[^\d]/g, ''),
+    example: '98765 43210',
+  },
+  US: {
+    name: 'United States',
+    dialCode: '+1',
+    regex: /^\d{10}$/,
+    normalize: value => value.replace(/[^\d]/g, ''),
+    example: '555 123 4567',
+  },
+  GB: {
+    name: 'United Kingdom',
+    dialCode: '+44',
+    regex: /^\d{10}$/,
+    normalize: value => value.replace(/[^\d]/g, ''),
+    example: '7700 900123',
+  },
+  AU: {
+    name: 'Australia',
+    dialCode: '+61',
+    regex: /^\d{9}$/,
+    normalize: value => value.replace(/[^\d]/g, ''),
+    example: '412 345 678',
+  },
+};
+
 /* ─────────────── Main Checkout Component ───────────────────────────────────── */
 export default function Checkout() {
   const { cartItems, clearCart } = useCart();
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const buyNowItem = location.state?.buyNowItem
+    ? {
+        ...location.state.buyNowItem,
+        color: location.state.buyNowItem.selectedColor?.name ?? location.state.buyNowItem.color ?? 'Default',
+      }
+    : null;
+  const orderItems = buyNowItem ? [buyNowItem] : cartItems;
 
   /* ── Multi-step State ── */
   const [step, setStep] = useState(1);
@@ -57,6 +112,8 @@ export default function Checkout() {
     email: '', firstName: '', lastName: '',
     address: '', city: '', postalCode: '', phone: '',
   });
+  const [phoneCountry, setPhoneCountry] = useState('LK');
+  const [phoneCountryOpen, setPhoneCountryOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [cardNumber,    setCardNumber]    = useState('');
   const [cardExpiry,    setCardExpiry]    = useState('');
@@ -66,48 +123,79 @@ export default function Checkout() {
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const postalCodePattern = /^[0-9]{4,10}$/;
+  const cardNumberPattern = /^[0-9\s]{13,23}$/;
+  const expiryPattern = /^(0[1-9]|1[0-2])\s*\/\s*([0-9]{2})$/;
+  const cvvPattern = /^[0-9]{3,4}$/;
+
   /* ── Calculations ── */
-  const subtotal = cartItems.reduce((a, i) => a + i.price * i.quantity, 0);
-  const shipping = 350;
+  const subtotal = orderItems.reduce((a, i) => a + i.price * i.quantity, 0);
+  const shipping = orderItems.length ? 350 : 0;
   const total    = subtotal + shipping;
 
-  /* ── Validation for Step 1 (Shipping Details) ── */
   const validateStep1 = () => {
-    const e = {};
-    if (!form.email.trim())     e.email     = 'Required';
-    if (!form.firstName.trim()) e.firstName = 'Required';
-    if (!form.lastName.trim())  e.lastName  = 'Required';
-    if (!form.address.trim())   e.address   = 'Required';
-    if (!form.city.trim())      e.city      = 'Required';
-    if (!form.phone.trim())     e.phone     = 'Required';
-    
-    setErrors(e);
-    
-    // If no errors, proceed to Step 2 and scroll to top smoothly
-    if (Object.keys(e).length === 0) {
+    const nextErrors = {};
+    const phoneRule = PHONE_RULES[phoneCountry] || PHONE_RULES.LK;
+    const localPhone = phoneRule.normalize(form.phone);
+
+    if (!form.email.trim()) nextErrors.email = 'Required';
+    else if (!emailPattern.test(form.email.trim())) nextErrors.email = 'Enter a valid email address';
+
+    if (!form.firstName.trim()) nextErrors.firstName = 'Required';
+    else if (form.firstName.trim().length < 2) nextErrors.firstName = 'Too short';
+
+    if (!form.lastName.trim()) nextErrors.lastName = 'Required';
+    else if (form.lastName.trim().length < 2) nextErrors.lastName = 'Too short';
+
+    if (!form.address.trim()) nextErrors.address = 'Required';
+    if (!form.city.trim()) nextErrors.city = 'Required';
+
+    if (form.postalCode.trim() && !postalCodePattern.test(form.postalCode.trim())) {
+      nextErrors.postalCode = 'Enter a valid postal code';
+    }
+
+    if (!form.phone.trim()) nextErrors.phone = 'Required';
+    else if (!phoneRule.regex.test(localPhone)) nextErrors.phone = `Enter a valid ${phoneRule.name} number`;
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length === 0) {
       setStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  /* ── Validation for Step 2 (Payment Details) ── */
   const validateStep2 = () => {
-    const e = {};
+    const nextErrors = {};
+
     if (paymentMethod === 'card') {
-      if (!cardNumber.trim()) e.cardNumber = 'Required';
-      if (!cardExpiry.trim()) e.cardExpiry = 'Required';
-      if (!cardCVV.trim())    e.cardCVV    = 'Required';
+      const normalizedCardNumber = cardNumber.replace(/\s+/g, '');
+
+      if (!cardNumber.trim()) nextErrors.cardNumber = 'Required';
+      else if (!cardNumberPattern.test(cardNumber) || normalizedCardNumber.length < 13 || normalizedCardNumber.length > 19) {
+        nextErrors.cardNumber = 'Enter a valid card number';
+      }
+
+      if (!cardExpiry.trim()) nextErrors.cardExpiry = 'Required';
+      else if (!expiryPattern.test(cardExpiry.trim())) nextErrors.cardExpiry = 'Use MM/YY format';
+
+      if (!cardCVV.trim()) nextErrors.cardCVV = 'Required';
+      else if (!cvvPattern.test(cardCVV.trim())) nextErrors.cardCVV = 'Enter a valid CVV';
     }
-    setErrors(e);
-    return Object.keys(e).length === 0;
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   /* ── Handle Final Submission ── */
   const handleSubmit = () => {
     if (!validateStep2()) return;
-    setSubmitted(true);
 
-    // Generate mock order data
+    const orderSnapshot = orderItems.map(item => ({ ...item }));
+    setSubmitted(true);
+    clearCart();
+
     const orderNumber = 'DNP-' + Math.floor(10000 + Math.random() * 90000);
     const d = new Date();
     d.setDate(d.getDate() + 7);
@@ -115,19 +203,44 @@ export default function Checkout() {
       weekday: 'long', year: 'numeric', month: 'short', day: 'numeric',
     });
 
-    // Simulate API call delay
     setTimeout(() => {
-      clearCart?.();
       navigate('/order-success', {
         state: {
-          cartItems,
+          cartItems: orderSnapshot,
           total,
           orderNumber,
           deliveryDate,
+          paymentMethod,
         },
       });
     }, 1500);
   };
+
+  if (orderItems.length === 0) {
+    return (
+      <div className="min-h-screen pt-24 pb-20 px-4 font-sans bg-[radial-gradient(circle_at_top,_rgba(137,77,239,0.12),_transparent_35%),linear-gradient(180deg,_#f8f6ff_0%,_#ffffff_55%)] text-secondary">
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl border border-field-border bg-white/90 backdrop-blur-sm p-8 shadow-[0_20px_60px_#894def18] text-center"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
+              <FaShoppingBag size={22} className="text-accent" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-secondary mb-2">Your checkout is empty</h1>
+            <p className="text-sm font-medium text-secondary/60 mb-6">Add something to your cart or use Buy It Now from a product page.</p>
+            <Link
+              to="/shop"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl btn-color text-white text-xs font-black uppercase tracking-widest shadow-[0_10px_24px_#5a46c233]"
+            >
+              Back to Shop
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Submitting Overlay Screen ── */
   if (submitted) {
@@ -149,7 +262,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 font-sans bg-primary text-secondary">
+    <div className="min-h-screen pt-24 pb-20 px-4 font-sans bg-[radial-gradient(circle_at_top,_rgba(137,77,239,0.12),_transparent_35%),linear-gradient(180deg,_#f8f6ff_0%,_#ffffff_55%)] text-secondary">
       <div className="max-w-6xl mx-auto">
 
         {/* Page Title */}
@@ -190,7 +303,7 @@ export default function Checkout() {
                   className="space-y-6"
                 >
                   {/* Customer Information Panel */}
-                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                  <div className="rounded-2xl border border-field-border bg-white/95 backdrop-blur-sm p-6 shadow-[0_10px_40px_#894def10]">
                     <SectionTitle>Customer Information</SectionTitle>
                     <div className="space-y-4">
                       <div>
@@ -211,7 +324,7 @@ export default function Checkout() {
                   </div>
 
                   {/* Shipping Address Panel */}
-                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                  <div className="rounded-2xl border border-field-border bg-white/95 backdrop-blur-sm p-6 shadow-[0_10px_40px_#894def10]">
                     <SectionTitle>Shipping Address</SectionTitle>
                     <div className="space-y-4">
                       <div>
@@ -223,11 +336,86 @@ export default function Checkout() {
                         {errors.city && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.city}</p>}
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <Field label="Postal Code (Optional)" placeholder="00100" value={form.postalCode} onChange={set('postalCode')} />
                         <div>
-                          <Field label="Phone Number" placeholder="+94 77 123 4567" value={form.phone} onChange={set('phone')} type="tel" required />
-                          {errors.phone && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.phone}</p>}
+                          <Field label="Postal Code (Optional)" placeholder="00100" value={form.postalCode} onChange={set('postalCode')} />
+                          {errors.postalCode && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.postalCode}</p>}
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-accent/70 mb-1 block">
+                          Phone Number<span className="text-rose-400 ml-0.5">*</span>
+                        </label>
+                        <div className="grid grid-cols-[168px_1fr] gap-3">
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setPhoneCountryOpen(open => !open)}
+                              className="w-full h-[44px] rounded-xl border-[1.5px] border-field-border bg-white px-3 text-left outline-none transition-all hover:border-accent focus:border-accent focus:shadow-[0_0_0_3px_#894def18] flex items-center justify-between gap-3"
+                            >
+                              <span className="flex items-center gap-2 min-w-0">
+                                <span className="w-7 h-7 rounded-md bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                  <img
+                                    src={PHONE_COUNTRIES.find(country => country.code === phoneCountry)?.flagUrl}
+                                    alt={PHONE_COUNTRIES.find(country => country.code === phoneCountry)?.name}
+                                    className="w-5 h-4 object-cover rounded-sm"
+                                  />
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">
+                                    Country
+                                  </span>
+                                  <span className="block text-xs font-black text-secondary leading-none mt-1 truncate">
+                                    {PHONE_COUNTRIES.find(country => country.code === phoneCountry)?.dialCode}
+                                  </span>
+                                </span>
+                              </span>
+                              <FaChevronDown size={9} className="text-slate-400 flex-shrink-0" />
+                            </button>
+
+                            {phoneCountryOpen && (
+                              <div className="absolute left-0 top-[calc(100%+8px)] z-20 w-full rounded-2xl border border-field-border bg-white shadow-[0_20px_60px_#894def18] overflow-hidden">
+                                {PHONE_COUNTRIES.map(country => (
+                                  <button
+                                    key={country.code}
+                                    type="button"
+                                    onClick={() => {
+                                      setPhoneCountry(country.code);
+                                      setPhoneCountryOpen(false);
+                                    }}
+                                    className={`w-full px-3 py-2.5 flex items-center gap-3 text-left transition-colors ${phoneCountry === country.code ? 'bg-accent/5' : 'hover:bg-slate-50'}`}
+                                  >
+                                    <span className="w-8 h-8 rounded-md bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                      <img src={country.flagUrl} alt={country.name} className="w-6 h-4 object-cover rounded-sm" />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block text-xs font-black text-secondary truncate">
+                                        {country.name}
+                                      </span>
+                                      <span className="block text-[10px] font-bold text-slate-400 truncate">
+                                        {country.dialCode}
+                                      </span>
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <Field
+                              label={null}
+                              placeholder={PHONE_RULES[phoneCountry]?.placeholder || '77 123 4567'}
+                              value={form.phone}
+                              onChange={set('phone')}
+                              type="tel"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <p className="mt-1 text-[10px] font-bold text-slate-400">
+                          Format: {PHONE_RULES[phoneCountry]?.dialCode} {PHONE_RULES[phoneCountry]?.example}
+                        </p>
+                        {errors.phone && <p className="text-[10px] text-rose-400 font-bold mt-1">{errors.phone}</p>}
                       </div>
                     </div>
                   </div>
@@ -244,7 +432,7 @@ export default function Checkout() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6"
                 >
-                  <div className="rounded-2xl border border-field-border bg-white p-6 shadow-sm">
+                  <div className="rounded-2xl border border-field-border bg-white/95 backdrop-blur-sm p-6 shadow-[0_10px_40px_#894def10]">
                     <SectionTitle>Select Payment Method</SectionTitle>
                     <div className="space-y-3 mt-4">
 
@@ -343,14 +531,14 @@ export default function Checkout() {
                 <div>
                   <h2 className="text-base font-black leading-none text-secondary">Order Summary</h2>
                   <p className="text-xs text-accent mt-1.5 font-bold uppercase tracking-widest">
-                    {cartItems.reduce((a, i) => a + i.quantity, 0)} items in cart
+                    {orderItems.reduce((a, i) => a + i.quantity, 0)} items in order
                   </p>
                 </div>
               </div>
 
               {/* Cart Items List */}
               <div className="px-6 pt-5 pb-2 space-y-4">
-                {cartItems.map(item => (
+                {orderItems.map(item => (
                   <div key={`${item.id}-${item.color}`} className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-item-border bg-item-bg">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
