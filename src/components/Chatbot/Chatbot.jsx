@@ -192,7 +192,7 @@ export default function ChatBot() {
               animation: fade-in 0.25s ease-out forwards;
             }
           `}</style>
-          <IoChatbubbleEllipsesOutline size={20} />
+          <IoChatbubbleEllipsesOutline size={35} />
         </button>
       )}
 
