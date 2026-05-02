@@ -1,5 +1,4 @@
 import axios from "axios";
-import { log } from "three";
 
 const api = axios.create({
     baseURL: "http://localhost:5000/api/v1",
@@ -78,3 +77,23 @@ export const getProductById = async (id) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
+// Chatbot services
+
+export const getChatbotServices = async () => {
+    const response = await api.get(`/chatbot/all`);
+    return response.data; // { success, message, data: [...] }
+}
+
+export const getChatbotSizes = async () => {
+    const response = await api.get(`/chatbot/sizes`);
+    return response.data; // { success, message, data: [...] }
+}
+
+// Request price/estimate for Light Letter
+export const postLightLetterEstimate = async (payload) => {
+    // payload expected: { quantity, sizeInch, notes, exampleId?, material? }
+    const response = await api.post(`/chatbot/calculate
+        `, payload);
+    return response.data;
+}
+//===================================== 
