@@ -17,7 +17,7 @@ import Modal from "../../model/Modal";
 import { useProduct } from "../../hooks/useProduct";
 
 
-const COLUMNS = ["Product", "Category", "Price", "Quantity", "Status", "Actions"];
+const COLUMNS = ["Product", "Category", "Price", "Material", "Status", "Actions"];
 
 export default function ProductManagement() {
   const { products } = useProduct();
@@ -46,11 +46,16 @@ export default function ProductManagement() {
     );
   };
 
+const categories = useMemo(() => {
+  const unique = new Set(products.map((p) => p.category?.c_type));
+  return Array.from(unique);
+}, [products]);
+
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
-      const matchCat = category ? p.category === category : true;
-      const matchStatus = status ? p.status === status : true;
+      const matchSearch = p.p_name?.toLowerCase().includes(search.toLowerCase());
+      const matchCat = category ? p.category.c_type === category : true;
+      const matchStatus = status ? p.p_status === status : true;
       return matchSearch && matchCat && matchStatus;
     });
   }, [products, search, category, status]);
@@ -66,8 +71,7 @@ export default function ProductManagement() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div
-              className="p-2 rounded-lg shadow-lg shadow-indigo-200 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
+              className="p-2 rounded-lg shadow-lg shadow-indigo-200 flex items-center justify-center btn-color"
             >
               <FiPackage className="text-white" size={20} />
             </div>
@@ -80,11 +84,7 @@ export default function ProductManagement() {
           </div>
           <button
             onClick={() => setModal({ type: "add" })}
-            className="inline-flex items-center gap-2 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5"
-            style={{
-              background: "linear-gradient(135deg,#5a46c2,#4838a3)",
-              boxShadow: "0 4px 12px rgba(90,70,194,0.35)",
-            }}
+            className="inline-flex items-center gap-2 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 btn-color"
           >
             <FiPlus size={18} />
             <span className="hidden sm:inline">New Product</span>
@@ -94,12 +94,11 @@ export default function ProductManagement() {
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-5 sm:mb-6">
           {[
             { label: "Total Products", value: products.length, sub: "all categories", color: "#1e1b4b" },
-            { label: "In Stock", value: products.filter((p) => p.status === "stock").length, sub: "available", color: "#5a46c2" },
-            { label: "Out of Stock", value: products.filter((p) => p.status === "out_of_stock").length, sub: "restocking needed", color: "#e11d48" },
-            { label: "Total Units", value: products.reduce((s, p) => s + p.stock, 0), sub: "inventory count", color: "#1e1b4b" },
+            { label: "In Stock", value: products.filter((p) => p.p_status === "IN_STOCK").length, sub: "available", color: "#5a46c2" },
+            { label: "Out of Stock", value: products.filter((p) => p.p_status === "OUT_OF_STOCK").length, sub: "restocking needed", color: "#e11d48" },
           ].map((stat, idx) => (
             <div
               key={idx}
@@ -139,11 +138,9 @@ export default function ProductManagement() {
                   onChange={(e) => { setCategory(e.target.value); setPage(1); }}
                 >
                   <option value="">All Categories</option>
-                  <option value="Accessories">Accessories</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Footwear">Footwear</option>
-                  <option value="Furniture">Furniture</option>
-                  <option value="Kitchenware">Kitchenware</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
                 <select
                   className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none cursor-pointer focus:border-[#5a46c2] appearance-none"
@@ -151,8 +148,8 @@ export default function ProductManagement() {
                   onChange={(e) => { setStatus(e.target.value); setPage(1); }}
                 >
                   <option value="">All Status</option>
-                  <option value="stock">In Stock</option>
-                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="IN_STOCK">In Stock</option>
+                  <option value="OUT_OF_STOCK">Out of Stock</option>
                 </select>
               </div>
 
@@ -183,11 +180,9 @@ export default function ProductManagement() {
                   onChange={(e) => { setCategory(e.target.value); setPage(1); }}
                 >
                   <option value="">All Categories</option>
-                  <option value="Accessories">Accessories</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Footwear">Footwear</option>
-                  <option value="Furniture">Furniture</option>
-                  <option value="Kitchenware">Kitchenware</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
                 <select
                   className="px-3 py-2.5 bg-[#f9f8ff] border-[1.5px] border-[#e5e0ff] rounded-xl text-xs font-semibold text-[#1e1b4b] outline-none focus:border-[#5a46c2] appearance-none"
@@ -195,8 +190,8 @@ export default function ProductManagement() {
                   onChange={(e) => { setStatus(e.target.value); setPage(1); }}
                 >
                   <option value="">All Status</option>
-                  <option value="stock">In Stock</option>
-                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="IN_STOCK">In Stock</option>
+                  <option value="OUT_OF_STOCK">Out of Stock</option>
                 </select>
                 {activeFilters > 0 && (
                   <button
@@ -230,33 +225,32 @@ export default function ProductManagement() {
                   </tr>
                 ) : (
                   paginated.map((product) => (
-                    <tr key={product.id} className="hover:bg-[#faf9ff] transition-colors">
+                    <tr key={product.p_id} className="hover:bg-field-bg transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={product.image}
+                            src={product.images?.[0]?.img_url}
                             className="w-11 h-11 rounded-xl object-cover border-2 border-[#f0eeff] shrink-0"
-                            alt={product.name}
+                            alt={product.p_name}
                           />
                           <div className="min-w-0">
-                            <div className="font-mono text-[0.68rem] text-[#b0add0] mb-0.5">{product.id}</div>
-                            <div className="font-semibold text-[#1e1b4b] truncate max-w-45">{product.name}</div>
+                            <div className="font-semibold text-[#1e1b4b] truncate max-w-45">{product.p_name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         <span className="px-2.5 py-1 bg-[#ede9ff] text-[#5a46c2] border border-[#ddd6ff] rounded-full text-[0.7rem] font-bold uppercase whitespace-nowrap">
-                          {product.category}
+                          {product.category.c_type}
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="font-mono font-bold text-[#1e1b4b]">${product.price.toFixed(2)}</span>
+                        <span className="font-mono font-bold text-[#1e1b4b]">Rs {product.p_price}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-[#6d6a8a] font-medium">{product.stock} units</span>
+                        <span className="text-[#6d6a8a] font-medium">{product.p_material}</span>
                       </td>
                       <td className="px-5 py-4">
-                        {product.status === "stock" ? (
+                        {product.p_status === "IN_STOCK" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#d1fae5] text-[#065f46] border border-[#a7f3d0] rounded-full text-[0.68rem] font-bold uppercase tracking-wider whitespace-nowrap">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" /> In Stock
                           </span>
@@ -291,20 +285,19 @@ export default function ProductManagement() {
               <div className="text-center py-12 text-[#b0add0] text-sm">No products found.</div>
             ) : (
               paginated.map((product) => (
-                <div key={product.id} className="p-4 hover:bg-[#faf9ff] transition-colors">
+                <div key={product.p_id} className="p-4 hover:bg-field-bg transition-colors">
                   <div className="flex items-start gap-3">
                     <img
-                      src={product.image}
+                      src={product.images?.[0]?.img_url}
                       className="w-14 h-14 rounded-xl object-cover border-2 border-[#f0eeff] shrink-0"
-                      alt={product.name}
+                      alt={product.p_name}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-mono text-[9px] text-[#b0add0] leading-none mb-1">{product.id}</p>
-                          <p className="font-semibold text-[#1e1b4b] text-sm leading-snug truncate">{product.name}</p>
+                          <p className="font-semibold text-[#1e1b4b] text-sm leading-snug truncate">{product.p_name}</p>
                         </div>
-                        {product.status === "stock" ? (
+                        {product.p_status === "IN_STOCK" ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#d1fae5] text-[#065f46] border border-[#a7f3d0] rounded-full text-[9px] font-bold uppercase shrink-0">
                             <span className="w-1 h-1 rounded-full bg-[#10b981]" /> In Stock
                           </span>
@@ -316,10 +309,10 @@ export default function ProductManagement() {
                       </div>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
                         <span className="px-2 py-0.5 bg-[#ede9ff] text-[#5a46c2] border border-[#ddd6ff] rounded-full text-[9px] font-bold uppercase">
-                          {product.category}
+                          {product.category.c_type}
                         </span>
-                        <span className="font-mono font-bold text-[#1e1b4b] text-xs">${product.price.toFixed(2)}</span>
-                        <span className="text-[#6d6a8a] text-xs">{product.stock} units</span>
+                        <span className="font-mono font-bold text-[#1e1b4b] text-xs">Rs {product.p_price}</span>
+                        <span className="text-[#6d6a8a] text-xs">{product.p_material}</span>
                       </div>
                     </div>
                   </div>
