@@ -109,7 +109,7 @@ const ChangePasswordForm = ({ setActiveForm, email }) => {
       <div className="text-center pt-4">
         <button
           type="button"
-          onClick={() => setActiveForm("login")}
+          onClick={() => setActiveForm({ type: "login" })}
           className="text-gray-600 hover:text-gray-800 font-medium transition-colors flex items-center justify-center gap-2 mx-auto"
         >
           <span>←</span> Back to Sign In

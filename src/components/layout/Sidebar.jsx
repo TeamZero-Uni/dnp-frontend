@@ -67,12 +67,12 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         {
           label: "Portfolio Management",
           icon: <FaBoxes size={18} />,
-          path: "/dashboard/gallery/videos",
+          path: "/dash/portfolio",
         },
         {
           label: "Customer Feedback",
           icon: <FaComments size={18} />,
-          path: "/dashboard/feedback",
+          path: "/dash/feedback",
         },
       ],
     },
