@@ -198,8 +198,8 @@ export default function ChatBot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-70">
-          <div className="bg-slate-50/95 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-white/60 h-96">
+        <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[76vw] md:w-104 lg:w-136">
+          <div className="bg-slate-50/95 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-white/60 max-h-[70vh]">
             
             {/* Header */}
             <div className="bg-white/80 backdrop-blur-md border-b border-slate-100 text-slate-800 px-5 py-4 flex items-center justify-between z-10">

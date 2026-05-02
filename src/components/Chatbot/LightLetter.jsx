@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
-import { getChatbotServices, getChatbotSizes } from "../../api/api";
+import { getChatbotServices, getChatbotSizes, postLightLetterEstimate } from "../../api/api";
 
 const LightLetter = () => {
-    const smallSizeGuide = [
-        { size: 1, price: 100 },
-        { size: 2, price: 300 },
-        { size: 3, price: 500 },
-        { size: 4, price: 600 },
-        { size: 5, price: 700 },
-    ];
+    const sizeOptions = [...Array(14)].map((_, index) => ({ size: index + 1, price: (index + 1) * 100 }));
+
+    const normalizeImageItem = (item, fallbackLabel) => ({
+        ...item,
+        image_url: item?.image_url || item?.image || item?.url || "",
+        variant_name: item?.variant_name || item?.name || fallbackLabel,
+    });
 
     const [formData, setFormData] = useState({
         quantity: "",
         sizeInch: "1",
     });
+    const [quantityError, setQuantityError] = useState(null);
+    const MAX_LETTERS = 500;
     const [showPrice, setShowPrice] = useState(false);
     const [previewIndex, setPreviewIndex] = useState(null);
     const [sizePreviewIndex, setSizePreviewIndex] = useState(null);
@@ -25,16 +27,72 @@ const LightLetter = () => {
     const [sizes, setSizes] = useState([]);
     const [loadingSizes, setLoadingSizes] = useState(false);
     const [sizesError, setSizesError] = useState(null);
+    const [estimating, setEstimating] = useState(false);
+    const [estimateError, setEstimateError] = useState(null);
+    const [estimateResult, setEstimateResult] = useState(null);
     const exampleCount = examples.length > 0 ? examples.length : 6;
     const sizeCount = sizes.length > 0 ? sizes.length : 2;
 
-    const selectedPrice = smallSizeGuide.find((item) => String(item.size) === formData.sizeInch)?.price ?? 100;
+    const selectedPrice = sizeOptions.find((item) => String(item.size) === formData.sizeInch)?.price ?? 100;
     const totalPrice = formData.quantity ? Number(formData.quantity) * selectedPrice : 0;
 
     const handleChange = (field, value) => {
+        // validate quantity
+        if (field === "quantity") {
+            const v = String(value).trim();
+            if (v === "") {
+                setQuantityError("Please enter quantity");
+            } else if (!/^[0-9]+$/.test(v)) {
+                setQuantityError("Enter a whole number");
+            } else {
+                const n = parseInt(v, 10);
+                if (n < 1) setQuantityError("Minimum 1 letter");
+                else if (n > MAX_LETTERS) setQuantityError(`Maximum ${MAX_LETTERS} letters`);
+                else setQuantityError(null);
+            }
+        }
+
         setFormData((prev) => ({ ...prev, [field]: value }));
         // hide calculated price until user requests it again
         if (field === "quantity" || field === "sizeInch") setShowPrice(false);
+    };
+
+    const handleGetPrice = async () => {
+        // final validation
+        const q = String(formData.quantity).trim();
+        if (!/^[0-9]+$/.test(q)) {
+            setQuantityError("Enter a whole number");
+            return;
+        }
+        const n = parseInt(q, 10);
+        if (n < 1) {
+            setQuantityError("Minimum 1 letter");
+            return;
+        }
+        if (n > MAX_LETTERS) {
+            setQuantityError(`Maximum ${MAX_LETTERS} letters`);
+            return;
+        }
+
+        setEstimateError(null);
+        setEstimateResult(null);
+        setEstimating(true);
+
+        try {
+            const payload = {
+                quantity: n,
+                sizeInch: formData.sizeInch,
+            };
+            const res = await postLightLetterEstimate(payload);
+            // prefer res.data if API uses { success, data }
+            const data = res?.data ?? res;
+            setEstimateResult(data);
+            setShowPrice(true);
+        } catch (err) {
+            setEstimateError(err?.response?.data?.message || err?.message || "Estimate failed");
+        } finally {
+            setEstimating(false);
+        }
     };
 
     useEffect(() => {
@@ -75,7 +133,8 @@ const LightLetter = () => {
         getChatbotSizes()
             .then((res) => {
                 if (!mounted) return;
-                setSizes(res?.data ?? []);
+                const sizeList = Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.data) ? res.data.data : [];
+                setSizes(sizeList.map((item, index) => normalizeImageItem(item, `Size ${index + 1}`)));
             })
             .catch((err) => {
                 if (!mounted) return;
@@ -307,56 +366,82 @@ const LightLetter = () => {
                 </div>
             </div>
 
+            
             {/* Price form */}
-            <div className="space-y-4">
-                <h4 className="text-base font-semibold text-slate-900">Get Your Price:</h4>
+<div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <h4 className="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2">💰 Get Your Price</h4>
 
-                <label className="space-y-2">
-                    <span className="block text-sm font-medium text-slate-700">How many letters?</span>
-                    <input
-                        type="number"
-                        min="1"
-                        value={formData.quantity}
-                        onChange={(event) => handleChange("quantity", event.target.value)}
-                        placeholder="e.g., 10"
-                        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-slate-400"
-                    />
-                </label>
+    <label className="space-y-1">
+        <span className="block text-sm font-medium text-slate-700">How many letters?</span>
+        <input
+            type="number"
+            min="1"
+            max="500"
+            step="1"
+            inputMode="numeric"
+            value={formData.quantity}
+            onChange={(event) => handleChange("quantity", event.target.value)}
+            placeholder="e.g., 10"
+            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all"
+        />
+        {quantityError && (
+            <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                ⚠️ {quantityError}
+            </p>
+        )}
+    </label>
 
-                <label className="space-y-2">
-                    <span className="block text-sm font-medium text-slate-700">Size</span>
-                    <select
-                        value={formData.sizeInch}
-                        onChange={(event) => handleChange("sizeInch", event.target.value)}
-                        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-400"
-                    >
-                        {smallSizeGuide.map((item) => (
-                            <option key={item.size} value={item.size}>
-                                {item.size} inch{item.size > 1 ? "es" : ""}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+    <label className="space-y-1">
+        <span className="block text-sm font-medium text-slate-700 ">Select Size</span>
+        <select
+            value={formData.sizeInch}
+            onChange={(event) => handleChange("sizeInch", event.target.value)}
+            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all "
+        >
+            {sizeOptions.map((item) => (
+                <option key={item.size} value={item.size}>
+                    {item.size} inch{item.size > 1 ? "es" : ""} — Rs {item.price}
+                </option>
+            ))}
+        </select>
+    </label>
 
-                <button
-                    type="button"
-                    onClick={() => setShowPrice(true)}
-                    className="h-10 w-full rounded-lg bg-slate-300 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-400 disabled:opacity-60"
-                    disabled={!formData.quantity}
-                >
-                    Get Price
-                </button>
+    <button
+        type="button"
+        onClick={handleGetPrice}
+        className="h-11 w-full rounded-xl bg-slate-800 text-sm font-semibold text-white transition-all hover:bg-slate-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 pt-2.5 mt-4"
+        disabled={!formData.quantity || quantityError || estimating}
+    >
+        {estimating ? (
+            <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Calculating…
+            </span>
+        ) : "Get Price →"}
+    </button>
 
-                {showPrice && formData.quantity && (
-                    <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-                        <p className="text-xs text-slate-600">Total Price:</p>
-                        <p className="mt-1 text-lg font-semibold text-slate-900">Rs {totalPrice}</p>
-                        <p className="text-[13px] text-slate-600 mt-1">
-                            {formData.quantity} × Rs {selectedPrice}
-                        </p>
-                    </div>
-                )}
-            </div>
+    {estimateError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <p className="text-xs text-red-600 flex items-center gap-1">⚠️ {estimateError}</p>
+        </div>
+    )}
+
+    {estimateResult && (
+        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 space-y-1">
+            <p className="text-xs font-medium text-green-700 uppercase tracking-wide">Estimated Price</p>
+            <p className="text-2xl font-bold text-green-800">
+                Rs {estimateResult.total ?? estimateResult.estimatedPrice ?? estimateResult.price ?? totalPrice}
+            </p>
+            
+            {estimateResult.details && (
+                <p className="text-xs text-green-600 mt-1">{estimateResult.details}</p>
+            )}
+        </div>
+    )}
+</div>
         </div>
     );
 };
