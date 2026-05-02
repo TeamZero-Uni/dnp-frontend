@@ -78,3 +78,15 @@ export const getProductById = async (id) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
+// Chatbot services
+
+export const getChatbotServices = async () => {
+    const response = await api.get(`/chatbot/all`);
+    return response.data; // { success, message, data: [...] }
+}
+
+export const getChatbotSizes = async () => {
+    const response = await api.get(`/chatbot/sizes`);
+    return response.data; // { success, message, data: [...] }
+}
+//===================================== 

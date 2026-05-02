@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
+import { getChatbotServices, getChatbotSizes } from "../../api/api";
 
 const LightLetter = () => {
     const smallSizeGuide = [
@@ -18,8 +19,14 @@ const LightLetter = () => {
     const [showPrice, setShowPrice] = useState(false);
     const [previewIndex, setPreviewIndex] = useState(null);
     const [sizePreviewIndex, setSizePreviewIndex] = useState(null);
-    const exampleCount = 6;
-    const sizeCount = 2;
+    const [examples, setExamples] = useState([]);
+    const [loadingExamples, setLoadingExamples] = useState(false);
+    const [examplesError, setExamplesError] = useState(null);
+    const [sizes, setSizes] = useState([]);
+    const [loadingSizes, setLoadingSizes] = useState(false);
+    const [sizesError, setSizesError] = useState(null);
+    const exampleCount = examples.length > 0 ? examples.length : 6;
+    const sizeCount = sizes.length > 0 ? sizes.length : 2;
 
     const selectedPrice = smallSizeGuide.find((item) => String(item.size) === formData.sizeInch)?.price ?? 100;
     const totalPrice = formData.quantity ? Number(formData.quantity) * selectedPrice : 0;
@@ -29,6 +36,60 @@ const LightLetter = () => {
         // hide calculated price until user requests it again
         if (field === "quantity" || field === "sizeInch") setShowPrice(false);
     };
+
+    useEffect(() => {
+        let mounted = true;
+        setLoadingExamples(true);
+        setExamplesError(null);
+
+        getChatbotServices()
+            .then((res) => {
+                if (!mounted) return;
+                const services = res?.data ?? [];
+                const allImages = services.flatMap((s) => s.images ?? []);
+                const lightImages = allImages.filter((img) => {
+                    const sub = (img.sub_category || "").toString().toLowerCase();
+                    return sub === "light letter" || sub === "light-letter" || sub === "light_letter";
+                });
+                setExamples(lightImages);
+            })
+            .catch((err) => {
+                if (!mounted) return;
+                setExamplesError(err?.message || "Unable to load examples");
+            })
+            .finally(() => {
+                if (!mounted) return;
+                setLoadingExamples(false);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        let mounted = true;
+        setLoadingSizes(true);
+        setSizesError(null);
+
+        getChatbotSizes()
+            .then((res) => {
+                if (!mounted) return;
+                setSizes(res?.data ?? []);
+            })
+            .catch((err) => {
+                if (!mounted) return;
+                setSizesError(err?.message || "Unable to load sizes");
+            })
+            .finally(() => {
+                if (!mounted) return;
+                setLoadingSizes(false);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     useEffect(() => {
         const onKey = (e) => {
@@ -45,24 +106,57 @@ const LightLetter = () => {
         return () => window.removeEventListener("keydown", onKey);
     }, [previewIndex, exampleCount]);
 
+    useEffect(() => {
+        const onKey = (e) => {
+            if (e.key === "Escape") setSizePreviewIndex(null);
+            if (sizePreviewIndex === null) return;
+            if (e.key === "ArrowLeft") {
+                setSizePreviewIndex((prev) => (prev === 1 ? sizeCount : prev - 1));
+            }
+            if (e.key === "ArrowRight") {
+                setSizePreviewIndex((prev) => (prev === sizeCount ? 1 : prev + 1));
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [sizePreviewIndex, sizeCount]);
+
     return (
         <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             {/* Example photos - small horizontal strip */}
             <div>
                 <h4 className="text-sm font-semibold text-slate-900">Examples</h4>
                 <div className="mt-2 flex gap-2 overflow-x-auto py-1">
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <div
-                            key={n}
-                            onClick={() => setPreviewIndex(n)}
-                            role="button"
-                            tabIndex={0}
-                            className="shrink-0 h-12 w-16 rounded-md bg-slate-100 shadow-inner flex items-center justify-center text-sm font-medium text-slate-700 cursor-pointer"
-                            aria-hidden
-                        >
-                            A{n}
-                        </div>
-                    ))}
+                    {loadingExamples ? (
+                        <div className="py-2 text-sm text-slate-500">Loading examples…</div>
+                    ) : examplesError ? (
+                        <div className="py-2 text-sm text-red-600">{examplesError}</div>
+                    ) : examples.length > 0 ? (
+                        examples.map((img, idx) => (
+                            <div
+                                key={img.id ?? idx}
+                                onClick={() => setPreviewIndex(idx + 1)}
+                                role="button"
+                                tabIndex={0}
+                                className="shrink-0 h-12 w-16 rounded-md bg-slate-100 shadow-inner flex items-center justify-center overflow-hidden cursor-pointer"
+                            >
+                                <img src={img.image_url} alt={img.sub_category || `Example ${idx + 1}`} className="h-full w-full object-cover" />
+                            </div>
+                        ))
+                    ) : (
+                        [1, 2, 3, 4, 5, 6].map((n) => (
+                            <div
+                                key={n}
+                                onClick={() => setPreviewIndex(n)}
+                                role="button"
+                                tabIndex={0}
+                                className="shrink-0 h-12 w-16 rounded-md bg-slate-100 shadow-inner flex items-center justify-center text-sm font-medium text-slate-700 cursor-pointer"
+                                aria-hidden
+                            >
+                                A{n}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -97,7 +191,11 @@ const LightLetter = () => {
 
                             {/* Photo area */}
                             <div className="flex-1 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200 overflow-hidden max-w-2xl max-h-96 md:max-h-full">
-                                <div className="text-7xl md:text-9xl font-bold text-slate-400">A{previewIndex}</div>
+                                {examples.length > 0 && examples[previewIndex - 1] ? (
+                                    <img src={examples[previewIndex - 1].image_url} alt={examples[previewIndex - 1].sub_category || `Example ${previewIndex}`} className="max-h-full max-w-full object-contain" />
+                                ) : (
+                                    <div className="text-7xl md:text-9xl font-bold text-slate-400">A{previewIndex}</div>
+                                )}
                             </div>
 
                             {/* Right arrow */}
@@ -147,7 +245,11 @@ const LightLetter = () => {
 
                             {/* Photo area */}
                             <div className="flex-1 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200 overflow-hidden max-w-2xl max-h-96 md:max-h-full">
-                                <div className="text-7xl md:text-9xl font-bold text-slate-400">S{sizePreviewIndex}</div>
+                                {sizes.length > 0 && sizes[sizePreviewIndex - 1] ? (
+                                    <img src={sizes[sizePreviewIndex - 1].image_url} alt={sizes[sizePreviewIndex - 1].variant_name || `Size ${sizePreviewIndex}`} className="max-h-full max-w-full object-contain" />
+                                ) : (
+                                    <div className="text-7xl md:text-9xl font-bold text-slate-400">S{sizePreviewIndex}</div>
+                                )}
                             </div>
 
                             {/* Right arrow */}
@@ -170,20 +272,38 @@ const LightLetter = () => {
             <div>
                 <h4 className="text-sm font-semibold text-slate-900">Our Sizes</h4>
                 <div className="mt-2 flex gap-3 overflow-x-auto py-1">
-                    {[
-                        { key: "s", label: "Small" },
-                        { key: "m", label: "Medium" },
-                    ].map((it, idx) => (
-                        <div 
-                            key={it.key} 
-                            className="shrink-0 w-28 cursor-pointer"
-                            onClick={() => setSizePreviewIndex(idx + 1)}
-                        >
-                            <div className="h-20 w-full rounded-md bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
-                                {it.label}
+                    {loadingSizes ? (
+                        <div className="py-2 text-sm text-slate-500">Loading sizes…</div>
+                    ) : sizesError ? (
+                        <div className="py-2 text-sm text-red-600">{sizesError}</div>
+                    ) : sizes.length > 0 ? (
+                        sizes.map((item, idx) => (
+                            <div
+                                key={item.id ?? idx}
+                                className="shrink-0 w-28 cursor-pointer"
+                                onClick={() => setSizePreviewIndex(idx + 1)}
+                            >
+                                <div className="h-20 w-full rounded-md bg-slate-100 overflow-hidden flex items-center justify-center hover:bg-slate-200 transition-colors">
+                                    <img src={item.image_url} alt={item.variant_name || `Size ${idx + 1}`} className="h-full w-full object-cover" />
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        [
+                            { key: "s", label: "Small" },
+                            { key: "m", label: "Medium" },
+                        ].map((it, idx) => (
+                            <div
+                                key={it.key}
+                                className="shrink-0 w-28 cursor-pointer"
+                                onClick={() => setSizePreviewIndex(idx + 1)}
+                            >
+                                <div className="h-20 w-full rounded-md bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
+                                    {it.label}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
