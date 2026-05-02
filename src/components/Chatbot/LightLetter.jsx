@@ -4,7 +4,22 @@ import { IoClose } from "react-icons/io5";
 import { getChatbotServices, getChatbotSizes, postLightLetterEstimate } from "../../api/api";
 
 const LightLetter = () => {
-    const sizeOptions = [...Array(14)].map((_, index) => ({ size: index + 1, price: (index + 1) * 100 }));
+    const sizeOptions = [
+    { size: 1,  price: 100 },
+    { size: 2,  price: 300 },
+    { size: 3,  price: 500 },
+    { size: 4,  price: 600 },
+    { size: 5,  price: 700 },
+    { size: 6,  price: 2100 },
+    { size: 7,  price: 2200 },
+    { size: 8,  price: 2300 },
+    { size: 9,  price: 2400 },
+    { size: 10, price: 2500 },
+    { size: 11, price: 2650 },
+    { size: 12, price: 2750 },
+    { size: 13, price: 2850 },
+    { size: 14, price: 2950 },
+];
 
     const normalizeImageItem = (item, fallbackLabel) => ({
         ...item,
