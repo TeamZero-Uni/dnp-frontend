@@ -11,6 +11,21 @@ const api = axios.create({
 
 export default api;
 
+export const request = async (method, url, data = null, config = {}) => {
+    try {
+        const response = await api({
+            method,
+            url,
+            data,
+            ...config,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const googleLogin = () => {
     window.location.href = "http://localhost:5000/api/v1/auth/google";
 };
