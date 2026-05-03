@@ -13,6 +13,7 @@ import {
 } from "react-icons/io5";
 
 import LightLetter from "./LightLetter";
+import ThreeDPart from "./ThreeDPart";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -300,6 +301,12 @@ export default function ChatBot() {
               {activeNodeId === "light-letter" && (
                 <div className="mb-4 animate-fade-in">
                   <LightLetter onSubmitRequest={handleLightLetterRequest} />
+                </div>
+              )}
+
+              {activeNodeId === "3d-part" && (
+                <div className="mb-4 animate-fade-in">
+                  <ThreeDPart />
                 </div>
               )}
 

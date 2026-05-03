@@ -94,21 +94,56 @@ export const voteReviewAPI = async (reviewId, likesChange, dislikesChange) => {
 }
 // Chatbot services
 
+// ── GET requests ────────────────────────────────────────
 export const getChatbotServices = async () => {
-    const response = await api.get(`/chatbot/all`);
-    return response.data; // { success, message, data: [...] }
-}
+    try {
+        const response = await api.get("/chatbot/all");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching chatbot services:", error);
+        throw error;
+    }
+};
 
 export const getChatbotSizes = async () => {
-    const response = await api.get(`/chatbot/sizes`);
-    return response.data; // { success, message, data: [...] }
-}
+    try {
+        const response = await api.get("/chatbot/sizes");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching chatbot sizes:", error);
+        throw error;
+    }
+};
 
-// Request price/estimate for Light Letter
+export const getChatbotMaterials = async () => {
+    try {
+        const response = await api.get("/chatbot/materials");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching chatbot materials:", error);
+        throw error;
+    }
+};
+
+
+
+// ── POST requests ───────────────────────────────────────
 export const postLightLetterEstimate = async (payload) => {
-    // payload expected: { quantity, sizeInch, notes, exampleId?, material? }
-    const response = await api.post(`/chatbot/calculate
-        `, payload);
-    return response.data;
-}
+    try {
+        const response = await api.post("/chatbot/calculate", payload);
+        return response.data;
+    } catch (error) {
+        console.error("Error posting light letter estimate:", error);
+        throw error;
+    }
+};
+export const postThreeDPartEstimate = async (payload) => {
+    try {
+        const response = await api.post("/chatbot/calculate/3dpart", payload);
+        return response.data;
+    } catch (error) {
+        console.error("Error posting 3D part estimate:", error);
+        throw error;
+    }
+};
 //===================================== 
