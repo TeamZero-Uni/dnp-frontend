@@ -212,7 +212,7 @@ const handleVote = async (reviewId, type) => {
                 <button 
                   onClick={handlePostReview}
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-[#a49ee8] hover:bg-[#5a46c2] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#5a46c2] hover:bg-[#894def] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? "Posting..." : "Post Review"}
                 </button>
