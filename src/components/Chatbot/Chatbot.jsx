@@ -9,11 +9,17 @@ import {
   IoArrowBack,
   IoRefreshOutline,
   IoBulb,       // Solid bulb icon for Light Letter
-  IoConstruct   // Wrench icon for 3D Parts
+  IoConstruct,  // Wrench icon for 3D Parts
+  IoCut,        // Scissors icon for Cutting
+  IoBrush,      // Brush icon for Engraving
+  IoMailOutline // Contact icon
 } from "react-icons/io5";
 
 import LightLetter from "./LightLetter";
 import ThreeDPart from "./ThreeDPart";
+import Cutting from "./Cutting";
+import Engraving from "./Engraving";
+import ContactUs from "./ContactUs";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +35,7 @@ export default function ChatBot() {
         options: [
           { id: "3d-printing", title: "3D Printing", subtitle: "Light Letter & 3D Part", icon: IoPrint, colorClass: "from-blue-500 to-indigo-600", glowColor: "shadow-indigo-500/40" },
           { id: "laser-cutting", title: "Laser Cutting", subtitle: "Cutting & Lighting", icon: IoSparkles, colorClass: "from-amber-400 to-orange-500", glowColor: "shadow-orange-500/40" },
+          { id: "contact", title: "Contact us ", subtitle: "Send your details", icon: IoMailOutline, colorClass: "from-pink-500 to-rose-600", glowColor: "shadow-rose-500/40" },
           { id: "other-service", title: "Other Service", subtitle: "Custom request", icon: IoChatbubbles, colorClass: "from-emerald-400 to-teal-500", glowColor: "shadow-teal-500/40" },
         ],
       },
@@ -48,7 +55,22 @@ export default function ChatBot() {
         options: [],
       },
       "laser-cutting": {
-        text: "Please share the material, thickness, size, and quantity for laser cutting.",
+        text: "Please choose a laser service option.",
+        options: [
+          { id: "laser-cutting-cut", title: "Cutting", subtitle: "Precise material cutting", icon: IoCut, colorClass: "from-amber-500 to-orange-600", glowColor: "shadow-orange-500/40" },
+          { id: "laser-cutting-engraving", title: "Engraving", subtitle: "Surface engraving", icon: IoBrush, colorClass: "from-orange-500 to-red-600", glowColor: "shadow-red-500/40" },
+        ],
+      },
+      "laser-cutting-cut": {
+        text: "Laser Cutting service",
+        options: [],
+      },
+      "laser-cutting-engraving": {
+        text: "Laser Engraving service",
+        options: [],
+      },
+      contact: {
+        text: "Please choose a contact method.",
         options: [{ id: "start", title: "Main Menu", subtitle: "Return to start", icon: IoChevronForward, colorClass: "from-slate-500 to-slate-700", glowColor: "shadow-slate-400/40" }],
       },
       "other-service": {
@@ -307,6 +329,24 @@ export default function ChatBot() {
               {activeNodeId === "3d-part" && (
                 <div className="mb-4 animate-fade-in">
                   <ThreeDPart />
+                </div>
+              )}
+
+              {activeNodeId === "laser-cutting-cut" && (
+                <div className="mb-4 animate-fade-in">
+                  <Cutting />
+                </div>
+              )}
+
+              {activeNodeId === "laser-cutting-engraving" && (
+                <div className="mb-4 animate-fade-in">
+                  <Engraving />
+                </div>
+              )}
+
+              {activeNodeId === "contact" && (
+                <div className="mb-4 animate-fade-in">
+                  <ContactUs />
                 </div>
               )}
 

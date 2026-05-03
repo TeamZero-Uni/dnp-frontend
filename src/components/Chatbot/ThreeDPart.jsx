@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
-import { getChatbotMaterials, postThreeDPartEstimate } from "../../api/api";
+import { getChatbotMaterials, postThreeDPartEstimate } from "../../api/chatbotApi";
 
 const ThreeDPart = () => {
     const [tab, setTab] = useState("examples");
@@ -73,6 +73,7 @@ const ThreeDPart = () => {
         } finally {
             setEstimating(false);
         }
+        
     };
 
     useEffect(() => {

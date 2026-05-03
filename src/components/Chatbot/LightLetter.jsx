@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
-import { getChatbotServices, getChatbotSizes, postLightLetterEstimate } from "../../api/api";
+import { getChatbotServices, getChatbotSizes, postLightLetterEstimate } from "../../api/chatbotApi";
 
 const LightLetter = () => {
     const sizeOptions = [
