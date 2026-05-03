@@ -37,6 +37,7 @@ import QuotetionManagement from "./pages/admin/QuotetionManagement";
 import RequestQuote from './pages/RequestQuote';
 import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
+import FeedbackManagement from "./pages/admin/FeedbackManagement";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -71,6 +72,7 @@ const router = createBrowserRouter(
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="portfolio" element={<PortfolioManagemet />} /> 
           <Route path="quotes" element={<QuotetionManagement />} />
+          <Route path="feedback" element={<FeedbackManagement />} />
         </Route>
       </Route>
     </Route>,
