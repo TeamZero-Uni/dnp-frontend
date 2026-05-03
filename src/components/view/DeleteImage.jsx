@@ -1,29 +1,22 @@
 import { useState } from "react";
 import { Trash2, AlertTriangle, ImageOff, CheckCircle2 } from "lucide-react";
+import { deleteGallery } from "../../api/galleryApi";
 
-const SAMPLE_IMAGE = {
-  id: 1,
-  title: "Mountain Sunrise.jpg",
-  category: "Nature",
-  thumb:
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop",
-};
-
-export default function DeleteImage({
-  image = SAMPLE_IMAGE,
-  onDelete,
-  onCancel,
-}) {
+export default function DeleteImage({ images, onDelete, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await Promise.all(images.map((img) => deleteGallery(img.id)));
       setDeleted(true);
-      if (onDelete) onDelete(image.id);
-    }, 1200);
+      if (onDelete) onDelete(images.map((img) => img.id));
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (deleted) {
@@ -33,14 +26,12 @@ export default function DeleteImage({
           <CheckCircle2 size={26} className="text-emerald-500" />
         </div>
         <div>
-          <p className="text-base font-black text-slate-800">
-            Successfully Deleted
-          </p>
+          <p className="text-base font-black text-slate-800">Successfully Deleted</p>
           <p className="text-sm text-slate-400 mt-1">
             <span className="font-semibold text-slate-600">
-              "{image.title}"
+              {images.length === 1 ? `"${images[0].title}"` : `${images.length} images`}
             </span>{" "}
-            has been removed from your gallery.
+            {images.length === 1 ? "has" : "have"} been removed from your gallery.
           </p>
         </div>
         <button
@@ -60,40 +51,48 @@ export default function DeleteImage({
           <AlertTriangle size={15} className="text-red-500" />
         </div>
         <div>
-          <p className="text-sm font-bold text-red-700">
-            This action cannot be undone
-          </p>
+          <p className="text-sm font-bold text-red-700">This action cannot be undone</p>
           <p className="text-xs text-red-400 mt-0.5 leading-relaxed">
-            The image will be permanently removed from your gallery and cannot
-            be recovered.
+            {images.length === 1
+              ? "The image will be permanently removed from your gallery and cannot be recovered."
+              : `${images.length} images will be permanently removed from your gallery and cannot be recovered.`}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-2xl p-3">
-        {image.thumb ? (
-          <img
-            src={image.thumb}
-            alt={image.title}
-            className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
-            <ImageOff size={20} className="text-slate-400" />
+      {/* Single image preview OR multi image count */}
+      {images.length === 1 ? (
+        <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-2xl p-3">
+          {images[0].image_url ? (
+            <img
+              src={images[0].image_url}
+              alt={images[0].title}
+              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+              <ImageOff size={20} className="text-slate-400" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-800 truncate">{images[0].title}</p>
+            <span className="inline-block mt-1.5 text-xs font-semibold text-violet-600 bg-violet-50 border border-violet-100 px-2.5 py-0.5 rounded-full">
+              {images[0].category.c_type}
+            </span>
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-slate-800 truncate">
-            {image.title}
-          </p>
-          <span className="inline-block mt-1.5 text-xs font-semibold text-violet-600 bg-violet-50 border border-violet-100 px-2.5 py-0.5 rounded-full">
-            {image.category}
-          </span>
+          <div className="w-8 h-8 rounded-full bg-red-100 border-2 border-white flex items-center justify-center shrink-0">
+            <Trash2 size={13} className="text-red-500" />
+          </div>
         </div>
-        <div className="w-8 h-8 rounded-full bg-red-100 border-2 border-white flex items-center justify-center shrink-0">
-          <Trash2 size={13} className="text-red-500" />
+      ) : (
+        <div className="grid grid-cols-4 gap-2">
+          {images.map((img) => (
+            <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200">
+              <img src={img.image_url} alt={img.title} className="w-full h-full object-cover" />
+            </div>
+          ))}
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <button
@@ -107,39 +106,20 @@ export default function DeleteImage({
           onClick={handleDelete}
           disabled={loading}
           className={`py-3 rounded-2xl text-sm font-bold text-white transition-all flex items-center justify-center gap-2
-            ${
-              loading
-                ? "bg-red-300 cursor-not-allowed"
-                : "bg-red-500 hover:bg-red-600 shadow-md shadow-red-100 active:scale-95"
-            }`}
+            ${loading ? "bg-red-300 cursor-not-allowed" : "bg-red-500 hover:bg-red-600 shadow-md shadow-red-100 active:scale-95"}`}
         >
           {loading ? (
             <>
-              <svg
-                className="animate-spin w-4 h-4 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
-                />
+              <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
               </svg>
               Deleting…
             </>
           ) : (
             <>
               <Trash2 size={14} />
-              Delete
+              Delete {images.length > 1 && `(${images.length})`}
             </>
           )}
         </button>

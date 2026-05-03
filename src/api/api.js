@@ -73,6 +73,15 @@ export const uploadMultipleImages = async (formData) => {
   return response.data;
 };
 
+export const uploadSingleImage = async (formData) => {
+  const response = await api.post("/upload/single", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+}
+
 export const getAllCategories = async () => {
   const response = await api.get("/categories");
   return response.data;
