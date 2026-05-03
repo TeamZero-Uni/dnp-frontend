@@ -78,3 +78,10 @@ export const getProductById = async (id) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
+
+export const getYoutubeVideos = async (maxResults = 12, pageToken = '') => {
+    const response = await api.get("/youtube", {
+        params: { maxResults, pageToken },
+    });
+    return response.data;
+};
