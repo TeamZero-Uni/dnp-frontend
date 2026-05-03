@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   FiSearch, FiFilter, FiEye, FiTrash2,
   FiPackage, FiChevronLeft, FiChevronRight,
@@ -7,117 +7,7 @@ import {
 import Modal from "../../model/Modal";
 import CodOrderView from "../../components/view/CodOrderView";
 import DeleteOrderView from "../../components/view/DeleteOrderView";
-
-const INITIAL_ORDERS = [
-  {
-    order_id: "ORD-001",
-    product_name: "Minimalist Desk Lamp",
-    user_name: "Alice Johnson",
-    total_amount: 158.00,
-    order_status: "pending", // pending, confirmed, shipped, delivered, cancelled
-    order_date: "2025-01-10",
-    quantity: 2,
-    payment_method: "cod",
-    payment_status: "unpaid", 
-    shipping_name: "Alice Johnson",
-    shipping_phone: "+1-555-0101",
-    shipping_address: "123 Maple Avenue",
-    shipping_city: "Portland",
-    shipping_state: "Oregon",
-    shipping_pincode: "97201",
-    shipping_country: "USA"
-  },
-  {
-    order_id: "ORD-002",
-    product_name: "Ceramic Coffee Set",
-    user_name: "Bob Martinez",
-    total_amount: 55.00,
-    order_status: "pending",
-    order_date: "2025-01-14",
-    quantity: 1,
-    payment_method: "cod",
-    payment_status: "unpaid",
-    shipping_name: "Bob Martinez",
-    shipping_phone: "+1-555-0102",
-    shipping_address: "456 Oak Street",
-    shipping_city: "Austin",
-    shipping_state: "Texas",
-    shipping_pincode: "73301",
-    shipping_country: "USA"
-  },
-  {
-    order_id: "ORD-003",
-    product_name: "Leather Journal",
-    user_name: "Clara Nguyen",
-    total_amount: 105.00,
-    order_status: "pending",
-    order_date: "2025-01-18",
-    quantity: 3,
-    payment_method: "cod",
-    payment_status: "unpaid",
-    shipping_name: "Clara Nguyen",
-    shipping_phone: "+1-555-0103",
-    shipping_address: "789 Pine Lane",
-    shipping_city: "Seattle",
-    shipping_state: "Washington",
-    shipping_pincode: "98101",
-    shipping_country: "USA"
-  },
-  {
-    order_id: "ORD-004",
-    product_name: "Minimalist Desk Lamp",
-    user_name: "David Kim",
-    total_amount: 79.00,
-    order_status: "confirmed",
-    order_date: "2025-01-20",
-    quantity: 1,
-    payment_method: "cod",
-    payment_status: "unpaid",
-    shipping_name: "David Kim",
-    shipping_phone: "+1-555-0104",
-    shipping_address: "321 Birch Blvd",
-    shipping_city: "Chicago",
-    shipping_state: "Illinois",
-    shipping_pincode: "60601",
-    shipping_country: "USA"
-  },
-  {
-    order_id: "ORD-005",
-    product_name: "Ceramic Coffee Set",
-    user_name: "Emma Wilson",
-    total_amount: 110.00,
-    order_status: "cancelled",
-    order_date: "2025-01-22",
-    quantity: 2,
-    payment_method: "cod",
-    payment_status: "unpaid",
-    shipping_name: "Emma Wilson",
-    shipping_phone: "+1-555-0105",
-    shipping_address: "654 Cedar Court",
-    shipping_city: "Denver",
-    shipping_state: "Colorado",
-    shipping_pincode: "80201",
-    shipping_country: "USA"
-  },
-  {
-    order_id: "ORD-006",
-    product_name: "Leather Journal",
-    user_name: "Frank Lee",
-    total_amount: 35.00,
-    order_status: "pending",
-    order_date: "2025-01-25",
-    quantity: 1,
-    payment_method: "cod",
-    payment_status: "unpaid",
-    shipping_name: "Frank Lee",
-    shipping_phone: "+1-555-0106",
-    shipping_address: "987 Elm Road",
-    shipping_city: "Miami",
-    shipping_state: "Florida",
-    shipping_pincode: "33101",
-    shipping_country: "USA"
-  }
-];
+import { getAllOrders } from "../../api/ordersApi";
 
 const PER_PAGE = 6;
 
@@ -130,20 +20,21 @@ const STATUS_STYLES = {
   cancelled:  { bg: "bg-rose-50",    text: "text-rose-700",    border: "border-rose-200",    dot: "bg-rose-500"    },
 };
 
-const COLUMNS = ["Order ID", "Product", "Customer", "Qty", "Total", "Status", "Date", "Actions"];
+const COLUMNS = ["Product", "Customer", "Qty", "Total", "Status", "Date", "Actions"];
 
 function StatusBadge({ status }) {
-  const s = STATUS_STYLES[status] || STATUS_STYLES.pending;
+  const key = status?.toLowerCase() ?? "pending";
+  const s = STATUS_STYLES[key] || STATUS_STYLES.pending;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap ${s.bg} ${s.text} ${s.border}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {key.charAt(0).toUpperCase() + key.slice(1)}
     </span>
   );
 }
 
 export default function CodOrderManagement() {
-  const [orders] = useState(INITIAL_ORDERS);
+  const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [modal, setModal] = useState(null);
@@ -152,15 +43,38 @@ export default function CodOrderManagement() {
 
   const closeModal = () => setModal(null);
 
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await getAllOrders();
+        const onlineOrders = res.data.filter(
+          (o) => o.payment_method === "CASH_ON_DELIVERY"
+        );
+        setOrders(onlineOrders);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+    fetchOrders();
+  }, []);
+
   const filtered = useMemo(() => {
     return orders.filter((o) => {
       const q = search.toLowerCase();
+      const productName = o.items?.[0]?.product?.p_name ?? "";
+      const productId   = o.items?.[0]?.product?.p_id ?? "";
+      const customerName = o.shippingAddress?.cus_name ?? "";
+
       const matchSearch =
         o.order_id.toLowerCase().includes(q) ||
-        o.product_name.toLowerCase().includes(q) ||
-        o.user_name.toLowerCase().includes(q) ||
-        o.product_id.toLowerCase().includes(q);
-      const matchStatus = statusFilter ? o.order_status === statusFilter : true;
+        productName.toLowerCase().includes(q) ||
+        customerName.toLowerCase().includes(q) ||
+        productId.toLowerCase().includes(q);
+
+      const matchStatus = statusFilter
+        ? o.status?.toLowerCase() === statusFilter.toLowerCase()
+        : true;
+
       return matchSearch && matchStatus;
     });
   }, [orders, search, statusFilter]);
@@ -169,10 +83,10 @@ export default function CodOrderManagement() {
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const stats = [
-    { label: "Total Orders",  value: orders.length,                                                   color: "#1e1b4b" },
-    { label: "Pending",       value: orders.filter(o => o.order_status === "pending").length,          color: "#d97706" },
-    { label: "Delivered",     value: orders.filter(o => o.order_status === "delivered").length,        color: "#059669" },
-    { label: "Revenue",       value: `$${orders.reduce((s, o) => s + o.total_amount, 0).toFixed(0)}`,  color: "#5a46c2" },
+    { label: "Total Orders", value: orders.length, color: "#1e1b4b" },
+    { label: "Pending",      value: orders.filter(o => o.status?.toLowerCase() === "pending").length,   color: "#d97706" },
+    { label: "Delivered",    value: orders.filter(o => o.status?.toLowerCase() === "delivered").length, color: "#059669" },
+    { label: "Revenue",      value: `$${orders.reduce((s, o) => s + parseFloat(o.total_amount || 0), 0).toFixed(0)}`, color: "#5a46c2" },
   ];
 
   const activeFilters = [statusFilter].filter(Boolean).length;
@@ -183,10 +97,7 @@ export default function CodOrderManagement() {
       <header className="bg-white border-b border-[#e5e0ff] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div
-              className="p-2 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200"
-              style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
-            >
+            <div className="p-2 btn-color rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
               <FiShoppingBag className="text-white" size={20} />
             </div>
             <div>
@@ -306,38 +217,38 @@ export default function CodOrderManagement() {
               <tbody className="divide-y divide-[#f0eeff]">
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-[#b0add0] text-sm">
+                    <td colSpan={7} className="text-center py-16 text-[#b0add0] text-sm">
                       No orders found.
                     </td>
                   </tr>
                 ) : paginated.map((order) => (
-                  <tr
-                    key={order.order_id}
-                    className="hover:bg-[#faf9ff] transition-colors cursor-pointer"
-                  >
-                    <td className="px-5 py-4">
-                      <span className="font-mono text-xs font-semibold text-[#5a46c2]">{order.order_id}</span>
-                    </td>
+                  <tr key={order.order_id} className="hover:bg-field-bg transition-colors cursor-pointer">
                     <td className="px-5 py-4">
                       <div>
-                        <p className="font-semibold text-[#1e1b4b] text-sm truncate max-w-40">{order.product_name}</p>
-                        <p className="font-mono text-[10px] text-[#b0add0] mt-0.5">{order.product_id}</p>
+                        <p className="font-semibold text-[#1e1b4b] text-sm truncate max-w-40">
+                          {order.items?.[0]?.product?.p_name ?? "—"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div>
-                        <p className="font-semibold text-[#1e1b4b] text-sm">{order.user_name}</p>
-                        <p className="font-mono text-[10px] text-[#b0add0] mt-0.5">{order.user_id}</p>
+                        <p className="font-semibold text-[#1e1b4b] text-sm">
+                          {order.shippingAddress?.cus_name ?? "—"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="font-semibold text-[#1e1b4b]">{order.quantity}</span>
+                      <span className="font-semibold text-[#1e1b4b]">
+                        {order.items?.[0]?.quantity ?? 0}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="font-mono font-bold text-[#1e1b4b]">${order.total_amount.toFixed(2)}</span>
+                      <span className="font-mono font-bold text-[#1e1b4b]">
+                        ${parseFloat(order.total_amount || 0).toFixed(2)}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
-                      <StatusBadge status={order.order_status} />
+                      <StatusBadge status={order.status} />
                     </td>
                     <td className="px-5 py-4">
                       <span className="text-xs text-[#6d6a8a] font-medium whitespace-nowrap">
@@ -374,33 +285,34 @@ export default function CodOrderManagement() {
             ) : paginated.map((order) => (
               <div
                 key={order.order_id}
-                className="p-4 hover:bg-[#faf9ff] transition-colors"
+                className="p-4 hover:bg-field-bg transition-colors"
                 onClick={() => setModal({ type: "view", order })}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-mono text-[11px] font-bold text-[#5a46c2]">{order.order_id}</span>
-                      <span className="text-[10px] text-[#b0add0]">·</span>
-                      <span className="font-mono text-[10px] text-[#b0add0]">{order.product_id}</span>
-                    </div>
-                    <p className="font-semibold text-[#1e1b4b] text-sm truncate">{order.product_name}</p>
+                    <p className="font-semibold text-[#1e1b4b] text-sm truncate">
+                      {order.items?.[0]?.product?.p_name ?? "—"}
+                    </p>
                   </div>
-                  <StatusBadge status={order.order_status} />
+                  <StatusBadge status={order.status} />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 my-3">
                   <div className="bg-[#f9f8ff] border border-[#f0eeff] rounded-xl px-2.5 py-2">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-[#b0add0] mb-0.5">Customer</p>
-                    <p className="text-xs font-semibold text-[#1e1b4b] truncate">{order.user_name.split(" ")[0]}</p>
+                    <p className="text-xs font-semibold text-[#1e1b4b] truncate">
+                      {(order.shippingAddress?.cus_name ?? "—").split(" ")[0]}
+                    </p>
                   </div>
                   <div className="bg-[#f9f8ff] border border-[#f0eeff] rounded-xl px-2.5 py-2">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-[#b0add0] mb-0.5">Qty</p>
-                    <p className="text-xs font-semibold text-[#1e1b4b]">{order.quantity} units</p>
+                    <p className="text-xs font-semibold text-[#1e1b4b]">{order.items?.[0]?.quantity ?? 0} units</p>
                   </div>
                   <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-2.5 py-2">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-indigo-300 mb-0.5">Total</p>
-                    <p className="text-xs font-bold text-[#5a46c2] font-mono">${order.total_amount.toFixed(2)}</p>
+                    <p className="text-xs font-bold text-[#5a46c2] font-mono">
+                      ${parseFloat(order.total_amount || 0).toFixed(2)}
+                    </p>
                   </div>
                 </div>
 
@@ -427,6 +339,7 @@ export default function CodOrderManagement() {
             ))}
           </div>
 
+          {/* Pagination */}
           <div className="flex flex-wrap justify-between items-center px-4 sm:px-5 py-4 border-t border-[#f0eeff] gap-3">
             <span className="text-[0.75rem] text-[#9090b0] font-medium">
               {filtered.length === 0
@@ -474,7 +387,7 @@ export default function CodOrderManagement() {
       )}
       {modal?.type === "delete" && (
         <Modal title="Delete Order" onClose={closeModal}>
-          <DeleteOrderView order={modal.order} onClose={closeModal} />
+          <DeleteOrderView order={modal.order} onClose={closeModal} onConfirm={closeModal}/>
         </Modal>
       )}
     </div>
