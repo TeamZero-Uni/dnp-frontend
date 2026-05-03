@@ -92,6 +92,21 @@ export const getProductById = async (id) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
+
+export const getProductReviews = async (productId) => {
+    const response = await api.get(`/products/${productId}/reviews`);
+    return response.data;
+}
+
+export const createReview = async (reviewData) => {
+    const response = await api.post("/reviews", reviewData);
+    return response.data;
+}
+
+export const voteReviewAPI = async (reviewId, likesChange, dislikesChange) => {
+    const response = await api.post(`/reviews/${reviewId}/vote`, { likesChange, dislikesChange });
+    return response.data;
+}
 // Chatbot services
 
 export const getChatbotServices = async () => {

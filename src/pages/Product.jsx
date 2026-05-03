@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import Banner from "../components/layout/Banner";
 import ProductCard from "../components/cards/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import FilterSection from "../components/sections/FilterSection";
-import ReadyToStart from "../components/ReadyToStart"
+import ReadyToStart from "../components/ReadyToStart";
+import { useProduct } from "../hooks/useProduct"; 
 import {
   FaCheckCircle,
-  FaTag,
   FaList,
   FaTags,
   FaDollarSign,
+  FaChevronDown,
 } from "react-icons/fa";
 
 const categories = [
@@ -26,126 +27,18 @@ const tagsList = [
   "Skull Collection",
   "Matte Finish",
   "DNP Originals",
+  "sofa",
+  "dining",
+  "lighting",
+  "vase",
+  "bedding"
 ];
 
 function Product() {
-  // In Product.jsx, update your products array:
-  const [products] = useState([
-    {
-      id: 1,
-      name: "Human Skull",
-      price: 1990,
-      image: "/assets/images/img7.jpg",
-      category: "3D Printing",
-      tags: ["Skull Collection"],
-      stock: 1,
-      stockCount: 1,
-    },
-    {
-      id: 2,
-      name: "3D-printed human skeleton hand model",
-      price: 1950,
-      image: "/assets/images/img8.jpg",
-      category: "3D Printing",
-      tags: ["PLA+"],
-      stock: 4,
-      stockCount: 4,
-    },
-    {
-      id: 3,
-      name: "SlantedDesigns",
-      price: 1200,
-      image: "/assets/images/img9.jpg",
-      category: "3D Resin Printing",
-      tags: ["Resin"],
-      stock: 5,
-      stockCount: null,
-    },
-    {
-      id: 4,
-      name: "3D-printed or ceramic planter shaped like a puffer jacket",
-      price: 2500,
-      image: "/assets/images/img10.jpg",
-      category: "3D Resin Printing",
-      tags: ["PLA+"],
-      stock: 2,
-      stockCount: 2,
-    },
-    {
-      id: 5,
-      name: "3D Printable Loki Mask KeyTag",
-      price: 450,
-      image: "/assets/images/img11.jpg",
-      category: "3D Resin Printing",
-      tags: ["Resin"],
-      stock: 0,
-      stockCount: null,
-    },
-    {
-      id: 6,
-      name: "3D-printed toy ship",
-      price: 800,
-      image: "/assets/images/img18.jpg",
-      category: "Injection Molding",
-      tags: ["DNP Originals"],
-      stock: 3,
-      stockCount: 2,
-    },
-    {
-      id: 7,
-      name: "Rapid prototyping parts",
-      price: 1500,
-      image: "/assets/images/img19.jpg",
-      category: "Injection Molding",
-      tags: ["Skull Collection"],
-      stock: 6,
-      stockCount: 6,
-    },
-    {
-      id: 8,
-      name: "Decorative wooden carving",
-      price: 2200,
-      image: "/assets/images/img14.jpg",
-      category: "Laser Cutting & Engraving",
-      tags: ["Matte Finish"],
-      stock: 2,
-      stockCount: 2,
-    },
-    {
-      id: 9,
-      name: "Decorative wooden carving",
-      price: 3000,
-      image: "/assets/images/img15.jpg",
-      category: "Laser Cutting & Engraving",
-      tags: ["PLA+"],
-      stock: 3,
-      stockCount: 3,
-    },
-    {
-      id: 10,
-      name: "custom 3D foam sign decoration",
-      price: 1800,
-      image: "/assets/images/img16.jpg",
-      category: "Light Letters",
-      tags: ["Resin"],
-      stock: 5,
-      stockCount: 4,
-    },
-    {
-      id: 11,
-      name: "custom 3D foam sign decoration",
-      price: 600,
-      image: "/assets/images/img17.jpg",
-      category: "Light Letters",
-      tags: ["DNP Originals"],
-      stock: 8,
-      stockCount: null,
-    },
-  ]);
-
+  const { products } = useProduct();
   const [inStockOnly, setInStockOnly] = useState(true);
   const [sortBy, setSortBy] = useState("default");
-  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [priceRange, setPriceRange] = useState([0, 100000]); 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -163,30 +56,35 @@ function Product() {
 
   const toggleCategory = (name) => {
     setSelectedCategories((prev) =>
-      prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name],
+      prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name]
     );
   };
 
   const toggleTag = (tag) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
-  // --- Filter Logic ---
+  //Filter Logic
   const filteredProducts = products.filter((product) => {
     const matchesPrice =
-      product.price >= priceRange[0] && product.price <= priceRange[1];
+      product.p_price >= priceRange[0] && product.p_price <= priceRange[1];
+    
     const matchesCategory =
       selectedCategories.length === 0 ||
-      selectedCategories.includes(product.category);
+      (product.category && selectedCategories.includes(product.category.c_type));
+    
     const matchesTag =
       selectedTags.length === 0 ||
-      product.tags.some((tag) => selectedTags.includes(tag));
-    const matchesSearch = product.name
-      .toLowerCase()
+      (product.p_tag && selectedTags.includes(product.p_tag));
+    
+    const matchesSearch = product.p_name
+      ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesStock = !inStockOnly || product.stock !== 0;
+    
+    const matchesStock = !inStockOnly || product.status === "stock" || product.p_status === "IN_STOCK";
+
     return (
       matchesPrice &&
       matchesCategory &&
@@ -196,25 +94,13 @@ function Product() {
     );
   });
 
+  // --- Sorting Logic ---
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "price-asc") return a.price - b.price;
-    if (sortBy === "price-desc") return b.price - a.price;
-    if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+    if (sortBy === "price-asc") return a.p_price - b.p_price;
+    if (sortBy === "price-desc") return b.p_price - a.p_price;
+    if (sortBy === "name-asc") return a.p_name.localeCompare(b.p_name);
     return 0;
   });
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.03,
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    }),
-  };
 
   return (
     <>
@@ -228,6 +114,8 @@ function Product() {
 
       <div className="container max-w-7xl mx-[6%] px-4 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* --- SIDEBAR --- */}
           <aside className="lg:w-1/4 w-full">
             <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
               <h2 className="text-xl font-black text-[#5a46c2] mb-2 tracking-tight uppercase">
@@ -244,23 +132,13 @@ function Product() {
                   className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-[#5a46c2] outline-none transition-all"
                 />
                 <button className="absolute right-2 top-1.5 p-1.5 bg-[#5a46c2] text-white rounded-lg">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
               </div>
 
+              {/* AVAILABILITY SECTION */}
               <FilterSection
                 title="Availability"
                 isOpen={openSections.availability}
@@ -273,9 +151,7 @@ function Product() {
                       onClick={() => setInStockOnly(!inStockOnly)}
                       className={`w-12 h-6 rounded-full transition-colors duration-300 relative cursor-pointer ${inStockOnly ? "bg-blue-500" : "bg-gray-200"}`}
                     >
-                      <span
-                        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${inStockOnly ? "left-7" : "left-1"}`}
-                      ></span>
+                      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${inStockOnly ? "left-7" : "left-1"}`}></span>
                     </div>
                     <span className="text-sm text-gray-600">In Stock</span>
                   </label>
@@ -298,55 +174,41 @@ function Product() {
                 icon={<FaDollarSign size={15} />}
               >
                 <div className="px-1 pt-2">
-                  {/* Dual Range Slider Logic */}
                   <div className="relative h-1.5 w-full bg-gray-200 rounded-lg mb-6">
-                    {/* Active Range Track */}
                     <div
                       className="absolute h-full bg-[#5a46c2] rounded-lg"
                       style={{
-                        left: `${(priceRange[0] / 10000) * 100}%`,
-                        right: `${100 - (priceRange[1] / 10000) * 100}%`,
+                        left: `${(priceRange[0] / 100000) * 100}%`,
+                        right: `${100 - (priceRange[1] / 100000) * 100}%`,
                       }}
                     ></div>
-
-                    {/* Minimum Price Slider */}
                     <input
                       type="range"
                       min="0"
-                      max="10000"
-                      step="100"
+                      max="100000"
+                      step="500"
                       value={priceRange[0]}
                       onChange={(e) => {
-                        const val = Math.min(
-                          parseInt(e.target.value),
-                          priceRange[1] - 500,
-                        );
+                        const val = Math.min(parseInt(e.target.value), priceRange[1] - 500);
                         setPriceRange([val, priceRange[1]]);
                       }}
                       className="absolute w-full h-1.5 bg-transparent appearance-none cursor-pointer accent-[#febc1c] pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto"
-                      style={{ zIndex: priceRange[0] > 9000 ? 5 : 3 }}
+                      style={{ zIndex: priceRange[0] > 90000 ? 5 : 3 }}
                     />
-
-                    {/* Maximum Price Slider */}
                     <input
                       type="range"
                       min="0"
-                      max="10000"
-                      step="100"
+                      max="100000"
+                      step="500"
                       value={priceRange[1]}
                       onChange={(e) => {
-                        const val = Math.max(
-                          parseInt(e.target.value),
-                          priceRange[0] + 500,
-                        );
+                        const val = Math.max(parseInt(e.target.value), priceRange[0] + 500);
                         setPriceRange([priceRange[0], val]);
                       }}
                       className="absolute w-full h-1.5 bg-transparent appearance-none cursor-pointer accent-[#febc1c] pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto"
                       style={{ zIndex: 4 }}
                     />
                   </div>
-
-                  {/* Display Values */}
                   <div className="flex justify-between items-center text-[12px] font-bold">
                     <div className="bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-lg text-gray-500">
                       Rs. {priceRange[0]}
@@ -367,20 +229,14 @@ function Product() {
               >
                 <div className="space-y-3">
                   {categories.map((cat) => (
-                    <label
-                      key={cat.name}
-                      className="flex items-center group cursor-pointer"
-                    >
+                    <label key={cat.name} className="flex items-center group cursor-pointer">
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded border-gray-300 text-[#5a46c2] focus:ring-[#5a46c2] cursor-pointer"
                         onChange={() => toggleCategory(cat.name)}
                       />
                       <span className="ml-3 text-sm text-gray-600 group-hover:text-[#5a46c2] transition-colors">
-                        {cat.name}{" "}
-                        <span className="text-gray-300 text-xs">
-                          ({cat.count})
-                        </span>
+                        {cat.name} <span className="text-gray-300 text-xs">({cat.count})</span>
                       </span>
                     </label>
                   ))}
@@ -413,38 +269,41 @@ function Product() {
             </div>
           </aside>
 
-          {/* Product Grid Area */}
-          <main className="lg:w-3/4 w-full">
-            {/* Sort Bar */}
-            <div className="flex items-center justify-between mb-6">
+          {/* --- PRODUCT GRID AREA --- */}
+          <main className="lg:w-3/4 w-full relative z-0">
+            
+            {/* SORT BAR */}
+            <div className="flex items-center justify-between mb-6 gap-3">
               <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
                 Products
               </h2>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-600 focus:ring-2 focus:ring-[#5a46c2] outline-none bg-white"
-              >
-                <option value="default">Default sorting</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name-asc">Name: A to Z</option>
-              </select>
+              <div className="relative z-20 min-w-[220px] max-w-full">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full appearance-none border-2 border-[#5a46c2] rounded-2xl pl-4 pr-11 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#5a46c2]/30 focus:border-[#5a46c2] outline-none bg-white shadow-sm"
+                >
+                  <option value="default">Default sorting</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name-asc">Name: A to Z</option>
+                </select>
+                <FaChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" size={12} />
+              </div>
             </div>
-            <motion.div
-              layout
-              className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-5"
-            >
-              <AnimatePresence mode="popLayout">
+
+            {/* MAIN PRODUCT DISPLAY AREA */}
+            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-5">
+              <AnimatePresence mode="popLayout" initial={false}>
                 {sortedProducts.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item.p_id || item.id}
+                    layout="position"
                     custom={index}
-                    variants={cardVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.2 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, ease: "easeOut", delay: index * 0.015 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.99, transition: { duration: 0.12 } }}
                   >
                     <ProductCard product={item} />
                   </motion.div>
@@ -463,6 +322,7 @@ function Product() {
                 </p>
               </motion.div>
             )}
+
           </main>
         </div>
       </div>
@@ -470,4 +330,5 @@ function Product() {
     </>
   );
 }
+
 export default Product;
