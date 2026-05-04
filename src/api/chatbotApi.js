@@ -40,6 +40,16 @@ export const getEngravingExamples = async () => {
     }
 };
 
+export const getChatbotCutting = async () => {
+    try {
+        const response = await api.get("/chatbot/cutting");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching chatbot cutting examples:", error);
+        throw error;
+    }
+};
+
 // ── POST requests ───────────────────────────────────────
 export const postLightLetterEstimate = async (payload) => {
     try {
