@@ -83,8 +83,8 @@ function ProductCard({ product }) {
             </div>
 
             <img
-              src={product.p_img_path || "/assets/images/placeholder.jpg"}
-              alt={product.p_name}
+              src={product?.images?.[0]?.img_url || product?.p_img_path || "/assets/images/placeholder.jpg"}
+              alt={product?.p_name || "Product"}
               className={`w-full h-full object-contain p-4 transition-transform duration-500 ${
                 isOutOfStock ? "grayscale opacity-50" : "group-hover:scale-105"
               }`}

@@ -400,7 +400,35 @@ function StepProjectDetails({ selectedService, details, onDetailChange }) {
   );
 }
 
-function StepReviewSubmit({ selectedService, files, details, contact, onContactChange }) {
+/* ─────────────────────────────────────────────
+   VALIDATION HELPERS
+───────────────────────────────────────────── */
+const validateEmail = (v) => {
+  if (!v) return "Email is required";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Enter a valid email address";
+  return "";
+};
+
+const validatePhone = (v) => {
+  if (!v) return ""; // optional field — empty is fine
+  // Accepts: +94771234567 | 0771234567 | +1 800 555 0199 | spaces, dashes, dots allowed
+  if (!/^\+?[\d\s\-().]{7,20}$/.test(v)) return "Enter a valid phone number";
+  return "";
+};
+
+function StepReviewSubmit({ selectedService, files, details, contact, onContactChange, touched, onBlur }) {
+  const emailError = touched.email ? validateEmail(contact.email) : "";
+  const phoneError = touched.phone ? validatePhone(contact.phone) : "";
+
+  const inputClass = (err, key) =>
+    `w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-colors ${
+      err
+        ? "border-red-400 bg-red-50 focus:border-red-400"
+        : contact[key] && key !== "name"
+        ? "border-emerald-400 bg-white focus:border-emerald-400"
+        : "border-slate-200 focus:border-violet-400 focus:bg-white"
+    }`;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* order summary */}
@@ -458,24 +486,88 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
       <div>
         <h2 className="text-base font-black text-slate-900 mb-4">Your Contact Info</h2>
         <div className="space-y-3">
-          {[
-            { key: "name",  label: "Full Name",  icon: FiUser,  type: "text",  placeholder: "e.g. Kasun Perera", required: true  },
-            { key: "email", label: "Email",       icon: FiMail,  type: "email", placeholder: "you@example.com",   required: true  },
-            { key: "phone", label: "Phone",       icon: FiPhone, type: "tel",   placeholder: "+94 77 000 0000",   required: false },
-          ].map(({ key, label, icon: Icon, type, placeholder, required }) => (
-            <div key={key}>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-                <Icon size={9} className="text-violet-400" /> {label} {required && <span className="text-red-400">*</span>}
-              </label>
+
+          {/* Full Name */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              <FiUser size={9} className="text-violet-400" /> Full Name <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={contact.name}
+              onChange={(e) => onContactChange("name", e.target.value)}
+              placeholder="e.g. Kasun Perera"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              <FiMail size={9} className="text-violet-400" /> Email <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
               <input
-                type={type}
-                value={contact[key]}
-                onChange={(e) => onContactChange(key, e.target.value)}
-                placeholder={placeholder}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors"
+                type="email"
+                value={contact.email}
+                onChange={(e) => onContactChange("email", e.target.value)}
+                onBlur={() => onBlur("email")}
+                placeholder="you@example.com"
+                className={inputClass(emailError, "email")}
               />
+              {contact.email && !emailError && touched.email && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <FiCheck size={11} className="text-emerald-600" strokeWidth={3} />
+                </span>
+              )}
+              {emailError && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                  <FiX size={11} className="text-red-500" strokeWidth={3} />
+                </span>
+              )}
             </div>
-          ))}
+            {emailError && (
+              <p className="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {emailError}
+              </p>
+            )}
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              <FiPhone size={9} className="text-violet-400" /> Phone
+              <span className="text-slate-300 font-normal normal-case tracking-normal ml-1">(optional)</span>
+            </label>
+            <div className="relative">
+              <input
+                type="tel"
+                value={contact.phone}
+                onChange={(e) => onContactChange("phone", e.target.value)}
+                onBlur={() => onBlur("phone")}
+                placeholder="+94 77 000 0000"
+                className={inputClass(phoneError, "phone")}
+              />
+              {contact.phone && !phoneError && touched.phone && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <FiCheck size={11} className="text-emerald-600" strokeWidth={3} />
+                </span>
+              )}
+              {phoneError && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                  <FiX size={11} className="text-red-500" strokeWidth={3} />
+                </span>
+              )}
+            </div>
+            {phoneError && (
+              <p className="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {phoneError}
+              </p>
+            )}
+          </div>
+
         </div>
         <p className="text-xs text-slate-400 mt-4 leading-relaxed">
           By submitting you agree to our{" "}
@@ -497,6 +589,7 @@ export default function RequestQuote() {
   const [dragging, setDragging]   = useState(false);
   const [details, setDetails]     = useState({});
   const [contact, setContact]     = useState({ name: "", email: "", phone: "" });
+  const [touched, setTouched]     = useState({ email: false, phone: false });
   const [submitted, setSubmitted] = useState(false);
 
   const selectedService = SERVICES.find((s) => s.id === service);
@@ -540,17 +633,30 @@ export default function RequestQuote() {
     setContact((c) => ({ ...c, [key]: val }));
   }, []);
 
+  const handleBlur = useCallback((key) => {
+    setTouched((t) => ({ ...t, [key]: true }));
+  }, []);
+
   const canNext = () => {
     if (step === 0) return !!service;
     if (step === 2) {
       const required = selectedService.fields.filter((f) => f.type !== "textarea");
       return required.every((f) => details[f.key] !== undefined && details[f.key] !== "");
     }
-    if (step === 3) return contact.name && contact.email;
+    if (step === 3) {
+      return (
+        contact.name.trim() !== "" &&
+        validateEmail(contact.email) === "" &&
+        validatePhone(contact.phone) === ""
+      );
+    }
     return true;
   };
 
-  const handleSubmit = () => setSubmitted(true);
+  const handleSubmit = () => {
+    setTouched({ email: true, phone: true });
+    if (canNext()) setSubmitted(true);
+  };
 
   const handleNewRequest = useCallback(() => {
     setStep(0);
@@ -558,6 +664,7 @@ export default function RequestQuote() {
     setFiles([]);
     setDetails({});
     setContact({ name: "", email: "", phone: "" });
+    setTouched({ email: false, phone: false });
     setSubmitted(false);
   }, []);
 
@@ -657,6 +764,8 @@ export default function RequestQuote() {
               details={details}
               contact={contact}
               onContactChange={handleContactChange}
+              touched={touched}
+              onBlur={handleBlur}
             />
           )}
         </div>
