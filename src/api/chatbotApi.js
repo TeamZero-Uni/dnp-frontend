@@ -30,6 +30,15 @@ export const getChatbotMaterials = async () => {
         throw error;
     }
 };
+export const getEngravingExamples = async () => {
+    try {
+        const response = await api.get("/chatbot/engraving");
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching engraving examples:", error);
+        throw error;
+    }
+};
 
 // ── POST requests ───────────────────────────────────────
 export const postLightLetterEstimate = async (payload) => {
@@ -51,4 +60,6 @@ export const postThreeDPartEstimate = async (payload) => {
         throw error;
     }
 };
+
+
 
