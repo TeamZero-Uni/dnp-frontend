@@ -147,3 +147,12 @@ export const deleteOrder = async (id) => {
     const response = await api.delete(`/orders/${id}`);
     return response.data;
 }
+//===================================== 
+
+
+export const getYoutubeVideos = async (maxResults = 12, pageToken = '') => {
+    const response = await api.get("/youtube", {
+        params: { maxResults, pageToken },
+    });
+    return response.data;
+};
