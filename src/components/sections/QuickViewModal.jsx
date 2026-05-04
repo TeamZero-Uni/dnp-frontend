@@ -39,8 +39,10 @@ function QuickViewModal({ product, onClose }) {
   const rating = 5; 
   const reviews = 0; 
 
-  // --- Original Image Logic (Restored) ---
-  const images = product?.images?.length ? product.images : [product?.p_img_path || "/assets/images/placeholder.jpg"];
+  // --- Original Image Logic---
+  const images = product?.images?.length 
+    ? product.images.map(img => img.img_url ? img.img_url : img) 
+    : [product?.p_img_path || "/assets/images/placeholder.jpg"];
 
   // --- Handlers ---
   const smoothExit = (action) => {
@@ -143,7 +145,7 @@ function QuickViewModal({ product, onClose }) {
         </div>
 
         {/* Body */}
-        <div className="flex flex-col md:flex-row gap-8 p-7">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8 p-4 md:p-7">
           
           {/* Left — Images Gallery */}
           <div className="flex-shrink-0 w-full md:w-[340px] flex flex-col items-center">
