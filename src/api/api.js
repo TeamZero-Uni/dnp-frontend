@@ -112,3 +112,11 @@ export const postLightLetterEstimate = async (payload) => {
     return response.data;
 }
 //===================================== 
+
+
+export const getYoutubeVideos = async (maxResults = 12, pageToken = '') => {
+    const response = await api.get("/youtube", {
+        params: { maxResults, pageToken },
+    });
+    return response.data;
+};
