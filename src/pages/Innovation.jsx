@@ -16,17 +16,17 @@ const TAG_COLORS = {
 
 const THUMB = (id) => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
 
-// YouTube API response → ඔබේ component format එකට map කරනවා
+// YouTube API response mapping to our video object
 const mapVideo = (item) => ({
   id: item.videoId,
   title: item.title,
   description: item.description,
-  duration: item.duration || "",   // backend වලින් duration නැත්නම් blank
+  duration: item.duration || "",   //get from API or calculate if needed
   views: item.views || "",
   date: new Date(item.publishedAt).toLocaleDateString("en-US", {
     year: "numeric", month: "short", day: "numeric",
   }),
-  tag: item.tag || "Tutorial",     // backend tag field add කළොත් use කරනවා
+  tag: item.tag || "Tutorial",     // backend tag field added, default to "Tutorial"
 });
 
 /* ── Video Modal ── */
@@ -179,7 +179,7 @@ export default function Innovation() {
         const mapped = res.data.videos.map(mapVideo);
         setVideos(mapped);
       } catch (err) {
-        setError("Videos load කිරීමට නොහැකි විය. පසුව නැවත උත්සාහ කරන්න.");
+        setError("Can not load videos at the moment. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -221,7 +221,7 @@ export default function Innovation() {
             </div>
           </div>
 
-          {/* Tag filter pills — videos load වූ පස්සේ පෙන්නනවා */}
+          {/* Tag filter pills — videos load  */}
           {!loading && (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
