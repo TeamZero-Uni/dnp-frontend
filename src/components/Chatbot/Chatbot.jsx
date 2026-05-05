@@ -17,9 +17,14 @@ import {
 
 import LightLetter from "./LightLetter";
 import ThreeDPart from "./ThreeDPart";
+import ThreeDModeling from "./ThreeDModeling";
+import ThreeDModelingNewDesign from "./ThreeDModelingNewDesign";
+import ThreeDModelingMyFile from "./ThreeDModelingMyFile";
+import ThreeDModelingReplacement from "./ThreeDModelingReplacement";
 import Cutting from "./Cutting";
 import Engraving from "./Engraving";
 import ContactUs from "./ContactUs";
+import OtherService from "./OtherService";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,17 +38,18 @@ export default function ChatBot() {
       start: {
         text: "How can we help?",
         options: [
-          { id: "3d-printing", title: "3D Printing", subtitle: "Light Letter & 3D Part", icon: IoPrint, colorClass: "from-blue-500 to-indigo-600", glowColor: "shadow-indigo-500/40" },
-          { id: "laser-cutting", title: "Laser Cutting", subtitle: "Cutting & Lighting", icon: IoSparkles, colorClass: "from-amber-400 to-orange-500", glowColor: "shadow-orange-500/40" },
-          { id: "contact", title: "Contact us ", subtitle: "Send your details", icon: IoMailOutline, colorClass: "from-pink-500 to-rose-600", glowColor: "shadow-rose-500/40" },
-          { id: "other-service", title: "Other Service", subtitle: "Custom request", icon: IoChatbubbles, colorClass: "from-emerald-400 to-teal-500", glowColor: "shadow-teal-500/40" },
+          { id: "3d-printing", title: "3D Printing", subtitle: "Light Letter & 3D Part", icon: IoPrint, badgeClass: "bg-blue-500", glowColor: "shadow-indigo-500/40" },
+          { id: "3d-modeling", title: "3D Modeling", subtitle: "CAD & design support", icon: IoConstruct, badgeClass: "bg-pink-500", glowColor: "shadow-pink-500/40" },
+          { id: "laser-cutting", title: "Laser Cutting", subtitle: "Cutting & Lighting", icon: IoSparkles, badgeClass: "bg-amber-500", glowColor: "shadow-orange-500/40" },
+          { id: "contact", title: "Contact us ", subtitle: "Send your details", icon: IoMailOutline, badgeClass: "bg-green-500", glowColor: "shadow-rose-500/40" },
+          { id: "other-service", title: "Other Service", subtitle: "Custom request", icon: IoChatbubbles, badgeClass: "bg-teal-500", glowColor: "shadow-teal-500/40" },
         ],
       },
       "3d-printing": {
         text: "Please choose a 3D printing option.",
         options: [
-          { id: "light-letter", title: "Light Letter", subtitle: "Illuminated signs", icon: IoBulb, colorClass: "from-indigo-500 to-purple-600", glowColor: "shadow-purple-500/40" },
-          { id: "3d-part", title: "3D Parts", subtitle: "Custom parts", icon: IoConstruct, colorClass: "from-purple-500 to-fuchsia-600", glowColor: "shadow-fuchsia-500/40" },
+          { id: "light-letter", title: "Light Letter", subtitle: "Illuminated signs", icon: IoBulb, badgeClass: "bg-blue-500", glowColor: "shadow-purple-500/40" },
+          { id: "3d-part", title: "3D Parts", subtitle: "Custom parts", icon: IoConstruct, badgeClass: "bg-green-500", glowColor: "shadow-fuchsia-500/40" },
         ],
       },
       "light-letter": {
@@ -54,11 +60,27 @@ export default function ChatBot() {
         text: "Please provide the file type, quantity, and finish requirements for 3D Parts.",
         options: [],
       },
+      "3d-modeling": {
+        text: "Please share your concept, reference images, or file requirements for 3D Modeling.",
+        options: [],
+      },
+      "3d-modeling-new-design": {
+        text: "Please describe your new design details below.",
+        options: [],
+      },
+      "3d-modeling-my-file": {
+        text: "Please share your 3D file details below.",
+        options: [],
+      },
+      "3d-modeling-replacement": {
+        text: "Please share your replacement request details below.",
+        options: [],
+      },
       "laser-cutting": {
         text: "Please choose a laser service option.",
         options: [
-          { id: "laser-cutting-cut", title: "Cutting", subtitle: "Precise material cutting", icon: IoCut, colorClass: "from-amber-500 to-orange-600", glowColor: "shadow-orange-500/40" },
-          { id: "laser-cutting-engraving", title: "Engraving", subtitle: "Surface engraving", icon: IoBrush, colorClass: "from-orange-500 to-red-600", glowColor: "shadow-red-500/40" },
+          { id: "laser-cutting-cut", title: "Cutting", subtitle: "Precise material cutting", icon: IoCut, badgeClass: "bg-amber-500", glowColor: "shadow-orange-500/40" },
+          { id: "laser-cutting-engraving", title: "Engraving", subtitle: "Surface engraving", icon: IoBrush, badgeClass: "bg-pink-500", glowColor: "shadow-red-500/40" },
         ],
       },
       "laser-cutting-cut": {
@@ -71,11 +93,11 @@ export default function ChatBot() {
       },
       contact: {
         text: "Please choose a contact method.",
-        options: [{ id: "start", title: "Main Menu", subtitle: "Return to start", icon: IoChevronForward, colorClass: "from-slate-500 to-slate-700", glowColor: "shadow-slate-400/40" }],
+        options: [{ id: "start", title: "Main Menu", subtitle: "Return to start", icon: IoChevronForward, badgeClass: "bg-teal-500", glowColor: "shadow-slate-400/40" }],
       },
       "other-service": {
         text: "Please describe your custom request and we will guide you to the next step.",
-        options: [{ id: "start", title: "Main Menu", subtitle: "Return to start", icon: IoChevronForward, colorClass: "from-slate-500 to-slate-700", glowColor: "shadow-slate-400/40" }],
+        options: [{ id: "start", title: "Main Menu", subtitle: "Return to start", icon: IoChevronForward, badgeClass: "bg-green-500", glowColor: "shadow-slate-400/40" }],
       },
     }),
     []
@@ -246,16 +268,6 @@ export default function ChatBot() {
                 </button>
 
                 <button
-                  onClick={() => handlePickOption({ id: "start", title: "Main Menu" })}
-                  className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100"
-                  aria-label="Main Menu"
-                  title="Main Menu"
-                  type="button"
-                >
-                  <IoChevronForward size={15} />
-                </button>
-
-                <button
                   onClick={startConversation}
                   className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
                   aria-label="Reset chat"
@@ -280,10 +292,14 @@ export default function ChatBot() {
               {messages.map((message, index) => {
                 const isBot = message.sender === "bot";
                 const isLatestBot = isBot && index === messages.length - 1 && message.nodeId === activeNodeId;
+                const isBotWithOptions = isBot && (message.options?.length > 0);
+                const containerClass = isBot
+                  ? (isBotWithOptions ? "max-w-[48%]" : "w-full")
+                  : "max-w-[80%]";
 
                 return (
                   <div key={message.id} className={`mb-4 flex ${isBot ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-full ${isBot ? "w-full" : "max-w-[80%]"}`}>
+                    <div className={containerClass}>
                       <div className={`mb-2 flex items-start gap-3 ${isBot ? "" : "flex-row-reverse"}`}>
                         {isBot && (
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white shadow-sm">
@@ -296,17 +312,18 @@ export default function ChatBot() {
                         </div>
                       </div>
 
-                      {isBot && message.options?.length > 0 && (
-                        <div className="ml-12 flex flex-col gap-3 animate-fade-in">
+                      {isBotWithOptions && (
+                        <div className="ml-12 flex flex-col gap-2.5 animate-fade-in">
                           {message.options.map((item) => (
                             <button
                               key={`${message.id}-${item.id}`}
                               onClick={() => handleQuickReply(item)}
                               disabled={!isLatestBot}
-                              className="inline-flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
+                              style={{ borderWidth: "0.5px" }}
+                              className="inline-flex w-full items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-700 transition-colors duration-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                             >
-                              <span className={`flex h-7 w-7 items-center justify-center rounded-full bg-linear-to-br ${item.colorClass} text-white shadow-sm`}>
-                                <item.icon size={12} />
+                              <span className={`flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-md ${item.badgeClass} text-white`}>
+                                <item.icon size={13} />
                               </span>
                               <span className="font-medium text-[13px] leading-tight">
                                 {item.title}
@@ -332,6 +349,65 @@ export default function ChatBot() {
                 </div>
               )}
 
+              {activeNodeId === "3d-modeling" && (
+                <div className="mb-4 animate-fade-in">
+                  <ThreeDModeling
+                    onBack={startConversation}
+                    onSelectSituation={(option) => {
+                      if (option?.id === "3d-modeling-new-design") {
+                        setMessages((prev) => [
+                          ...prev,
+                          {
+                            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                            sender: "user",
+                            text: option.title,
+                          },
+                        ]);
+                        addBotMessage("3d-modeling-new-design", true);
+                      } else if (option?.id === "3d-modeling-my-file") {
+                        setMessages((prev) => [
+                          ...prev,
+                          {
+                            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                            sender: "user",
+                            text: option.title,
+                          },
+                        ]);
+                        addBotMessage("3d-modeling-my-file", true);
+                      } else if (option?.id === "3d-modeling-replacement") {
+                        setMessages((prev) => [
+                          ...prev,
+                          {
+                            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                            sender: "user",
+                            text: option.title,
+                          },
+                        ]);
+                        addBotMessage("3d-modeling-replacement", true);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {activeNodeId === "3d-modeling-new-design" && (
+                <div className="mb-4 animate-fade-in">
+                  <ThreeDModelingNewDesign onBack={() => addBotMessage("3d-modeling", true)} />
+                </div>
+              )}
+
+              {activeNodeId === "3d-modeling-my-file" && (
+                <div className="mb-4 animate-fade-in">
+                  <ThreeDModelingMyFile onBack={() => addBotMessage("3d-modeling", true)} />
+                </div>
+              )}
+
+              {activeNodeId === "3d-modeling-replacement" && (
+                <div className="mb-4 animate-fade-in">
+                  <ThreeDModelingReplacement onBack={() => addBotMessage("3d-modeling", true)} />
+                </div>
+              )}
+
               {activeNodeId === "laser-cutting-cut" && (
                 <div className="mb-4 animate-fade-in">
                   <Cutting />
@@ -350,12 +426,18 @@ export default function ChatBot() {
                 </div>
               )}
 
+              {activeNodeId === "other-service" && (
+                <div className="mb-4 animate-fade-in">
+                  <OtherService onBack={() => addBotMessage("start", true)} />
+                </div>
+              )}
+
               {messages.length === 0 && (
                 <div className="mb-4 flex items-start gap-3 animate-fade-in">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[11px] font-bold text-white shadow-sm">
                     {getBotAvatar()}
                   </div>
-                  <div className="max-w-full rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                  <div className="max-w-[48%] rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
                     {getNodePrompt("start")}
                   </div>
                 </div>

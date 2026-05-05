@@ -71,5 +71,19 @@ export const postThreeDPartEstimate = async (payload) => {
     }
 };
 
+export const postOtherServiceRequest = async (formData) => {
+    try {
+        const response = await api.post("/chatbot/other-service", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error posting other service request:", error);
+        throw error;
+    }
+};
+
 
 
