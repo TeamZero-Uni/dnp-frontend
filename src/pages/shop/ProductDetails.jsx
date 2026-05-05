@@ -12,10 +12,8 @@ import { useCart } from '../../context/CartContext';
 import ReadyToStart from "../../components/ReadyToStart";
 import { useProduct } from "../../hooks/useProduct"; 
 
-/* ─────────────── constants ──────────────────────────────────── */
 const MAX_QTY = 10;
 
-/* ─────────────── Toast ──────────────────────────────────────── */
 function Toast({ message, type, visible }) {
   const bg = type === 'wishlist' ? 'bg-violet-500' : type === 'error' ? 'bg-rose-500' : 'bg-emerald-500';
   return (
@@ -25,7 +23,6 @@ function Toast({ message, type, visible }) {
   );
 }
 
-/* ─────────────── Spec Table Row ─────────────────────────────── */
 function SpecRow({ label, value, last, multiline }) {
   if (!value || (Array.isArray(value) && value.length === 0)) return null; 
   
@@ -41,7 +38,6 @@ function SpecRow({ label, value, last, multiline }) {
   );
 }
 
-/* ─────────────── Delivery Strip Tile ───────────────────────── */
 function DeliveryTile({ iconBg, icon, label, value, extra }) {
   return (
     <div className="flex items-start gap-2 bg-slate-50 rounded-xl px-3 py-2.5">
@@ -57,7 +53,6 @@ function DeliveryTile({ iconBg, icon, label, value, extra }) {
   );
 }
 
-/* ─────────────── Main Component ─────────────────────────────── */
 export default function ProductDetails() {
   const { id }        = useParams();
   const navigate      = useNavigate();
@@ -79,20 +74,16 @@ export default function ProductDetails() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id]);
 
-  // Database checks & Logic
   const inStock = dbProduct?.p_status === "IN_STOCK" || dbProduct?.status === "stock";
   const maxQty = inStock ? MAX_QTY : 0;
   const productCategory = dbProduct?.category?.c_type || dbProduct?.category || "General";
   const selectedColor = dbProduct?.p_color || "N/A";
 
-  // Gallery Images Array
-  const mainImage = dbProduct?.p_img_path || dbProduct?.image || "/assets/images/placeholder.jpg";
-  const extraImages = dbProduct?.images?.map((img) => img.img_url || img) || [];
-  const galleryImages = [mainImage, ...extraImages].slice(0, 5);
+  const dbImages = dbProduct?.images?.length > 0 ? dbProduct.images.map((img) => img.img_url || img) : [];
+  const fallbackImage = dbProduct?.p_img_path || dbProduct?.image || "/assets/images/placeholder.jpg";
+  const galleryImages = dbImages.length > 0 ? dbImages.slice(0, 5) : [fallbackImage];
+  const activeImage = galleryImages[activeImageIndex] || galleryImages[0];
 
-  const activeImage = galleryImages[activeImageIndex] || mainImage;
-
-  // Auto slider
   useEffect(() => {
     if (galleryImages.length <= 1) return;
     const intervalId = setInterval(() => {
@@ -101,7 +92,6 @@ export default function ProductDetails() {
     return () => clearInterval(intervalId);
   }, [galleryImages.length]);
 
-  // ─── FEATURES PARSING LOGIC ─────────────────────────────────
   let parsedFeatures = [];
   if (dbProduct?.p_features) {
     if (Array.isArray(dbProduct.p_features)) {
@@ -178,7 +168,6 @@ export default function ProductDetails() {
       <Toast {...toast} />
 
       <div className="flex flex-col lg:flex-row gap-5 max-w-7xl mx-auto">
-        {/* ── Gallery ── */}
         <div className="w-full lg:w-[36%] space-y-3 flex-shrink-0">
           <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="w-full aspect-square flex items-center justify-center cursor-zoom-in bg-gray-50 rounded-xl overflow-hidden"
@@ -204,13 +193,10 @@ export default function ProductDetails() {
           )}
         </div>
 
-        {/* ── Product Card ── */}
         <div className="w-full lg:flex-1 bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="p-5 flex flex-col gap-4 flex-1">
 
-            {/* Badges + Title + Price */}
             <div>
-              {/* TOP BADGES ROW */}
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <span className="bg-[#f0eeff] text-[#5a46c2] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
                   {productCategory}
@@ -235,7 +221,6 @@ export default function ProductDetails() {
 
             <div className="h-px bg-slate-100" />
 
-            {/* Color + Specs */}
             <div className="flex gap-5 flex-col md:flex-row">
               <div className="space-y-2.5 flex-shrink-0">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Color</p>
@@ -286,7 +271,6 @@ export default function ProductDetails() {
 
             <div className="h-px bg-slate-100" />
 
-            {/* Qty + Buttons */}
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end">
               <div className="space-y-1">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Qty</p>
@@ -333,7 +317,6 @@ export default function ProductDetails() {
 
             <div className="h-px bg-slate-100" />
 
-            {/* Delivery Strip - Location Eka Islandwide wela modal eka ain kala */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <DeliveryTile
                 iconBg="bg-blue-100" icon={<FaMapMarkerAlt size={11} className="text-blue-600" />}
