@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Trash2,
@@ -10,58 +10,23 @@ import {
   Filter,
   CheckSquare,
   Square,
-  SlidersHorizontal,
-  Feather,
-  Edit3,
-  ExternalLink,
-  Github,
   Calendar,
-  Clock,
-  Tag,
-  User,
-  BarChart2,
-  ChevronDown,
   X,
-  Star,
-  Layers,
-  TrendingUp,
-  Package,
-  Check,
   AlertCircle,
-  MoreVertical,
-  Copy,
-  Archive,
-  Subtitles,
 } from "lucide-react";
 import Modal from "../../model/Modal";
 import ProjectForm from "../../components/view/ProjectForm";
+import DetailModal from "../../components/view/DetailModal";
+import { deleteProject, getAllProjects } from "../../api/portfolioApi";
 
-const portfolioItems = [
-  {
-    id: 1,
-    title: "3D Printing Service Platform",
-    description:
-      "A full-stack web platform for a 3D printing business that allows users to upload models, request quotations, and order custom prints online.",
-    image: "/images/3d-printing-main.png",
-    gallery: [
-      "/images/3d-upload.png",
-      "/images/3d-quote.png",
-      "/images/3d-dashboard.png",
-    ],
-    features: [
-      "Upload 3D model files (STL, OBJ)",
-      "Automatic quotation system based on material & time",
-      "Custom order request system",
-      "Admin dashboard to manage orders",
-      "User authentication with JWT",
-      "Order tracking and status updates",
-    ],
-    date: "2025-02-10",
-    Subtitles: "Web Application",
-  },
-];
+function parseTags(rawType) {
+  if (!rawType) return [];
+  return rawType
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
 
-// ImagePlaceholder Component
 function ImagePlaceholder({ title }) {
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
@@ -73,9 +38,27 @@ function ImagePlaceholder({ title }) {
   );
 }
 
-function GridCard({ item, selected, onSelect, setModal, setDetailItem }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+function TagBadges({ tags }) {
+  if (!tags || tags.length === 0) return (
+    <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
+      Portfolio
+    </span>
+  );
+  return (
+    <div className="flex flex-wrap gap-1">
+      {tags.map((tag, i) => (
+        <span
+          key={i}
+          className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400"
+        >
+          {tag}{i < tags.length - 1 ? " · " : ""}
+        </span>
+      ))}
+    </div>
+  );
+}
 
+function GridCard({ item, selected, onSelect, setModal, setDetailItem }) {
   const handleViewDetails = () => {
     setDetailItem(item);
     setModal("details");
@@ -87,9 +70,8 @@ function GridCard({ item, selected, onSelect, setModal, setDetailItem }) {
         selected ? "border-[#5a46c2] ring-2 ring-[#5a46c2]/20" : "border-slate-100 hover:border-slate-200"
       }`}
     >
-      {/* Checkbox */}
       <button
-        onClick={() => onSelect(item.id)}
+        onClick={() => onSelect(item.portfolio_id)}
         className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         {selected ? (
@@ -99,18 +81,16 @@ function GridCard({ item, selected, onSelect, setModal, setDetailItem }) {
         )}
       </button>
 
-      {/* Image */}
       <div className="h-44 overflow-hidden relative bg-slate-100">
-        {item.image ? (
+        {item.images && item.images.length > 0 ? (
           <img
-            src={item.image}
+            src={item.images[0].imageUrl}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <ImagePlaceholder title={item.title} />
         )}
-        {/* overlay actions */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-end p-3 gap-2">
           <button
             onClick={handleViewDetails}
@@ -121,12 +101,9 @@ function GridCard({ item, selected, onSelect, setModal, setDetailItem }) {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 p-4 flex flex-col gap-3">
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
-            {item.Subtitles}
-          </span>
+          <TagBadges tags={item.tags} />
           <h3 className="text-sm font-bold text-[#1e1b4b] mt-0.5 leading-snug line-clamp-1">
             {item.title}
           </h3>
@@ -160,7 +137,7 @@ function ListRow({ item, selected, onSelect, setModal, setDetailItem }) {
         selected ? "border-[#5a46c2] ring-2 ring-[#5a46c2]/20" : "border-slate-100 hover:border-slate-200"
       }`}
     >
-      <button onClick={() => onSelect(item.id)} className="shrink-0">
+      <button onClick={() => onSelect(item.portfolio_id)} className="shrink-0">
         {selected ? (
           <CheckSquare size={16} style={{ color: "#5a46c2" }} />
         ) : (
@@ -168,27 +145,22 @@ function ListRow({ item, selected, onSelect, setModal, setDetailItem }) {
         )}
       </button>
 
-      {/* Thumbnail */}
       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-        {item.image ? (
-          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+        {item.images && item.images.length > 0 ? (
+          <img src={item.images[0].imageUrl} alt={item.title} className="w-full h-full object-cover" />
         ) : (
           <ImagePlaceholder />
         )}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-sm font-bold text-[#1e1b4b] truncate">{item.title}</h3>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 shrink-0">
-            {item.Subtitles}
-          </span>
+          <TagBadges tags={item.tags} />
         </div>
         <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{item.description}</p>
       </div>
 
-      {/* Meta */}
       <div className="hidden md:flex items-center gap-5 text-xs text-slate-400 shrink-0">
         <div className="flex items-center gap-1.5">
           <Calendar size={11} />
@@ -202,7 +174,6 @@ function ListRow({ item, selected, onSelect, setModal, setDetailItem }) {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={handleViewDetails}
@@ -215,137 +186,51 @@ function ListRow({ item, selected, onSelect, setModal, setDetailItem }) {
   );
 }
 
-function DetailModal({ item, onClose }) {
-  if (!item) return null;
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(15,10,40,0.55)", backdropFilter: "blur(6px)" }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-7 py-5 border-b border-slate-100 rounded-t-3xl">
-          <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400">
-              {item.Subtitles}
-            </span>
-            <h2 className="text-lg font-bold text-[#1e1b4b]">{item.title}</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors ml-2"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="px-7 py-6 space-y-6">
-          {/* Image */}
-          <div className="h-48 rounded-2xl overflow-hidden bg-slate-100">
-            {item.image ? (
-              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-            ) : (
-              <ImagePlaceholder title={item.title} />
-            )}
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-slate-600 leading-relaxed">{item.description}</p>
-
-          {/* Meta Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              {
-                icon: Calendar,
-                label: "Date",
-                value: new Date(item.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                }),
-              },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="bg-slate-50 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">
-                  <Icon size={10} />
-                  {label}
-                </div>
-                <p className="text-sm font-semibold text-[#1e1b4b]">{value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Features */}
-          {item.features && item.features.length > 0 && (
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
-                Features
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {item.features.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-slate-600">
-                    <span
-                      className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                      style={{ background: "#5a46c2" }}
-                    >
-                      ✓
-                    </span>
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Gallery */}
-          {item.gallery && item.gallery.length > 0 && (
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
-                Gallery
-              </h4>
-              <div className="grid grid-cols-3 gap-3">
-                {item.gallery.map((img, i) => (
-                  <div key={i} className="h-24 rounded-lg overflow-hidden bg-slate-100">
-                    <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function PortfolioManagement() {
-  const [items, setItems] = useState(portfolioItems);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("grid");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
   const [detailItem, setDetailItem] = useState(null);
   const [sortBy, setSortBy] = useState("date");
   const [modal, setModal] = useState(null);
+  const [activeTag, setActiveTag] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const response = await getAllProjects();
+        if (response.success && response.data) {
+          const formattedItems = response.data.map((project) => ({
+            ...project,
+            id: project.portfolio_id,
+            tags: parseTags(project.socialMediaType),
+            image: project.images && project.images.length > 0 ? project.images[0].imageUrl : null,
+            gallery: project.images ? project.images.map((img) => img.imageUrl) : [],
+            features: project.features || [],
+          }));
+          setItems(formattedItems);
+        }
+      } catch (err) {
+        setError("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const allTags = Array.from(
+    new Set(items.flatMap((i) => i.tags))
+  ).sort();
 
   const closeModal = () => {
     setModal(null);
     setDetailItem(null);
-  };
-
-  const handleAddProject = (newProject) => {
-    const projectToAdd = {
-      ...newProject,
-      id: Math.max(...items.map((i) => i.id), 0) + 1,
-      gallery: newProject.gallery ? newProject.gallery.split(",").map((g) => g.trim()) : [],
-      features: newProject.features ? newProject.features.split(",").map((f) => f.trim()) : [],
-    };
-    setItems((prev) => [projectToAdd, ...prev]);
-    closeModal();
   };
 
   const handleSelect = (id) => {
@@ -356,24 +241,25 @@ export default function PortfolioManagement() {
 
   const handleSelectAll = () => {
     if (selected.length === filtered.length) setSelected([]);
-    else setSelected(filtered.map((i) => i.id));
+    else setSelected(filtered.map((i) => i.portfolio_id || i.id));
   };
 
-  const handleDelete = (id) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    setSelected((prev) => prev.filter((s) => s !== id));
-  };
+const handleDeleteSelected = async () => {
+  try {
+    await Promise.all(selected.map((id) => deleteProject(id)));
 
-  const handleDeleteSelected = () => {
     setItems((prev) => prev.filter((i) => !selected.includes(i.id)));
     setSelected([]);
-  };
+  } catch (err) {
+    console.error("Delete failed", err);
+  }
+};
 
   const renderModal = () => {
     if (modal === "add") {
       return (
         <Modal title="Add New Project" onClose={closeModal}>
-          <ProjectForm onClose={closeModal} onSubmit={handleAddProject} />
+          <ProjectForm onClose={closeModal} />
         </Modal>
       );
     }
@@ -385,11 +271,15 @@ export default function PortfolioManagement() {
   const filtered = items
     .filter((i) => {
       const q = search.toLowerCase();
-      return (
+      const matchesSearch =
         i.title.toLowerCase().includes(q) ||
         i.description.toLowerCase().includes(q) ||
-        i.Subtitles.toLowerCase().includes(q)
-      );
+        i.tags.some((tag) => tag.toLowerCase().includes(q));
+
+      const matchesTag =
+        activeTag === null || i.tags.includes(activeTag);
+
+      return matchesSearch && matchesTag;
     })
     .sort((a, b) => {
       if (sortBy === "date") return new Date(b.date) - new Date(a.date);
@@ -397,9 +287,34 @@ export default function PortfolioManagement() {
       return 0;
     });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block p-4 rounded-2xl bg-slate-100 mb-4">
+            <Grid3X3 size={32} className="text-slate-300 animate-spin" />
+          </div>
+          <p className="text-slate-600 font-medium">Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block p-4 rounded-2xl bg-red-100 mb-4">
+            <AlertCircle size={32} className="text-red-500" />
+          </div>
+          <p className="text-red-600 font-medium">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* HEADER */}
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <div
@@ -429,11 +344,8 @@ export default function PortfolioManagement() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Toolbar */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4 flex flex-wrap items-center gap-3">
-          {/* Search */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex-1 min-w-0 max-w-xs">
             <Search size={14} className="text-slate-400 shrink-0" />
             <input
@@ -450,7 +362,6 @@ export default function PortfolioManagement() {
             )}
           </div>
 
-          {/* Sort */}
           <div className="flex items-center gap-2 flex-wrap">
             <Filter size={13} className="text-slate-400 hidden sm:block" />
             <select
@@ -463,7 +374,6 @@ export default function PortfolioManagement() {
             </select>
           </div>
 
-          {/* View Toggle */}
           <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1 ml-auto">
             <button
               onClick={() => setViewMode("grid")}
@@ -488,7 +398,33 @@ export default function PortfolioManagement() {
           </div>
         </div>
 
-        {/* Bulk Actions Bar */}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 px-1">
+            <button
+              onClick={() => setActiveTag(null)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                activeTag === null
+                  ? "bg-[#5a46c2] text-white border-[#5a46c2]"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+              }`}
+            >
+              All
+            </button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                  activeTag === tag
+                    ? "bg-[#5a46c2] text-white border-[#5a46c2]"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
         {selected.length > 0 && (
           <div
             className="flex items-center gap-3 px-5 py-3 rounded-2xl border text-sm font-medium"
@@ -507,12 +443,18 @@ export default function PortfolioManagement() {
             </button>
           </div>
         )}
-
-        {/* Results Summary */}
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-slate-400 font-medium">
             Showing <span className="text-slate-700 font-bold">{filtered.length}</span> of{" "}
             <span className="text-slate-700 font-bold">{items.length}</span> projects
+            {activeTag && (
+              <span className="ml-2 inline-flex items-center gap-1 text-indigo-500 font-semibold">
+                · {activeTag}
+                <button onClick={() => setActiveTag(null)}>
+                  <X size={10} className="hover:text-red-400" />
+                </button>
+              </span>
+            )}
           </p>
           <button
             onClick={handleSelectAll}
@@ -525,7 +467,6 @@ export default function PortfolioManagement() {
           </button>
         </div>
 
-        {/* Project List/Grid */}
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="p-5 rounded-2xl bg-slate-100 mb-4">
@@ -538,9 +479,9 @@ export default function PortfolioManagement() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((item) => (
               <GridCard
-                key={item.id}
+                key={item.portfolio_id || item.id}
                 item={item}
-                selected={selected.includes(item.id)}
+                selected={selected.includes(item.portfolio_id) || selected.includes(item.id)}
                 onSelect={handleSelect}
                 setModal={setModal}
                 setDetailItem={setDetailItem}
@@ -551,9 +492,9 @@ export default function PortfolioManagement() {
           <div className="flex flex-col gap-3">
             {filtered.map((item) => (
               <ListRow
-                key={item.id}
+                key={item.portfolio_id || item.id}
                 item={item}
-                selected={selected.includes(item.id)}
+                selected={selected.includes(item.portfolio_id) || selected.includes(item.id)}
                 onSelect={handleSelect}
                 setModal={setModal}
                 setDetailItem={setDetailItem}
@@ -564,13 +505,6 @@ export default function PortfolioManagement() {
 
         {renderModal()}
       </div>
-
-      <style>{`
-        .btn-color {
-          background: linear-gradient(135deg, #5a46c2, #4838a3);
-          color: white;
-        }
-      `}</style>
     </div>
   );
 }

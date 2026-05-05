@@ -296,9 +296,9 @@ export default function Innovation() {
           </>
         )}
 
-        <ReadyToStart />
+        
       </div>
-
+      <ReadyToStart />
       <VideoModal video={activeVideo} onClose={() => setActiveVideo(null)} />
     </div>
   );
