@@ -33,15 +33,11 @@ const OtherService = ({ onBack }) => {
   }, []);
 
   const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-  const isValidPhone = (s) => {
-    const digits = (s.match(/\d/g) || []).length;
-    return digits >= 7 && /^[+\d\s().-]+$/.test(s);
-  };
 
   const validateContact = (value) => {
-    if (!value) return "Contact is required";
-    if (isValidEmail(value) || isValidPhone(value)) return "";
-    return "Enter a valid email or phone number";
+    if (!value) return "Email is required";
+    if (isValidEmail(value)) return "";
+    return "Enter a valid email";
   };
 
   const handleChange = (e) => {
@@ -127,13 +123,14 @@ const OtherService = ({ onBack }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700">Your contact</label>
+          <label className="block text-sm font-medium text-slate-700">Email</label>
           <input
+            type="email"
             name="contact"
             value={form.contact}
             onChange={handleChange}
             required
-            placeholder="Email or phone"
+            placeholder="Email address"
             aria-invalid={contactError ? "true" : "false"}
             className={`mt-2 w-full rounded-lg border px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 ${contactError ? "border-red-300 focus:ring-red-200" : "border-slate-200 focus:ring-indigo-200"}`}
           />
