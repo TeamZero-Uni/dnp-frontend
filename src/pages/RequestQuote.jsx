@@ -1,14 +1,19 @@
 import React, { useState, useCallback } from "react";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   FiCheck, FiChevronRight, FiChevronLeft, FiUpload,
   FiX, FiMinus, FiPlus, FiSend, FiUser, FiMail, FiPhone,
 } from "react-icons/fi";
 import {
-  MdOutlinePrint, MdOutlineDesignServices, MdOutlineElectricBolt,
+  MdOutlinePrint, MdOutlineDesignServices, MdOutlineElectricBolt, MdOutlineAutorenew,
   MdOutlineContentCut, MdOutlineLightbulb, MdOutlineFactory,
 } from "react-icons/md";
 import Banner from "../components/layout/Banner";
 import ReadyToStart from "../components/ReadyToStart";
+import StepSelectService from "../components/sections/quote/StepSelectService";
+import StepUploadFiles from "../components/sections/quote/StepUploadFiles";
+import StepProjectDetails from "../components/sections/quote/StepProjectDetails";
+import { submitQuoteRequest } from "../api/quoteApi";
 
 /* ─────────────────────────────────────────────
    SERVICE DEFINITIONS
@@ -22,13 +27,13 @@ const SERVICES = [
     color: "text-violet-600",
     bg: "bg-violet-50",
     border: "border-violet-200",
+    gradientFrom: "#7c3aed",
+    gradientTo: "#5b21b6",
+    shadow: "rgba(109,40,217,0.25)",
     fields: [
-      { key: "material", label: "Material", type: "select",
-        options: ["PLA", "ABS", "PETG", "TPU", "ASA", "Nylon"] },
-      { key: "quality",  label: "Print Quality", type: "select",
-        options: ["Draft (0.3mm)", "Standard (0.2mm)", "Fine (0.1mm)"] },
-      { key: "infill",   label: "Infill %", type: "select",
-        options: ["15%", "20%", "30%", "50%", "75%", "100%"] },
+      { key: "material", label: "Material", type: "select", options: ["PLA", "ABS", "PETG", "PPU"] },
+      { key: "quality",  label: "Print Quality", type: "select", options: ["Draft (0.3mm)", "Standard (0.2mm)", "Fine (0.1mm)"] },
+      { key: "infill",   label: "Infill %", type: "select", options: ["15%", "20%", "30%", "50%", "75%", "100%"] },
       { key: "color",    label: "Color", type: "color" },
       { key: "quantity", label: "Quantity", type: "counter" },
       { key: "notes",    label: "Additional Notes", type: "textarea" },
@@ -42,11 +47,12 @@ const SERVICES = [
     color: "text-sky-600",
     bg: "bg-sky-50",
     border: "border-sky-200",
+    gradientFrom: "#0284c7",
+    gradientTo: "#075985",
+    shadow: "rgba(2,132,199,0.25)",
     fields: [
-      { key: "resinType", label: "Resin Type", type: "select",
-        options: ["Standard", "ABS-Like", "Flexible", "Castable", "Dental Grade"] },
-      { key: "finish",    label: "Surface Finish", type: "select",
-        options: ["Raw", "Sanded", "Painted", "Polished"] },
+      { key: "resinType", label: "Resin Type", type: "select", options: ["Standard", "ABS-Like", "Flexible", "Castable", "Dental Grade"] },
+      { key: "quality",   label: "Print Quality", type: "select", options: ["Draft (0.3mm)", "Standard (0.2mm)", "Fine (0.1mm)"] },
       { key: "color",     label: "Color", type: "color" },
       { key: "quantity",  label: "Quantity", type: "counter" },
       { key: "notes",     label: "Additional Notes", type: "textarea" },
@@ -60,15 +66,15 @@ const SERVICES = [
     color: "text-amber-600",
     bg: "bg-amber-50",
     border: "border-amber-200",
+    gradientFrom: "#d97706",
+    gradientTo: "#b45309",
+    shadow: "rgba(217,119,6,0.25)",
     fields: [
-      { key: "material",   label: "Material", type: "select",
-        options: ["Acrylic", "Wood (MDF)", "Wood (Plywood)", "Leather", "Cardboard", "Foam"] },
-      { key: "thickness",  label: "Thickness (mm)", type: "select",
-        options: ["2mm", "3mm", "5mm", "6mm", "8mm", "10mm"] },
-      { key: "jobType",    label: "Job Type", type: "select",
-        options: ["Cutting Only", "Engraving Only", "Cut + Engrave"] },
-      { key: "quantity",   label: "Quantity / Sheets", type: "counter" },
-      { key: "notes",      label: "Design Notes", type: "textarea" },
+      { key: "material",  label: "Material", type: "select", options: ["Acrylic", "Wood (Plywood)"] },
+      { key: "thickness", label: "Thickness (mm)", type: "select", options: ["2mm", "3mm", "5mm", "6mm", "8mm", "10mm"] },
+      { key: "jobType",   label: "Job Type", type: "select", options: ["Cutting Only", "Engraving Only", "Cut + Engrave"] },
+      { key: "quantity",  label: "Quantity / Sheets", type: "counter" },
+      { key: "notes",     label: "Design Notes", type: "textarea" },
     ],
   },
   {
@@ -79,52 +85,61 @@ const SERVICES = [
     color: "text-rose-600",
     bg: "bg-rose-50",
     border: "border-rose-200",
+    gradientFrom: "#e11d48",
+    gradientTo: "#be123c",
+    shadow: "rgba(225,29,72,0.25)",
     fields: [
-      { key: "size",       label: "Letter Height", type: "select",
-        options: ["20cm", "30cm", "40cm", "60cm", "80cm", "Custom"] },
-      { key: "ledColor",   label: "LED Color", type: "select",
-        options: ["Warm White", "Cool White", "RGB (Multicolor)", "Red", "Blue", "Green", "Yellow"] },
-      { key: "mounting",   label: "Mounting Type", type: "select",
-        options: ["Wall Mount", "Free Standing", "Table Top", "Hanging"] },
-      { key: "quantity",   label: "No. of Letters / Words", type: "counter" },
-      { key: "notes",      label: "Text / Design Notes", type: "textarea" },
+      { key: "size",     label: "Letter Height", type: "select", options: ["20cm", "30cm", "40cm", "60cm", "80cm", "Custom"] },
+      { key: "ledColor", label: "Color", type: "select", options: ["Warm White", "Cool White", "RGB (Multicolor)", "Red", "Blue", "Green", "Yellow"] },
+      { key: "ledtype",  label: "Type", type: "select", options: ["Seal Types", "Back Open"] },
+      { key: "quantity", label: "No. of Letters / Words", type: "counter" },
+      { key: "notes",    label: "Text / Design Notes", type: "textarea" },
     ],
   },
   {
-    id: "cad",
-    label: "3D Modeling & CAD",
-    desc: "Professional design services for your concepts",
+    id: "robotic",
+    label: "Robotic Project",
+    desc: "Upload reference images, then describe your automation goal",
     icon: MdOutlineElectricBolt,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
+    color: "text-indigo-600",
+    bg: "bg-indigo-50",
+    border: "border-indigo-200",
+    gradientFrom: "#4f46e5",
+    gradientTo: "#3730a3",
+    shadow: "rgba(79,70,229,0.25)",
     fields: [
-      { key: "software",    label: "Preferred Software", type: "select",
-        options: ["Fusion 360", "SolidWorks", "Blender", "Rhino", "No Preference"] },
-      { key: "deliverable", label: "Deliverable Format", type: "select",
-        options: ["STL", "STEP", "OBJ", "IGES", "Native File", "All Formats"] },
-      { key: "complexity",  label: "Model Complexity", type: "select",
-        options: ["Simple (basic shapes)", "Medium (mechanical parts)", "Complex (organic/detailed)", "Very Complex"] },
-      { key: "notes",       label: "Describe Your Model", type: "textarea" },
+      { key: "notes", label: "Project Details", type: "textarea" },
     ],
   },
   {
     id: "injection",
     label: "Injection Molding",
-    desc: "Mass production with high precision",
+    desc: "Upload your part images, share dimensions and requirements",
     icon: MdOutlineFactory,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
-    border: "border-indigo-200",
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+    border: "border-teal-200",
+    gradientFrom: "#0d9488",
+    gradientTo: "#0f766e",
+    shadow: "rgba(13,148,136,0.25)",
     fields: [
-      { key: "material",  label: "Material", type: "select",
-        options: ["ABS", "PP", "PE", "Nylon", "PC", "POM"] },
-      { key: "color",     label: "Color", type: "color" },
-      { key: "quantity",  label: "Production Quantity", type: "select",
-        options: ["100–500", "500–1,000", "1,000–5,000", "5,000–10,000", "10,000+"] },
-      { key: "moldType",  label: "Mold Type", type: "select",
-        options: ["Single Cavity", "Multi Cavity", "Family Mold"] },
-      { key: "notes",     label: "Additional Requirements", type: "textarea" },
+      { key: "notes", label: "Additional Requirements", type: "textarea" },
+    ],
+  },
+  {
+    id: "filament",
+    label: "3D Printing Filament Recycler",
+    desc: "Recycle waste filament into reusable material",
+    icon: MdOutlineAutorenew,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    gradientFrom: "#059669",
+    gradientTo: "#047857",
+    shadow: "rgba(5,150,105,0.25)",
+    fields: [
+      { key: "material", label: "Material", type: "select", options: ["ABS", "PP", "PE", "Nylon", "PC", "POM"] },
+      { key: "color",    label: "Color", type: "color" },
     ],
   },
 ];
@@ -142,9 +157,15 @@ const COLOR_OPTIONS = [
 
 const STEPS = ["Select Service", "Upload Files", "Project Details", "Review & Submit"];
 
+const STEP_COLORS = [
+  { from: "#7c3aed", to: "#5b21b6" },
+  { from: "#0284c7", to: "#075985" },
+  { from: "#d97706", to: "#b45309" },
+  { from: "#059669", to: "#047857" },
+];
+
 /* ─────────────────────────────────────────────
    STEP INDICATOR
-   Defined outside main component — stable reference
 ───────────────────────────────────────────── */
 function StepBar({ current }) {
   return (
@@ -152,26 +173,39 @@ function StepBar({ current }) {
       {STEPS.map((label, i) => {
         const done   = i < current;
         const active = i === current;
+        const col    = STEP_COLORS[i];
         return (
           <React.Fragment key={label}>
             <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300 ${
-                  done   ? "border-[#5a46c2] bg-[#5a46c2] text-white" :
-                  active ? "border-[#5a46c2] bg-white text-[#5a46c2] shadow-md shadow-violet-200" :
-                           "border-slate-200 bg-white text-slate-400"
-                }`}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all duration-300"
+                style={
+                  done
+                    ? { background: `linear-gradient(135deg,${col.from},${col.to})`, borderColor: col.from, color: "#fff" }
+                    : active
+                    ? { background: "#fff", borderColor: col.from, color: col.from, boxShadow: `0 0 0 4px ${col.from}22` }
+                    : { background: "#fff", borderColor: "#e2e8f0", color: "#cbd5e1" }
+                }
               >
                 {done ? <FiCheck size={15} strokeWidth={3} /> : i + 1}
               </div>
-              <span className={`text-[10px] font-bold whitespace-nowrap hidden sm:block ${
-                active ? "text-[#5a46c2]" : done ? "text-slate-500" : "text-slate-300"
-              }`}>{label}</span>
+              <span
+                className="text-[10px] font-bold whitespace-nowrap hidden sm:block"
+                style={{ color: active ? col.from : done ? "#64748b" : "#cbd5e1" }}
+              >
+                {label}
+              </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-1 mt-[-14px] sm:mt-[-20px] transition-all duration-500 ${
-                done ? "bg-[#5a46c2]" : "bg-slate-200"
-              }`} style={{ minWidth: 20 }} />
+              <div
+                className="flex-1 h-0.5 mx-1 mt-[-14px] sm:mt-[-20px] transition-all duration-500"
+                style={{
+                  background: done
+                    ? `linear-gradient(90deg,${STEP_COLORS[i].from},${STEP_COLORS[i + 1].from})`
+                    : "#e2e8f0",
+                  minWidth: 20,
+                }}
+              />
             )}
           </React.Fragment>
         );
@@ -182,226 +216,25 @@ function StepBar({ current }) {
 
 /* ─────────────────────────────────────────────
    DYNAMIC FIELD RENDERER
-   Defined outside main component — stable reference,
-   no remounting on parent state change
-───────────────────────────────────────────── */
-function DynamicField({ field, value, onChange }) {
-  if (field.type === "select") return (
-    <div>
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">{field.label}</label>
-      <select
-        value={value || ""}
-        onChange={(e) => onChange(field.key, e.target.value)}
-        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-colors appearance-none cursor-pointer"
-      >
-        <option value="">Select {field.label}...</option>
-        {field.options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </div>
-  );
-
-  if (field.type === "counter") return (
-    <div>
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">{field.label}</label>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => onChange(field.key, Math.max(1, (value || 1) - 1))}
-          className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 hover:border-violet-300 hover:text-[#5a46c2] transition-colors"
-        >
-          <FiMinus size={14} />
-        </button>
-        <span className="w-16 text-center text-lg font-black text-slate-900">{value || 1}</span>
-        <button
-          onClick={() => onChange(field.key, (value || 1) + 1)}
-          className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 hover:border-violet-300 hover:text-[#5a46c2] transition-colors"
-        >
-          <FiPlus size={14} />
-        </button>
-      </div>
-    </div>
-  );
-
-  if (field.type === "color") return (
-    <div>
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">{field.label}</label>
-      <div className="flex flex-wrap gap-2">
-        {COLOR_OPTIONS.map((c) => (
-          <button
-            key={c.value}
-            title={c.label}
-            onClick={() => onChange(field.key, c.value)}
-            className={`w-8 h-8 rounded-full border-2 transition-all ${
-              value === c.value ? "ring-2 ring-[#5a46c2] ring-offset-2 scale-110" : "border-slate-200 hover:scale-105"
-            } ${c.border ? "border-slate-300" : "border-transparent"}`}
-            style={{ background: c.value === "custom" ? "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)" : c.value }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-
-  if (field.type === "textarea") return (
-    <div>
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">{field.label}</label>
-      <textarea
-        value={value || ""}
-        onChange={(e) => onChange(field.key, e.target.value)}
-        rows={4}
-        placeholder="Describe your requirements..."
-        className="w-full resize-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors"
-      />
-    </div>
-  );
-
-  return null;
-}
-
-/* ─────────────────────────────────────────────
-   STEP CONTENT COMPONENTS
-   All defined OUTSIDE the main component so
-   React never recreates them on state changes.
-   Props are passed in explicitly.
 ───────────────────────────────────────────── */
 
-function StepSelectService({ service, onSelect }) {
-  return (
-    <div>
-      <h2 className="text-lg font-black text-slate-900 mb-1">Select a Service</h2>
-      <p className="text-sm text-slate-400 mb-5">Choose the service that best fits your project needs</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {SERVICES.map((s) => {
-          const Icon = s.icon;
-          const isSelected = service === s.id;
-          return (
-            <button
-              key={s.id}
-              onClick={() => onSelect(s.id)}
-              className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${
-                isSelected
-                  ? "border-[#5a46c2] bg-violet-50 shadow-md shadow-violet-100"
-                  : "border-slate-200 bg-white hover:border-violet-200 hover:bg-slate-50"
-              }`}
-            >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${s.bg} ${s.border} border`}>
-                <Icon size={20} className={s.color} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-black leading-none mb-1 ${isSelected ? "text-[#5a46c2]" : "text-slate-900"}`}>
-                  {s.label}
-                </p>
-                <p className="text-xs text-slate-400 leading-snug">{s.desc}</p>
-              </div>
-              {isSelected && (
-                <div className="w-5 h-5 rounded-full bg-[#5a46c2] flex items-center justify-center shrink-0 mt-0.5">
-                  <FiCheck size={11} className="text-white" strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function StepUploadFiles({ files, dragging, onDragOver, onDragLeave, onDrop, onBrowseClick, onFileChange, onRemoveFile }) {
-  return (
-    <div>
-      <h2 className="text-lg font-black text-slate-900 mb-1">Upload Your Files</h2>
-      <p className="text-sm text-slate-400 mb-5">STL, STEP, OBJ, DXF, AI, PDF — max 50MB each (up to 5 files)</p>
-
-      <div
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer mb-4 ${
-          dragging
-            ? "border-[#5a46c2] bg-violet-50"
-            : "border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-violet-50/40"
-        }`}
-        onClick={onBrowseClick}
-      >
-        <input
-          id="file-input"
-          type="file"
-          multiple
-          className="hidden"
-          onChange={onFileChange}
-          accept=".stl,.step,.stp,.obj,.dxf,.ai,.pdf,.igs,.iges"
-        />
-        <div className="w-14 h-14 rounded-2xl bg-violet-100 border border-violet-200 flex items-center justify-center mx-auto mb-3">
-          <FiUpload size={22} className="text-[#5a46c2]" />
-        </div>
-        <p className="text-sm font-bold text-slate-700 mb-1">
-          {dragging ? "Drop files here!" : "Drag & drop files here"}
-        </p>
-        <p className="text-xs text-slate-400 mb-3">or click to browse</p>
-        <span className="inline-block px-5 py-2 rounded-full text-xs font-bold text-white"
-          style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}>
-          Browse Files
-        </span>
-      </div>
-
-      {files.length > 0 && (
-        <div className="space-y-2">
-          {files.map((file, i) => (
-            <div key={i} className="flex items-center gap-3 bg-white border border-violet-100 rounded-xl px-4 py-3">
-              <div className="w-8 h-8 rounded-lg bg-violet-50 border border-violet-200 flex items-center justify-center text-[#5a46c2] shrink-0 text-[10px] font-black uppercase">
-                {file.name.split(".").pop()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-800 truncate">{file.name}</p>
-                <p className="text-[10px] text-slate-400">{(file.size / 1024).toFixed(0)} KB</p>
-              </div>
-              <button
-                onClick={() => onRemoveFile(i)}
-                className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors shrink-0"
-              >
-                <FiX size={13} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {files.length === 0 && (
-        <p className="text-center text-xs text-slate-400 mt-3">
-          No files required — you can skip this step and describe your project in notes.
-        </p>
-      )}
-    </div>
-  );
-}
-
-function StepProjectDetails({ selectedService, details, onDetailChange }) {
-  return (
-    <div>
-      <div className="flex items-center gap-3 mb-5">
-        {selectedService && (
-          <>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedService.bg} ${selectedService.border} border`}>
-              <selectedService.icon size={20} className={selectedService.color} />
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-slate-900 leading-none">{selectedService.label}</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Fill in the project details below</p>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {selectedService?.fields.map((field) => (
-          <div key={field.key} className={field.type === "textarea" || field.type === "color" ? "sm:col-span-2" : ""}>
-            <DynamicField field={field} value={details[field.key]} onChange={onDetailChange} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /* ─────────────────────────────────────────────
-   VALIDATION HELPERS
+   STEP 1 — SELECT SERVICE
+───────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────
+   STEP 2 — UPLOAD FILES
+───────────────────────────────────────────── */
+
+
+/* ─────────────────────────────────────────────
+   STEP 3 — PROJECT DETAILS
+───────────────────────────────────────────── */
+
+
+/* ─────────────────────────────────────────────
+   VALIDATION
 ───────────────────────────────────────────── */
 const validateEmail = (v) => {
   if (!v) return "Email is required";
@@ -410,36 +243,54 @@ const validateEmail = (v) => {
 };
 
 const validatePhone = (v) => {
-  if (!v) return ""; // optional field — empty is fine
-  // Accepts: +94771234567 | 0771234567 | +1 800 555 0199 | spaces, dashes, dots allowed
+  if (!v) return "";
   if (!/^\+?[\d\s\-().]{7,20}$/.test(v)) return "Enter a valid phone number";
   return "";
 };
 
+const validatePostalCode = (code) => {
+   if (!code) return "Postal code is required";
+  if (!/^\d{5}$/.test(code)) return "Enter a valid 5-digit postal code";
+  return "";
+};
+
+const validateAddress = (v) => {
+  if (!v) return "Address is required";
+  if (v.length < 10) return "Address must be at least 10 characters";
+  return "";
+}
+
+/* ─────────────────────────────────────────────
+   STEP 4 — REVIEW & SUBMIT
+───────────────────────────────────────────── */
 function StepReviewSubmit({ selectedService, files, details, contact, onContactChange, touched, onBlur }) {
   const emailError = touched.email ? validateEmail(contact.email) : "";
   const phoneError = touched.phone ? validatePhone(contact.phone) : "";
+  const accent     = selectedService?.gradientFrom || "#5a46c2";
 
-  const inputClass = (err, key) =>
-    `w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-colors ${
-      err
-        ? "border-red-400 bg-red-50 focus:border-red-400"
-        : contact[key] && key !== "name"
-        ? "border-emerald-400 bg-white focus:border-emerald-400"
-        : "border-slate-200 focus:border-violet-400 focus:bg-white"
-    }`;
+  const inputBorder = (err, key) =>
+    err ? "#f87171" : contact[key] && key !== "name" && !err && touched[key] ? "#34d399" : "#e2e8f0";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* order summary */}
       <div>
         <h2 className="text-base font-black text-slate-900 mb-4">Order Summary</h2>
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
+        <div
+          className="rounded-2xl p-4 space-y-3"
+          style={{
+            background: selectedService ? `linear-gradient(135deg,${selectedService.gradientFrom}08,${selectedService.gradientTo}14)` : "#f8fafc",
+            border: selectedService ? `1px solid ${selectedService.gradientFrom}25` : "1px solid #f1f5f9",
+          }}
+        >
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200">
             {selectedService && (
               <>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${selectedService.bg} ${selectedService.border} border`}>
-                  <selectedService.icon size={17} className={selectedService.color} />
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0"
+                  style={{ background: `linear-gradient(135deg,${selectedService.gradientFrom},${selectedService.gradientTo})` }}
+                >
+                  <selectedService.icon size={17} />
                 </div>
                 <div>
                   <p className="text-sm font-black text-slate-900">{selectedService.label}</p>
@@ -454,11 +305,10 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
               <span className="font-semibold text-slate-400 uppercase tracking-widest text-[10px]">{f.label}</span>
               {f.type === "color" && details[f.key] ? (
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full border border-slate-200"
-                    style={{ background: details[f.key] }} />
-                  <span className="font-bold text-slate-700 capitalize">{
-                    COLOR_OPTIONS.find((c) => c.value === details[f.key])?.label || details[f.key]
-                  }</span>
+                  <span className="w-3.5 h-3.5 rounded-full border border-slate-200" style={{ background: details[f.key] }} />
+                  <span className="font-bold text-slate-700 capitalize">
+                    {COLOR_OPTIONS.find((c) => c.value === details[f.key])?.label || details[f.key]}
+                  </span>
                 </div>
               ) : (
                 <span className="font-bold text-slate-700">{details[f.key] || "—"}</span>
@@ -474,37 +324,43 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
           )}
         </div>
 
-        <div className="mt-3 bg-violet-50 border border-violet-100 rounded-2xl px-4 py-3">
-          <p className="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-1">Pricing</p>
-          <p className="text-xs text-violet-700 font-semibold leading-relaxed">
+        <div
+          className="mt-3 rounded-2xl px-4 py-3"
+          style={{ background: "linear-gradient(135deg,#fdf4ff,#eff6ff)", border: "1px solid #e9d5ff" }}
+        >
+          <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: "#7c3aed" }}>Pricing</p>
+          <p className="text-xs leading-relaxed" style={{ color: "#6d28d9" }}>
             Final pricing will be calculated after reviewing your files and requirements. You'll receive a detailed quote within <strong>24 hours</strong>.
           </p>
         </div>
       </div>
 
-      {/* contact info */}
+      {/* contact */}
       <div>
         <h2 className="text-base font-black text-slate-900 mb-4">Your Contact Info</h2>
         <div className="space-y-3">
 
-          {/* Full Name */}
+          {/* Name */}
           <div>
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-              <FiUser size={9} className="text-violet-400" /> Full Name <span className="text-red-400">*</span>
+              <FiUser size={9} style={{ color: accent }} /> Full Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               value={contact.name}
               onChange={(e) => onContactChange("name", e.target.value)}
               placeholder="e.g. Kasun Perera"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors"
+              className="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-all"
+              style={{ border: `1.5px solid #e2e8f0` }}
+              onFocus={(e) => { e.target.style.borderColor = accent; e.target.style.background = "#fff"; }}
+              onBlur={(e)  => { e.target.style.borderColor = "#e2e8f0"; e.target.style.background = ""; }}
             />
           </div>
 
           {/* Email */}
           <div>
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-              <FiMail size={9} className="text-violet-400" /> Email <span className="text-red-400">*</span>
+              <FiMail size={9} style={{ color: accent }} /> Email <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <input
@@ -513,7 +369,9 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
                 onChange={(e) => onContactChange("email", e.target.value)}
                 onBlur={() => onBlur("email")}
                 placeholder="you@example.com"
-                className={inputClass(emailError, "email")}
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-all"
+                style={{ border: `1.5px solid ${inputBorder(emailError, "email")}` }}
+                onFocus={(e) => { e.target.style.borderColor = accent; e.target.style.background = "#fff"; }}
               />
               {contact.email && !emailError && touched.email && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -526,18 +384,13 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
                 </span>
               )}
             </div>
-            {emailError && (
-              <p className="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {emailError}
-              </p>
-            )}
+            {emailError && <p className="text-[11px] text-red-500 font-semibold mt-1.5">{emailError}</p>}
           </div>
 
           {/* Phone */}
           <div>
             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-              <FiPhone size={9} className="text-violet-400" /> Phone
+              <FiPhone size={9} style={{ color: accent }} /> Phone
               <span className="text-slate-300 font-normal normal-case tracking-normal ml-1">(optional)</span>
             </label>
             <div className="relative">
@@ -547,7 +400,9 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
                 onChange={(e) => onContactChange("phone", e.target.value)}
                 onBlur={() => onBlur("phone")}
                 placeholder="+94 77 000 0000"
-                className={inputClass(phoneError, "phone")}
+                className="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-all"
+                style={{ border: `1.5px solid ${inputBorder(phoneError, "phone")}` }}
+                onFocus={(e) => { e.target.style.borderColor = accent; e.target.style.background = "#fff"; }}
               />
               {contact.phone && !phoneError && touched.phone && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -560,18 +415,46 @@ function StepReviewSubmit({ selectedService, files, details, contact, onContactC
                 </span>
               )}
             </div>
-            {phoneError && (
-              <p className="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {phoneError}
-              </p>
-            )}
+            {phoneError && <p className="text-[11px] text-red-500 font-semibold mt-1.5">{phoneError}</p>}
           </div>
+           
+           <div>{/*address field*/}
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              <FiUser size={9} style={{ color: accent }} /> Address <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={contact.address}
+              onChange={(e) => onContactChange("address", e.target.value)}
+              placeholder="NO:123 Main Street, Colombo"
+              className="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-all"
+              style={{ border: `1.5px solid #e2e8f0` }}
+              onFocus={(e) => { e.target.style.borderColor = accent; e.target.style.background = "#fff"; }}
+              onBlur={(e)  => { e.target.style.borderColor = "#e2e8f0"; e.target.style.background = ""; }}
+            />
+          </div>
+
+          <div>{/*porstal code*/}
+            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              <FiUser size={9} style={{ color: accent }} /> Postal Code <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={contact.postalCode}
+              onChange={(e) => onContactChange("postalCode", e.target.value)}
+              placeholder="e.g. 10100"
+              className="w-full bg-slate-50 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-300 outline-none transition-all"
+              style={{ border: `1.5px solid #e2e8f0` }}
+              onFocus={(e) => { e.target.style.borderColor = accent; e.target.style.background = "#fff"; }}
+              onBlur={(e)  => { e.target.style.borderColor = "#e2e8f0"; e.target.style.background = ""; }}
+            />
+          </div>
+
 
         </div>
         <p className="text-xs text-slate-400 mt-4 leading-relaxed">
           By submitting you agree to our{" "}
-          <a href="#" className="text-[#5a46c2] font-semibold hover:underline">privacy policy</a>.
+          <a href="#" className="font-semibold hover:underline" style={{ color: accent }}>privacy policy</a>.
           We'll never share your info.
         </p>
       </div>
@@ -588,54 +471,29 @@ export default function RequestQuote() {
   const [files, setFiles]         = useState([]);
   const [dragging, setDragging]   = useState(false);
   const [details, setDetails]     = useState({});
-  const [contact, setContact]     = useState({ name: "", email: "", phone: "" });
-  const [touched, setTouched]     = useState({ email: false, phone: false });
+  const [contact, setContact]     = useState({ name: "", email: "", phone: "", address: "", postalCode: "" });
+  const [touched, setTouched]     = useState({ email: false, phone: false, address: false, postalCode: false });
   const [submitted, setSubmitted] = useState(false);
 
   const selectedService = SERVICES.find((s) => s.id === service);
+  const accent          = selectedService?.gradientFrom || "#5a46c2";
+  const accentTo        = selectedService?.gradientTo   || "#4838a3";
+  const accentShadow    = selectedService?.shadow       || "rgba(90,70,194,.3)";
 
-  /* file handlers */
   const addFiles = useCallback((newFiles) => {
     const arr = Array.from(newFiles).filter((f) => f.size <= 50 * 1024 * 1024);
     setFiles((prev) => [...prev, ...arr].slice(0, 5));
   }, []);
 
-  const removeFile = useCallback((i) => {
-    setFiles((f) => f.filter((_, idx) => idx !== i));
-  }, []);
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    setDragging(true);
-  }, []);
-
+  const removeFile    = useCallback((i) => setFiles((f) => f.filter((_, idx) => idx !== i)), []);
+  const handleDragOver  = useCallback((e) => { e.preventDefault(); setDragging(true); }, []);
   const handleDragLeave = useCallback(() => setDragging(false), []);
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    setDragging(false);
-    addFiles(e.dataTransfer.files);
-  }, [addFiles]);
-
-  const handleBrowseClick = useCallback(() => {
-    document.getElementById("file-input").click();
-  }, []);
-
-  const handleFileChange = useCallback((e) => {
-    addFiles(e.target.files);
-  }, [addFiles]);
-
-  const setDetail = useCallback((key, val) => {
-    setDetails((d) => ({ ...d, [key]: val }));
-  }, []);
-
-  const handleContactChange = useCallback((key, val) => {
-    setContact((c) => ({ ...c, [key]: val }));
-  }, []);
-
-  const handleBlur = useCallback((key) => {
-    setTouched((t) => ({ ...t, [key]: true }));
-  }, []);
+  const handleDrop      = useCallback((e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }, [addFiles]);
+  const handleBrowseClick = useCallback(() => document.getElementById("file-input").click(), []);
+  const handleFileChange  = useCallback((e) => addFiles(e.target.files), [addFiles]);
+  const setDetail         = useCallback((key, val) => setDetails((d) => ({ ...d, [key]: val })), []);
+  const handleContactChange = useCallback((key, val) => setContact((c) => ({ ...c, [key]: val })), []);
+  const handleBlur          = useCallback((key) => setTouched((t) => ({ ...t, [key]: true })), []);
 
   const canNext = () => {
     if (step === 0) return !!service;
@@ -647,54 +505,95 @@ export default function RequestQuote() {
       return (
         contact.name.trim() !== "" &&
         validateEmail(contact.email) === "" &&
-        validatePhone(contact.phone) === ""
+        validatePhone(contact.phone) === "" &&
+        validatePostalCode(contact.postalCode) === "" &&
+        validateAddress(contact.address) === ""
       );
     }
     return true;
   };
 
-  const handleSubmit = () => {
-    setTouched({ email: true, phone: true });
-    if (canNext()) setSubmitted(true);
-  };
+  
+
+
+const [submitting, setSubmitting] = useState(false);
+const [submitError, setSubmitError] = useState(null);
+
+  const handleSubmit = async () => {
+  setTouched({ email: true, phone: true, address: true, postalCode: true });
+  
+  if (!canNext()) return;
+
+  try {
+    setSubmitting(true);
+    setSubmitError(null);
+    console.log("Submitting quote request with data:", {
+      service,
+      serviceLabel: selectedService?.label,
+      details,
+      contact,
+    });
+    await submitQuoteRequest({
+      service,                    // "fdm", "resin", etc.
+      serviceLabel: selectedService?.label,
+      details,                    // { material, quality, infill, color, quantity, notes }
+      contact,                    // { name, email, phone, address, postalCode }
+    });
+
+    setSubmitted(true);
+
+  } catch (err) {
+    console.error("submitQuoteRequest error:", err);
+    setSubmitError(err?.message || "Can not Submit");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleNewRequest = useCallback(() => {
-    setStep(0);
-    setService(null);
-    setFiles([]);
-    setDetails({});
-    setContact({ name: "", email: "", phone: "" });
-    setTouched({ email: false, phone: false });
+    setStep(0); setService(null); setFiles([]); setDetails({});
+    setContact({ name: "", email: "", phone: "", address: "", postalCode: "" });
+    setTouched({ email: false, phone: false, address: false, postalCode: false });
     setSubmitted(false);
   }, []);
 
   /* ── SUCCESS ── */
   if (submitted) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="bg-white rounded-3xl border border-violet-100 p-10 text-center max-w-md w-full"
-        style={{ boxShadow: "0 8px 40px rgba(90,70,194,.12)" }}>
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
-          style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}>
-          <FiCheck size={28} className="text-white" strokeWidth={3} />
+    <div className="min-h-screen flex items-center justify-center p-6" >
+      <div
+        className="bg-white rounded-3xl p-10 text-center max-w-md w-full"
+        style={{ border: `1px solid ${accent}30`, boxShadow: `0 16px 60px ${accentShadow}` }}
+      >
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white"
+          style={{ background: `linear-gradient(135deg,${accent},${accentTo})`, boxShadow: `0 8px 24px ${accentShadow}` }}
+        >
+          <FiCheck size={28} strokeWidth={3} />
         </div>
         <h2 className="text-2xl font-black text-slate-900 mb-2">Quote Requested!</h2>
         <p className="text-sm text-slate-400 leading-relaxed mb-2">
           Thanks <strong className="text-slate-700">{contact.name}</strong>! We've received your request for
         </p>
-        <span className="inline-block text-xs font-black text-[#5a46c2] bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-full mb-4">
+        <span
+          className="inline-block text-xs font-black px-3 py-1.5 rounded-full mb-4"
+          style={{ background: `${accent}15`, color: accent, border: `1px solid ${accent}30` }}
+        >
           {selectedService?.label}
         </span>
         <p className="text-sm text-slate-400 leading-relaxed mb-6">
-          We'll review your details and send a quote to <strong className="text-slate-700">{contact.email}</strong> within <strong>24 hours</strong>.
+          We'll send a quote to <strong className="text-slate-700">{contact.email}</strong> within <strong>24 hours</strong>.
         </p>
         <div className="flex gap-3 justify-center">
-          <a href="/" className="px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors">
+          <a
+            href="/"
+            className="px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+          >
             Go Home
           </a>
           <button
             onClick={handleNewRequest}
             className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95"
-            style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
+            style={{ background: `linear-gradient(135deg,${accent},${accentTo})`, boxShadow: `0 4px 14px ${accentShadow}` }}
           >
             New Request
           </button>
@@ -703,19 +602,18 @@ export default function RequestQuote() {
     </div>
   );
 
-  /* ── MAIN LAYOUT ── */
   return (
-    <div className="min-h-screen bg-slate-50 px-4">
+    <div className="min-h-screen px-4" style={{ background: "linear-gradient(160deg,#f5f3ff 0%,#eff6ff 40%,#f0fdf4 100%)" }}>
       <style>{`
         @keyframes stepIn {
-          from { opacity:0; transform:translateX(16px); }
-          to   { opacity:1; transform:translateX(0);     }
+          from { opacity:0; transform:translateY(12px); }
+          to   { opacity:1; transform:translateY(0); }
         }
       `}</style>
 
       <Banner
         path="Quote"
-        title={<>Build Something<br /><span className="text-[#5a46c2]">Extraordinary</span></>}
+        title={<>Build Something<br /><span style={{ color: accent }}>Extraordinary</span></>}
         description="Tell us about your project — we'll review your files and send a detailed quote within 24 hours."
         tagLine="Free Quote · No Commitment"
         imageUrl={null}
@@ -723,91 +621,107 @@ export default function RequestQuote() {
         buttonLink="#quote"
       />
 
-      {/* card */}
       <div
-        className="max-w-3xl mx-auto mt-20 bg-white rounded-3xl border border-violet-100 p-6 sm:p-8"
-        style={{ boxShadow: "0 8px 40px rgba(90,70,194,.1)" }}
+        className="max-w-3xl mx-auto mt-20 bg-white rounded-3xl p-6 sm:p-8"
+        style={{
+          border: `1px solid ${accent}20`,
+          boxShadow: `0 8px 48px ${accentShadow}, 0 2px 8px rgba(0,0,0,0.04)`,
+        }}
       >
         <StepBar current={step} />
 
-        {/* step content — inline JSX, not component definitions */}
         <div style={{ animation: "stepIn .25s ease both" }} key={step}>
-          {step === 0 && (
-            <StepSelectService
-              service={service}
-              onSelect={setService}
-            />
-          )}
+          {step === 0 && <StepSelectService service={service} onSelect={setService} SERVICES={SERVICES} />}
           {step === 1 && (
-            <StepUploadFiles
-              files={files}
-              dragging={dragging}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onBrowseClick={handleBrowseClick}
-              onFileChange={handleFileChange}
-              onRemoveFile={removeFile}
+            <StepUploadFiles selectedService={selectedService} accent={accent} accentTo={accentTo}
+              files={files} dragging={dragging}
+              onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+              onBrowseClick={handleBrowseClick} onFileChange={handleFileChange} onRemoveFile={removeFile}
             />
           )}
           {step === 2 && (
-            <StepProjectDetails
-              selectedService={selectedService}
-              details={details}
-              onDetailChange={setDetail}
-            />
+            <StepProjectDetails selectedService={selectedService} details={details} onDetailChange={setDetail} contact={contact} />
           )}
           {step === 3 && (
             <StepReviewSubmit
-              selectedService={selectedService}
-              files={files}
-              details={details}
-              contact={contact}
-              onContactChange={handleContactChange}
-              touched={touched}
-              onBlur={handleBlur}
+              selectedService={selectedService} files={files} details={details}
+              contact={contact} onContactChange={handleContactChange}
+              touched={touched} onBlur={handleBlur}
             />
           )}
         </div>
 
         {/* navigation */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
-          <button
-            onClick={() => setStep((s) => s - 1)}
-            disabled={step === 0}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-          >
-            <FiChevronLeft size={15} /> Back
-          </button>
+<div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+  <button
+    onClick={() => setStep((s) => s - 1)}
+    disabled={step === 0}
+    className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+  >
+    <FiChevronLeft size={15} /> Back
+  </button>
 
-          <span className="text-xs font-bold text-slate-300">
-            Step {step + 1} of {STEPS.length}
-          </span>
+  <div className="flex items-center gap-1.5">
+    {STEPS.map((_, i) => (
+      <div
+        key={i}
+        className="rounded-full transition-all duration-300"
+        style={{
+          width: i === step ? 20 : 6,
+          height: 6,
+          background: i <= step ? `linear-gradient(90deg,${accent},${accentTo})` : "#e2e8f0",
+        }}
+      />
+    ))}
+  </div>
 
-          {step < 3 ? (
-            <button
-              onClick={() => setStep((s) => s + 1)}
-              disabled={!canNext()}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
-              style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)", boxShadow: "0 4px 14px rgba(90,70,194,.3)" }}
-            >
-              Next <FiChevronRight size={15} />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={!canNext()}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
-              style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)", boxShadow: "0 4px 14px rgba(90,70,194,.3)" }}
-            >
-              <FiSend size={14} /> Submit Request
-            </button>
-          )}
-        </div>
+  {step < 3 ? (
+    <button
+      onClick={() => setStep((s) => s + 1)}
+      disabled={!canNext()}
+      className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+      style={{
+        background: `linear-gradient(135deg,${accent},${accentTo})`,
+        boxShadow: canNext() ? `0 4px 14px ${accentShadow}` : "none",
+      }}
+    >
+      Next <FiChevronRight size={15} />
+    </button>
+  ) : (
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={handleSubmit}
+        disabled={!canNext() || submitting}
+        className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+        style={{
+          background: `linear-gradient(135deg,${accent},${accentTo})`,
+          boxShadow: canNext() ? `0 4px 14px ${accentShadow}` : "none",
+        }}
+      >
+        {submitting ? (
+          <>
+            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            Submitting...
+          </>
+        ) : (
+          <><FiSend size={14} /> Submit Request</>
+        )}
+      </button>
+      {submitError && (
+        <p className="text-xs text-red-500 font-semibold text-center">{submitError}</p>
+      )}
+    </div>
+  )}
+</div>
       </div>
 
-      <p className="text-center text-xs text-slate-400 mt-6">
-        Need help? <a href="/contact" className="text-[#5a46c2] font-semibold hover:underline">Contact us directly</a>
+      <p className="text-center text-xs text-slate-400 mt-6 mb-10">
+        Need help?{" "}
+        <a href="/contact" className="font-semibold hover:underline" style={{ color: accent }}>
+          Contact us directly
+        </a>
       </p>
     </div>
   );
