@@ -25,12 +25,17 @@ export default function GalleryManagement() {
   const { categories } = useProduct();
 
   useEffect(() => {
-    const fetchGalleries = async () => {
-      const res = await getAllGalleries();
-      setImages(res.data);
-    };
     fetchGalleries();
   }, []);
+
+  const fetchGalleries = async () => {
+    try {
+      const res = await getAllGalleries();
+      setImages(res.data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
   const filtered = images.filter((img) => {
     const matchCat =
@@ -45,21 +50,19 @@ export default function GalleryManagement() {
     if (modal === "add")
       return (
         <Modal title="Add New Image" onClose={closeModal}>
-          <AddImageView onClose={closeModal} />
+          <AddImageView onClose={closeModal} onSuccess={fetchGalleries} />
         </Modal>
       );
     if (modal === "delete")
       return (
         <Modal title="Delete Image" onClose={closeModal}>
           <DeleteImage
-            images={filtered.filter((i) => selected.includes(i.id))} 
+            images={filtered.filter((i) => selected.includes(i.id))}
             onCancel={closeModal}
-            onDelete={(deletedIds) => {
-              setImages((prev) =>
-                prev.filter((img) => !deletedIds.includes(img.id)),
-              );
+            onDelete={() => {
               setSelected([]);
               setModal(null);
+              fetchGalleries(); 
             }}
           />
         </Modal>

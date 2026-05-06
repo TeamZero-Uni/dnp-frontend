@@ -20,7 +20,7 @@ import { useProduct } from "../../hooks/useProduct";
 const COLUMNS = ["Product", "Category", "Price", "Material", "Status", "Actions"];
 
 export default function ProductManagement() {
-  const { products } = useProduct();
+  const { products, fetchProductsData } = useProduct();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
@@ -33,10 +33,10 @@ export default function ProductManagement() {
   const renderModal = () => {
     if (!modal) return null;
     const config = {
-      add: { title: "Add Product", Comp: ProductForm, props: { mode: "add" } },
-      edit: { title: "Edit Product", Comp: ProductForm, props: { mode: "edit", product: modal.product } },
+      add: { title: "Add Product", Comp: ProductForm, props: { mode: "add", onSuccess: fetchProductsData } },
+      edit: { title: "Edit Product", Comp: ProductForm, props: { mode: "edit", product: modal.product, onSuccess: fetchProductsData } },
       view: { title: "Product Details", Comp: ProductView, props: { product: modal.product } },
-      delete: { title: "Delete Product", Comp: DeleteView, props: { t: modal.product, onConfirm: () => closeModal() } },
+      delete: { title: "Delete Product", Comp: DeleteView, props: { t: modal.product, onConfirm: () => {fetchProductsData(); closeModal();} } },
     };
     const { title, Comp, props } = config[modal.type];
     return (

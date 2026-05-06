@@ -19,8 +19,9 @@ import {
   updatePaymentStatus,
   updateTrackingNumber,
 } from "../../api/ordersApi";
+import toast from "react-hot-toast";
 
-export default function CodOrderView({ order, onClose }) {
+export default function CodOrderView({ order, onClose, onUpdated }) {
   if (!order) return null;
 
   const [status, setStatus] = useState(
@@ -43,21 +44,33 @@ export default function CodOrderView({ order, onClose }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await changeOrderStatus({
+      const res = await changeOrderStatus({
         id: order.order_id,
         status: status.toUpperCase(),
       });
+
+      let updatedOrder = {
+        ...order,
+        status: status.toUpperCase(),
+      };
+
       if (status === "shipped" && trackingInput) {
         await updateTrackingNumber({
           id: order.order_id,
           tracking_number: trackingInput,
         });
+
+        updatedOrder.tracking_number = trackingInput;
         setSavedTracking(trackingInput);
       }
+
+      onUpdated && onUpdated(updatedOrder);
+      
+      toast.success(res.message || "Order updated successfully.");
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      console.error("Failed to update order:", err);
+      toast.error(err?.response?.data?.message || "Failed to update order.");
     } finally {
       setSaving(false);
     }
@@ -70,11 +83,20 @@ export default function CodOrderView({ order, onClose }) {
         id: order.order_id,
         payment_status: "COMPLETED",
       });
+
       setPaymentStatus("completed");
+
+      onUpdated &&
+        onUpdated({
+          ...order,
+          payment_status: "COMPLETED",
+        });
+
+      toast.success("Payment collected.");
       setCollected(true);
       setTimeout(() => setCollected(false), 2000);
     } catch (error) {
-      console.error("Failed to update payment status:", error);
+      toast.error(error?.response?.data?.message || "Failed to update payment status.");
     } finally {
       setCollecting(false);
     }

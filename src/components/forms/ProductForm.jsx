@@ -2,8 +2,9 @@ import { useState } from "react";
 import { uploadMultipleImages, createProduct, updateProduct } from "../../api/api";
 import { useProduct } from "../../hooks/useProduct";
 import { FiX, FiImage, FiLoader } from "react-icons/fi";
+import toast from "react-hot-toast";
 
-function ProductForm({ product, mode = "add", onClose }) {
+function ProductForm({ product, mode = "add", onClose, onSuccess }) {
   const { categories } = useProduct();
 
   const normalize = (p) => ({
@@ -109,9 +110,11 @@ function ProductForm({ product, mode = "add", onClose }) {
         await createProduct(finalData);
       }
 
+      onSuccess && onSuccess();
+      toast.success(`Product ${mode === "edit" ? "updated" : "created"} successfully!`);
       onClose();
     } catch (error) {
-      console.error("Error submitting form:", error);
+      toast.error(error?.response?.data?.message || "Failed to submit form.");
     } finally {
       setLoading(false);
     }

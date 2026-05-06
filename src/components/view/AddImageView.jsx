@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useProduct } from "../../hooks/useProduct";
 import { uploadMultipleImages } from "../../api/api";
 import { createGallery } from "../../api/galleryApi";
+import toast from "react-hot-toast";
 
-function AddImageView({ onClose }) {
+function AddImageView({ onClose, onSuccess  }) {
   const [formData, setFormData] = useState({
     category: "",
     images: [],
@@ -76,13 +77,16 @@ function AddImageView({ onClose }) {
         ),
       );
 
-      alert("Images saved to gallery successfully!");
-
+      toast.success("Images uploaded successfully!");
       setFormData({ category: "", images: [] });
       setPreviews([]);
+      onSuccess();
       onClose();
     } catch (err) {
-      console.error("Error:", err?.response?.data?.message);
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to upload images. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

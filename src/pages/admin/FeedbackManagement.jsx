@@ -4,6 +4,7 @@ import {
   CheckCircle, Filter, Search, ThumbsUp
 } from "lucide-react";
 import { changeFeedbackStatus, deleteFeedback, getAllFeedback } from '../../api/feedbackApi';
+import toast from "react-hot-toast";
 
 function FeedbackManagement() {
   const [feedbacks, setFeedbacks]         = useState([]);
@@ -40,8 +41,12 @@ function FeedbackManagement() {
       setFeedbacks(prev =>
         prev.map(f => f.feedback_id === feedback.feedback_id ? { ...f, status: nextStatus } : f)
       );
+      toast.success("Feedback status updated successfully!");
     } catch (err) {
-      console.error("Failed to update status:", err);
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to update status. Please try again.",
+      );
     } finally {
       setActionLoading(null);
     }
@@ -52,8 +57,12 @@ function FeedbackManagement() {
     try {
       await deleteFeedback(id);
       setFeedbacks(prev => prev.filter(f => f.feedback_id !== id)); 
+      toast.success("Feedback deleted successfully!");
     } catch (err) {
-      console.error("Failed to delete feedback:", err);
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to delete feedback. Please try again.",
+      );
     } finally {
       setActionLoading(null);
     }

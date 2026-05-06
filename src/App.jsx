@@ -4,6 +4,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 
 import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -86,7 +87,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimeDone(true);
-    }, 3000); // ⏱️ CHANGE THIS (e.g., 2000, 5000)
+    }, 3000); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -95,7 +96,12 @@ function App() {
     return  <Loader />;
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Toaster position="top-right" />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

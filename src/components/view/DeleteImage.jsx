@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Trash2, AlertTriangle, ImageOff, CheckCircle2 } from "lucide-react";
 import { deleteGallery } from "../../api/galleryApi";
+import toast from "react-hot-toast";
 
 export default function DeleteImage({ images, onDelete, onCancel }) {
   const [loading, setLoading] = useState(false);
@@ -11,9 +12,13 @@ export default function DeleteImage({ images, onDelete, onCancel }) {
     try {
       await Promise.all(images.map((img) => deleteGallery(img.id)));
       setDeleted(true);
-      if (onDelete) onDelete(images.map((img) => img.id));
+      if (onDelete) onDelete();
+      toast.success("Images deleted successfully!");
     } catch (err) {
-      console.error("Delete failed:", err);
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to delete images. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

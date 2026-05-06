@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import { FiAlertTriangle } from "react-icons/fi";
-import { deleteOrder } from '../../api/api';
+import { deleteOrder } from "../../api/ordersApi";
+import toast from "react-hot-toast";
 
 function DeleteOrderView({ order, onClose, onConfirm }) {
   const [error, setError] = useState(null);
@@ -11,9 +12,13 @@ function DeleteOrderView({ order, onClose, onConfirm }) {
     setLoading(true);
     try {
       const res = await deleteOrder(order.order_id);
-      onConfirm();
+      onConfirm && onConfirm(order.order_id);
+      toast.success(res.data.message || "Order deleted successfully.");
     } catch (err) {
-      setError(err?.response?.data?.message ?? "Something went wrong. Please try again.");
+      setError(
+        err?.response?.data?.message ??
+          "Something went wrong. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -28,7 +33,8 @@ function DeleteOrderView({ order, onClose, onConfirm }) {
         <div>
           <p className="text-sm font-bold text-rose-800">Dangerous Action</p>
           <p className="text-sm text-rose-600 mt-1 leading-relaxed">
-            You are about to permanently delete this order. This cannot be undone.
+            You are about to permanently delete this order. This cannot be
+            undone.
           </p>
         </div>
       </div>
@@ -49,7 +55,7 @@ function DeleteOrderView({ order, onClose, onConfirm }) {
           Cancel
         </button>
         <button
-          onClick={handleConfirm}          
+          onClick={handleConfirm}
           disabled={loading}
           className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white rounded-xl text-sm font-bold transition-colors"
         >

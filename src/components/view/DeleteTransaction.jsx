@@ -1,19 +1,20 @@
+import React from 'react'
 import { useState } from "react";
 import { FiAlertTriangle, FiLoader } from "react-icons/fi";
-import { deleteProduct } from "../../api/api";
+import { deleteTransaction } from '../../api/transactionApi';
 import toast from "react-hot-toast";
 
-export default function DeleteView({ t, onClose, onConfirm }) {
+export default function DeleteTransaction({t, onConfirm, onClose}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+    
   const deleteP = async () => {
     setLoading(true);
     setError(null);
     try {
-      await deleteProduct(t.p_id);
+      await deleteTransaction(t.transaction_id);
+      toast.success("Transaction deleted successfully!");
       onConfirm();
-      toast.success("Product deleted successfully!");
     } catch (err) {
       setError(err?.response?.data?.message ?? "Something went wrong. Please try again.");
     } finally {
@@ -30,8 +31,7 @@ export default function DeleteView({ t, onClose, onConfirm }) {
         <div>
           <p className="text-sm font-bold text-rose-800">Dangerous Action</p>
           <p className="text-sm text-rose-700/80 mt-1 leading-relaxed">
-            You are about to permanently delete{" "}
-            <span className="font-bold underline">{t.p_name}</span>. This cannot be undone.
+            You are about to permanently delete this transaction. This cannot be undone.
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function DeleteView({ t, onClose, onConfirm }) {
               Deleting…
             </>
           ) : (
-            "Delete Product"
+            "Delete Transaction"
           )}
         </button>
       </div>
