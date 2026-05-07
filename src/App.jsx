@@ -4,6 +4,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 
 import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -37,6 +38,7 @@ import QuotetionManagement from "./pages/admin/QuotetionManagement";
 import RequestQuote from './pages/RequestQuote';
 import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
+import FeedbackManagement from "./pages/admin/FeedbackManagement";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,7 +52,7 @@ const router = createBrowserRouter(
       <Route path="order-success" element={<Payment />} />
       <Route path="contact" element={<Contact />} />
       <Route path='/checkout' element={<Checkout /> } />
-      {/* <Route path='/portfolio' element={<Portfolio /> } /> */}
+      <Route path='/portfolio' element={<Portfolio /> } />
        <Route path="quote" element={<RequestQuote />} />
         <Route path="gallery" element={<Gallery />} />
         <Route path="innovation" element={<Innovation />} />
@@ -71,6 +73,7 @@ const router = createBrowserRouter(
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="portfolio" element={<PortfolioManagemet />} /> 
           <Route path="quotes" element={<QuotetionManagement />} />
+          <Route path="feedback" element={<FeedbackManagement />} />
         </Route>
       </Route>
     </Route>,
@@ -84,7 +87,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimeDone(true);
-    }, 3000); // ⏱️ CHANGE THIS (e.g., 2000, 5000)
+    }, 3000); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -93,7 +96,12 @@ function App() {
     return  <Loader />;
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Toaster position="top-right" />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

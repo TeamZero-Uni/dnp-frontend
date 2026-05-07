@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Cpu, Package, Truck, Check, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   {
@@ -8,7 +9,7 @@ const steps = [
     title: 'Design Your Model',
     description: 'Upload your CAD file or work with our expert designers to bring your concept to life with precision.',
     details: ['Upload STL / OBJ / STEP files', 'Free design consultation', 'Instant quote generation'],
-    image: 'https://images.unsplash.com/photo-1631557097-c90cba98aee9?w=600&h=400&fit=crop',
+    image: 'assets/images/home/7.png',
     tag: 'Step One',
   },
   {
@@ -17,7 +18,7 @@ const steps = [
     title: 'Precision 3D Printing',
     description: 'State-of-the-art FDM and Resin printers manufacture your part with micron-level accuracy.',
     details: ['FDM & Resin technologies', 'Premium material selection', 'Quality inspection included'],
-    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=400&fit=crop',
+    image: 'assets/images/home/8.jpg',
     tag: 'Step Two',
   },
   {
@@ -26,16 +27,17 @@ const steps = [
     title: 'Secure Fast Delivery',
     description: 'Your finished product is carefully packaged and delivered to your doorstep on schedule.',
     details: ['Island-wide delivery', 'Secure packaging', 'Real-time tracking'],
-    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=400&fit=crop',
+    image: 'assets/images/home/9.png',
     tag: 'Step Three',
   },
 ];
 
 export default function HowItWorks() {
   const [active, setActive] = useState(0);
+  const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden py-16 px-6 bg-[#f9f8ff]">
+    <section className="relative overflow-hidden py-16 px-6 bg-[#f9f8ff] animate-appear">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
@@ -100,7 +102,9 @@ export default function HowItWorks() {
               );
             })}
 
-            <button className="mt-1 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm btn-color shadow-[0_8px_24px_rgba(90,70,194,0.3)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(90,70,194,0.45)]">
+            <button className="mt-1 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm btn-color shadow-[0_8px_24px_rgba(90,70,194,0.3)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(90,70,194,0.45)]"
+              onClick={() => navigate("/quote")}
+            >
               Start Your Project <ArrowRight className="w-4 h-4" />
             </button>
           </div>

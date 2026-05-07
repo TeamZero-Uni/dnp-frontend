@@ -1,70 +1,58 @@
 import React from "react";
 import {
   FiCreditCard, FiCheckCircle, FiXCircle, FiClock,
-  FiTrendingUp, FiDollarSign, FiCalendar, FiHash,
-  FiArrowUpRight, FiUser, FiTag
+  FiDollarSign, FiCalendar, FiHash,
+  FiArrowUpRight, FiUser, FiTag, FiMail
 } from "react-icons/fi";
-import { RiBankLine } from "react-icons/ri";
 
 const STATUS_STYLES = {
-  Completed: { dot: "bg-emerald-400", text: "text-emerald-700", bg: "bg-emerald-50",  border: "border-emerald-200", icon: <FiCheckCircle size={14}/> },
-  Pending:   { dot: "bg-amber-400",   text: "text-amber-700",   bg: "bg-amber-50",    border: "border-amber-200",   icon: <FiClock       size={14}/> },
-  Failed:    { dot: "bg-red-400",     text: "text-red-700",     bg: "bg-red-50",      border: "border-red-200",     icon: <FiXCircle     size={14}/> },
+  COMPLETED: { dot: "bg-emerald-400", text: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", icon: <FiCheckCircle size={14}/>, label: "Completed" },
+  PENDING:   { dot: "bg-amber-400",   text: "text-amber-700",   bg: "bg-amber-50",   border: "border-amber-200",   icon: <FiClock       size={14}/>, label: "Pending"   },
+  FAILED:    { dot: "bg-red-400",     text: "text-red-700",     bg: "bg-red-50",     border: "border-red-200",     icon: <FiXCircle     size={14}/>, label: "Failed"    },
 };
 
 const METHOD_META = {
-  "Credit Card":   { icon: <FiCreditCard size={16}/>, color: "text-violet-600", bg: "bg-violet-50",  border: "border-violet-200" },
-  "Debit Card":    { icon: <FiCreditCard size={16}/>, color: "text-indigo-600", bg: "bg-indigo-50",  border: "border-indigo-200" },
-  "PayPal":        { icon: <FiDollarSign size={16}/>, color: "text-sky-600",    bg: "bg-sky-50",     border: "border-sky-200"    },
-  "Bank Transfer": { icon: <RiBankLine   size={16}/>, color: "text-emerald-600",bg: "bg-emerald-50", border: "border-emerald-200"},
-};
-
-const SAMPLE = {
-  id:       "TXN-003",
-  amount:   2800.00,
-  date:     "2024-03-05",
-  method:   "Bank Transfer",
-  status:   "Completed",
-  customer: "Sarah Williams",
-  note:     "Enterprise package payment for Q1 subscription.",
+  card: { icon: <FiCreditCard size={16}/>, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-200", label: "Card" },
+  cash: { icon: <FiDollarSign size={16}/>, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", label: "Cash" },
 };
 
 export default function TransactionView({ transaction }) {
-  const t   = transaction;
-  const st  = STATUS_STYLES[t.status]  || STATUS_STYLES.Pending;
-  const m   = METHOD_META[t.method]    || METHOD_META["Credit Card"];
+  const t  = transaction;
+  const st = STATUS_STYLES[t.status]  || STATUS_STYLES.PENDING;   
+  const m  = METHOD_META[t.method]    || METHOD_META["card"];     
 
   const formattedDate = new Date(t.date).toLocaleDateString("en-US", {
     weekday: "short", year: "numeric", month: "long", day: "numeric",
   });
 
   const rows = [
-    { icon: <FiHash size={14}/>,      label: "Transaction ID", value: t.id,       mono: true },
-    { icon: <FiCalendar size={14}/>,  label: "Date",           value: formattedDate },
-    { icon: <FiUser size={14}/>,      label: "Customer",       value: t.customer || "—" },
-    { icon: m.icon,                   label: "Payment Method", value: t.method,   chip: true, chipStyle: m },
-    { icon: st.icon,                  label: "Status",         value: t.status,   status: true },
+    { icon: <FiHash size={14}/>,     label: "Transaction ID", value: t.transaction_id,      mono: true },   
+    { icon: <FiCalendar size={14}/>, label: "Date",           value: formattedDate },
+    { icon: <FiMail size={14}/>,     label: "Customer",       value: t.user?.email || "—" }, 
+    { icon: m.icon,                  label: "Payment Method", value: m.label, chip: true, chipStyle: m },   
+    { icon: st.icon,                 label: "Status",         value: st.label, status: true },              
   ];
 
   return (
     <div className="font-sans space-y-5">
+
       <div className="rounded-2xl p-5 relative overflow-hidden"
-        style={{ background:"linear-gradient(135deg,#5a46c2,#4838a3)" }}>
+        style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}>
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full pointer-events-none"
-          style={{ background:"rgba(255,255,255,.08)", transform:"translate(30%,-30%)" }}/>
+          style={{ background: "rgba(255,255,255,.08)", transform: "translate(30%,-30%)" }}/>
         <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full pointer-events-none"
-          style={{ background:"rgba(0,0,0,.1)", transform:"translate(-30%,30%)" }}/>
+          style={{ background: "rgba(0,0,0,.1)", transform: "translate(-30%,30%)" }}/>
 
         <div className="relative z-10 flex items-start justify-between">
           <div>
             <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">Total Amount</p>
-            <p className="syne text-4xl font-black text-white leading-none">
-              ${t.amount.toLocaleString("en", { minimumFractionDigits: 2 })}
+            <p className="text-4xl font-black text-white leading-none">
+              Rs {parseFloat(t.amount).toLocaleString("en", { minimumFractionDigits: 2 })}  {/* ✅ parseFloat */}
             </p>
           </div>
           <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border ${st.bg} ${st.text} ${st.border}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`}/>
-            {t.status}
+            {st.label}  
           </div>
         </div>
       </div>
@@ -107,7 +95,7 @@ export default function TransactionView({ transaction }) {
 
       <div className="flex items-center justify-between px-1">
         <p className="text-xs text-slate-400 font-semibold">
-          Processed via <span className="text-violet-600">{t.method}</span>
+          Processed via <span className="text-violet-600">{m.label}</span>  
         </p>
         <div className="flex items-center gap-1 text-xs font-bold text-emerald-600">
           <FiArrowUpRight size={12}/> Verified

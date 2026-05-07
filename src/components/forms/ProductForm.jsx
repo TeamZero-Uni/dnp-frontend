@@ -1,41 +1,123 @@
 import { useState } from "react";
+import { uploadMultipleImages, createProduct, updateProduct } from "../../api/api";
+import { useProduct } from "../../hooks/useProduct";
+import { FiX, FiImage, FiLoader } from "react-icons/fi";
+import toast from "react-hot-toast";
 
-function ProductForm({ product, mode = "add", onClose }) {
+function ProductForm({ product, mode = "add", onClose, onSuccess }) {
+  const { categories } = useProduct();
+
+  const normalize = (p) => ({
+    name:           p.p_name          ?? "",
+    description:    p.p_description   ?? "",
+    status:         p.p_status === "OUT_OF_STOCK" ? "out_of_stock" : "stock",
+    feature:        p.p_features      ?? "",
+    colorTheme:     p.p_color         ?? "#5a46c2",
+    material:       p.p_material      ?? "",
+    tags:           p.p_tag           ?? "",
+    category:       p.category?.c_id?.toString() ?? "",
+    price:          p.p_price         ?? "",
+    labelPrice:     p.p_label_price   ?? "",
+    existingImages: (p.images ?? []).map((img) => ({
+      id:      img.id,
+      img_url: img.img_url,
+    })),
+    newImages: [],
+  });
+
   const [form, setForm] = useState(
-    product || {
-      name: "",
-      description: "",
-      status: "stock",
-      feature: "",
-      image: null,
-      colorTheme: "#5a46c2",
-      material: "",
-      tags: "",
-      category: "",
-    }
+    product
+      ? normalize(product)
+      : {
+          name: "",
+          description: "",
+          status: "stock",
+          feature: "",
+          colorTheme: "#5a46c2",
+          material: "",
+          tags: "",
+          category: "",
+          price: "",
+          labelPrice: "",
+          existingImages: [],
+          newImages: [],
+        }
   );
+
+  const [newPreviews, setNewPreviews] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
     if (type === "file") {
-      setForm({ ...form, [name]: files[0] });
+      const fileArray = Array.from(files);
+      const previews  = fileArray.map((f) => URL.createObjectURL(f));
+      setForm((prev) => ({ ...prev, newImages: [...prev.newImages, ...fileArray] }));
+      setNewPreviews((prev) => [...prev, ...previews]);
     } else {
-      setForm({ ...form, [name]: value });
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const removeExistingImage = (idx) => {
+    setForm((prev) => ({
+      ...prev,
+      existingImages: prev.existingImages.filter((_, i) => i !== idx),
+    }));
+  };
+
+  const removeNewImage = (idx) => {
+    URL.revokeObjectURL(newPreviews[idx]);
+    setForm((prev) => ({
+      ...prev,
+      newImages: prev.newImages.filter((_, i) => i !== idx),
+    }));
+    setNewPreviews((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = {
-      ...form,
-      tags:
-        typeof form.tags === "string"
-          ? form.tags.split(",").map((t) => t.trim())
-          : form.tags,
-    };
-    if (mode === "add") console.log("CREATE PRODUCT:", finalData);
-    if (mode === "edit") console.log("UPDATE PRODUCT:", finalData);
-    onClose();
+    setLoading(true);
+    try {
+      let uploadedUrls = [];
+      if (form.newImages.length > 0) {
+        const formData = new FormData();
+        form.newImages.forEach((img) => formData.append("images", img));
+        const uploadRes = await uploadMultipleImages(formData);
+        uploadedUrls = uploadRes.data;
+      }
+
+      const finalData = {
+        p_name:        form.name,
+        p_description: form.description,
+        p_status:      form.status === "stock" ? "IN_STOCK" : "OUT_OF_STOCK",
+        p_features:    form.feature,
+        p_color:       form.colorTheme,
+        p_material:    form.material,
+        p_tag:         form.tags,
+        p_price:       parseFloat(form.price)      || 0,
+        p_label_price: parseFloat(form.labelPrice) || 0,
+        categoryId:    parseInt(form.category, 10),
+        images: [
+          ...form.existingImages.map((img) => img.img_url),
+          ...uploadedUrls,
+        ],
+      };
+
+      if (mode === "edit" && product?.p_id) {
+        await updateProduct(product.p_id, finalData);
+      } else {
+        await createProduct(finalData);
+      }
+
+      onSuccess && onSuccess();
+      toast.success(`Product ${mode === "edit" ? "updated" : "created"} successfully!`);
+      onClose();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to submit form.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputClass =
@@ -43,6 +125,8 @@ function ProductForm({ product, mode = "add", onClose }) {
 
   const labelClass =
     "block text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-1.5";
+
+  const allImageCount = form.existingImages.length + form.newImages.length;
 
   return (
     <form
@@ -84,12 +168,11 @@ function ProductForm({ product, mode = "add", onClose }) {
             className={inputClass}
           >
             <option value="">Select Category</option>
-            <option value="electronics">Electronics</option>
-            <option value="clothing">Clothing</option>
-            <option value="home">Home & Garden</option>
-            <option value="accessories">Accessories</option>
-            <option value="footwear">Footwear</option>
-            <option value="furniture">Furniture</option>
+            {categories.map((cat) => (
+              <option key={cat.c_id} value={cat.c_id}>
+                {cat.c_type}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -109,6 +192,63 @@ function ProductForm({ product, mode = "add", onClose }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
+          <label className={labelClass}>Price (Rs)</label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-indigo-300">
+              Rs
+            </span>
+            <input
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.price}
+              onChange={handleChange}
+              required
+              placeholder="0.00"
+              className={`${inputClass} pl-9`}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>
+            Label Price{" "}
+            <span className="text-slate-400 normal-case tracking-normal font-normal">
+              (original / crossed)
+            </span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-indigo-300">
+              Rs
+            </span>
+            <input
+              name="labelPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.labelPrice}
+              onChange={handleChange}
+              placeholder="0.00"
+              className={`${inputClass} pl-9`}
+            />
+          </div>
+          {form.price &&
+            form.labelPrice &&
+            parseFloat(form.labelPrice) > parseFloat(form.price) && (
+              <p className="mt-1.5 text-[10px] font-semibold text-emerald-500">
+                {Math.round(
+                  ((parseFloat(form.labelPrice) - parseFloat(form.price)) /
+                    parseFloat(form.labelPrice)) *
+                    100
+                )}% off
+              </p>
+            )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div>
           <label className={labelClass}>Material</label>
           <input
             name="material"
@@ -121,15 +261,15 @@ function ProductForm({ product, mode = "add", onClose }) {
 
         <div>
           <label className={labelClass}>Color Theme</label>
-          <div className="flex items-center gap-3 border border-indigo-100 bg-indigo-50/40 rounded-xl px-3 py-2 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-200 focus-within:bg-white">
+          <div className="flex items-center gap-3 border border-indigo-100 bg-indigo-50/40 rounded-xl px-3 py-2">
             <input
               name="colorTheme"
               type="color"
               value={form.colorTheme}
               onChange={handleChange}
-              className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent shrink-0"
+              className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent"
             />
-            <span className="text-xs font-mono font-semibold text-indigo-400 uppercase tracking-wider">
+            <span className="text-xs font-mono font-semibold text-indigo-400 uppercase">
               {form.colorTheme}
             </span>
           </div>
@@ -138,17 +278,20 @@ function ProductForm({ product, mode = "add", onClose }) {
 
       <div>
         <label className={labelClass}>Key Feature</label>
-        <input
+        <textarea
           name="feature"
           value={form.feature}
           onChange={handleChange}
+          rows="3"
           placeholder="e.g. Water-resistant up to 50m"
-          className={inputClass}
+          className={`${inputClass} resize-none`}
         />
       </div>
 
       <div>
-        <label className={labelClass}>Tags <span className="normal-case font-normal text-slate-400 tracking-normal">(comma separated)</span></label>
+        <label className={labelClass}>
+          Tags <span className="text-slate-400">(comma separated)</span>
+        </label>
         <input
           name="tags"
           value={form.tags}
@@ -158,35 +301,96 @@ function ProductForm({ product, mode = "add", onClose }) {
         />
         {form.tags && (
           <div className="flex flex-wrap gap-1.5 mt-2">
-            {form.tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-500 border border-indigo-100"
-              >
-                #{tag}
-              </span>
-            ))}
+            {form.tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+              .map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 rounded-full text-[10px] bg-indigo-50 text-indigo-500 border"
+                >
+                  #{tag}
+                </span>
+              ))}
           </div>
         )}
       </div>
 
       <div>
-        <label className={labelClass}>Product Image</label>
-        <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-indigo-200 rounded-xl py-5 px-4 cursor-pointer bg-indigo-50/30 hover:bg-indigo-50 hover:border-indigo-300 transition-all group">
-          <div className="flex flex-col items-center gap-1.5 text-center">
-            <svg className="w-7 h-7 text-indigo-300 group-hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-            </svg>
-            <p className="text-xs font-semibold text-indigo-400">
-              {form.image instanceof File
-                ? form.image.name
-                : "Click to upload image"}
+        <label className={labelClass}>
+          Product Images{" "}
+          {allImageCount > 0 && (
+            <span className="text-indigo-300 normal-case tracking-normal font-normal">
+              ({allImageCount} total)
+            </span>
+          )}
+        </label>
+
+        {form.existingImages.length > 0 && (
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              Current Images
             </p>
-            <p className="text-[10px] text-slate-400">PNG, JPG, WEBP up to 10MB</p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {form.existingImages.map((img, idx) => (
+                <div key={img.id} className="relative group aspect-square">
+                  <img
+                    src={img.img_url}
+                    alt={`Product image ${idx + 1}`}
+                    className="w-full h-full object-cover rounded-xl border-2 border-indigo-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeExistingImage(idx)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-600"
+                    title="Remove image"
+                  >
+                    <FiX size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
+        )}
+
+        {newPreviews.length > 0 && (
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              New Images
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {newPreviews.map((src, idx) => (
+                <div key={idx} className="relative group aspect-square">
+                  <img
+                    src={src}
+                    alt={`New image ${idx + 1}`}
+                    className="w-full h-full object-cover rounded-xl border-2 border-indigo-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(idx)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-600"
+                    title="Remove image"
+                  >
+                    <FiX size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <label className="flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50 rounded-xl py-4 px-3 cursor-pointer transition-colors">
+          <FiImage className="text-indigo-300" size={22} />
+          <span className="text-xs font-semibold text-indigo-400">
+            {allImageCount > 0 ? "Add more images" : "Click to upload images"}
+          </span>
+          <span className="text-[10px] text-slate-400">PNG, JPG, WEBP supported</span>
           <input
-            name="image"
+            name="images"
             type="file"
+            multiple
             onChange={handleChange}
             accept="image/*"
             className="hidden"
@@ -194,23 +398,28 @@ function ProductForm({ product, mode = "add", onClose }) {
         </label>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2.5 pt-2 sticky bottom-0 bg-white pb-1">
+      <div className="flex gap-2.5 pt-2">
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 border border-indigo-100 text-indigo-400 rounded-xl py-2.5 text-sm font-semibold hover:bg-indigo-50 hover:border-indigo-200 transition-all active:scale-95"
+          disabled={loading}
+          className="flex-1 border border-indigo-100 text-indigo-400 rounded-xl py-2.5 text-sm font-semibold hover:bg-indigo-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="flex-1 text-white rounded-xl py-2.5 text-sm font-bold transition-all active:scale-95 hover:-translate-y-0.5"
-          style={{
-            background: "linear-gradient(135deg, #5a46c2, #4838a3)",
-            boxShadow: "0 4px 14px rgba(90,70,194,0.35)",
-          }}
+          disabled={loading}
+          className="flex-1 btn-color rounded-xl py-2.5 font-bold text-sm transition-opacity hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {mode === "edit" ? "Update Product" : "Create Product"}
+          {loading ? (
+            <>
+              <FiLoader size={14} className="animate-spin" />
+              {mode === "edit" ? "Updating…" : "Creating…"}
+            </>
+          ) : (
+            mode === "edit" ? "Update Product" : "Create Product"
+          )}
         </button>
       </div>
     </form>

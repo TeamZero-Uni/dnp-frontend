@@ -15,7 +15,7 @@ function SkillBar({ label, value, delay }) {
   }, [value, delay]);
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 animate-appear">
       <div className="flex justify-between items-center mb-2">
         <span className="font-bold text-sm tracking-widest uppercase" style={{ color: "#1a1a4e" }}>
           {label}
