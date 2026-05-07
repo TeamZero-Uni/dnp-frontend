@@ -4,7 +4,7 @@ import { getProductReviews, createReview, voteReviewAPI } from "../../api/api";
 import { useAuth } from "../../hooks/useAuth"; 
 
 export default function ReviewSection({ productId }) {
-  const { user } = useAuth() || {}; 
+  const { user, isAuthenticated } = useAuth() || {}; 
 
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,17 +16,21 @@ export default function ReviewSection({ productId }) {
   const [votedReviews, setVotedReviews] = useState({});
 
   useEffect(() => {
-    const savedVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
-    setVotedReviews(savedVotes);
-  }, []);
+    if (isAuthenticated && user?.userId) {
+      const savedVotes = JSON.parse(localStorage.getItem(`userVotes_${user.userId}`)) || {};
+      setVotedReviews(savedVotes);
+    } else {
+      setVotedReviews({});
+    }
+  }, [isAuthenticated, user]);
 
   const fetchReviews = useCallback(async () => {
     if (!productId) return;
     setIsLoading(true);
     try {
       const data = await getProductReviews(productId);
-      if (data.success) {
-        setReviews(data.data);
+      if (data.success || data.data) {
+        setReviews(data.data || data); 
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);
@@ -40,18 +44,20 @@ export default function ReviewSection({ productId }) {
   }, [fetchReviews]);
 
   const handlePostReview = async () => {
+    if (!isAuthenticated || !user) {
+      alert("Please log in to post a review!");
+      return;
+    }
     if (!newComment || newRating === 0) {
       alert("Please provide a rating and a comment!");
       return;
     }
     
-    const currentUserId = (user && user.userId) ? user.userId : "22222222-2222-2222-2222-222222222222";
-
     setIsSubmitting(true);
     try {
       const reviewData = {
         p_id: productId,
-        userId: currentUserId, 
+        userId: user.userId, 
         comment: newComment,
         rating: newRating,
       };
@@ -71,54 +77,56 @@ export default function ReviewSection({ productId }) {
     }
   };
 
-const handleVote = async (reviewId, type) => {
-    const currentVote = votedReviews[reviewId]; 
-    let likesChange = 0;
-    let dislikesChange = 0;
-    let newVoteState = null;
-
-    if (currentVote === type) {
-        if (type === 'like') likesChange = -1;
-        if (type === 'dislike') dislikesChange = -1;
-        newVoteState = null;
-    } else {
-        if (type === 'like') {
-            likesChange = 1;
-            if (currentVote === 'dislike') dislikesChange = -1; 
-        } else if (type === 'dislike') {
-            dislikesChange = 1;
-            if (currentVote === 'like') likesChange = -1; 
-        }
-        newVoteState = type;
+    // INSTANT UPDATE (OPTIMISTIC UI) VOTE LOGIC
+    const handleVote = async (reviewId, type) => {
+    if (!isAuthenticated || !user?.userId) {
+      alert("Please sign in to vote on reviews!");
+      return;
     }
+
+    const currentVote = votedReviews[reviewId];
+
+    let newVoteState = null;
+    if (currentVote === type) {
+      newVoteState = null; 
+    } else {
+      newVoteState = type; 
+    }
+
+    const newVotes = { ...votedReviews };
+    if (newVoteState) {
+      newVotes[reviewId] = newVoteState;
+    } else {
+      delete newVotes[reviewId];
+    }
+    setVotedReviews(newVotes);
+    localStorage.setItem(`userVotes_${user.userId}`, JSON.stringify(newVotes));
 
     try {
+      const response = await voteReviewAPI(reviewId, user.userId, type);
+
+      if (response && response.success) {
         setReviews(prevReviews => prevReviews.map(r => {
-            if (r.id === reviewId) {
-                return { ...r, likes: r.likes + likesChange, dislikes: r.dislikes + dislikesChange };
-            }
-            return r;
+          if (r.id === reviewId) {
+            return { 
+              ...r, 
+              likes: response.likes, 
+              dislikes: response.dislikes 
+            };
+          }
+          return r;
         }));
-
-        const newVotes = { ...votedReviews };
-        if (newVoteState) {
-            newVotes[reviewId] = newVoteState;
-        } else {
-            delete newVotes[reviewId];
-        }
-        setVotedReviews(newVotes);
-        localStorage.setItem('userVotes', JSON.stringify(newVotes));
-
-        await voteReviewAPI(reviewId, likesChange, dislikesChange);
-
+      }
     } catch (error) {
-        console.error("Vote failed:", error);
+      console.error("Vote failed:", error);
+      setVotedReviews(votedReviews);
+      localStorage.setItem(`userVotes_${user.userId}`, JSON.stringify(votedReviews));
+      alert("Something went wrong while voting!");
     }
-  };
+    };
 
   // --- CHART CALCULATIONS ---
   const totalReviews = reviews?.length || 0;
-
   const averageRating = totalReviews === 0 
     ? 0 
     : (reviews.reduce((acc, curr) => acc + (Number(curr.rating) || 5), 0) / totalReviews).toFixed(1);
@@ -177,25 +185,26 @@ const handleVote = async (reviewId, type) => {
         <h3 className="text-xs font-black text-[#5a46c2] uppercase tracking-widest mb-4">Write a Review</h3>
         <div className="flex gap-4">
           <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 uppercase">
-             {user?.user_name ? user.user_name.charAt(0) : "Y"}
+             {isAuthenticated && user?.user_name ? user.user_name.charAt(0) : "U"}
           </div>
           <div className="flex-1 space-y-4">
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Share your experience with this product..."
-              className="w-full h-24 p-4 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#5a46c2] focus:ring-1 focus:ring-[#5a46c2] resize-none"
+              placeholder={isAuthenticated ? "Share your experience with this product..." : "Please log in to write a review..."}
+              disabled={!isAuthenticated}
+              className="w-full h-24 p-4 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#5a46c2] focus:ring-1 focus:ring-[#5a46c2] resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             ></textarea>
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rating</span>
-                <div className="flex gap-1 cursor-pointer">
+                <div className={`flex gap-1 ${isAuthenticated ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span 
                       key={star} 
-                      onClick={() => setNewRating(star)}
-                      className={`text-lg transition-colors ${newRating >= star ? "text-amber-400" : "text-gray-300 hover:text-amber-300"}`}
+                      onClick={() => isAuthenticated && setNewRating(star)}
+                      className={`text-lg transition-colors ${newRating >= star ? "text-amber-400" : "text-gray-300"} ${isAuthenticated ? 'hover:text-amber-300' : ''}`}
                     >
                       ★
                     </span>
@@ -211,8 +220,8 @@ const handleVote = async (reviewId, type) => {
                 </button>
                 <button 
                   onClick={handlePostReview}
-                  disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-[#5a46c2] hover:bg-[#894def] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors disabled:opacity-50"
+                  disabled={isSubmitting || !isAuthenticated}
+                  className="px-6 py-2.5 bg-[#5a46c2] hover:bg-[#894def] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Posting..." : "Post Review"}
                 </button>
@@ -225,12 +234,12 @@ const handleVote = async (reviewId, type) => {
       {/* --- REVIEWS LIST SECTION --- */}
       {isLoading ? (
         <div className="text-center text-[#5a46c2] font-bold animate-pulse py-10">Loading reviews...</div>
-      ) : totalReviews === 0 ? (
+      ) : reviews?.length === 0 ? (
         <div className="text-center text-gray-400 py-10">No reviews yet. Be the first to review!</div>
       ) : (
         <div className="space-y-6 divide-y divide-gray-100">
           {reviews.map((review) => {
-            const hasVoted = votedReviews[review.id]; 
+            const hasVoted = votedReviews[review.id] || null;
 
             return (
             <div key={review.id} className="pt-6 flex gap-4">

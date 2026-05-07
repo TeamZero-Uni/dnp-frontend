@@ -108,7 +108,8 @@ function Product() {
   return (
     <>
       <Banner
-        title="Shop"
+        path="Shop"
+        title={<>Explore Our Exclusive <br /> <span className="text-[#5a46c2]">3D Collections</span></>}
         subtitle="Explore our collection of premium 3D printed wall art, intricate miniatures, and unique home decor."
         breadcrumbs={["Home", "Shop"]}
         backgroundImage={null}

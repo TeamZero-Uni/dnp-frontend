@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -15,17 +15,20 @@ import { HiOutlineShoppingCart } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import { HiArrowRight } from "react-icons/hi2";
 import { useCart } from "../../context/CartContext";
+import { WishlistContext } from '../../context/WishlistContext';
 
 function QuickViewModal({ product, onClose }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  
   const [selectedImg, setSelectedImg] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
   const [qty, setQty] = useState(1);
   const [imgZoomed, setImgZoomed] = useState(false);
   const [exitState, setExitState] = useState("visible");
   const [isMounted, setIsMounted] = useState(false);
+  const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
+  const isWishlisted = wishlistItems?.includes(product?.p_id || product?.id) || false;
 
   useEffect(() => {
     setIsMounted(true);
@@ -33,7 +36,7 @@ function QuickViewModal({ product, onClose }) {
 
   // --- Derived Data & Logic ---
   const isOutOfStock = product?.p_status !== "IN_STOCK" && product?.status !== "stock";
-  const stockCount = null; // Update if DB provides real stock count
+  const stockCount = null; 
   const maxQty = stockCount ?? 99;
   const selectedColor = product?.p_color || "N/A"; 
   const rating = 5; 
@@ -89,10 +92,10 @@ function QuickViewModal({ product, onClose }) {
     });
   };
 
-  const handleWishlist = (e) => {
+  const onWishlistClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setWishlisted((w) => !w);
+    await handleWishlistToggle(product?.p_id || product?.id);
   };
 
   const handleDecrement = (e) => {
@@ -367,20 +370,20 @@ function QuickViewModal({ product, onClose }) {
 
                 <button
                   type="button"
-                  onClick={handleWishlist}
+                  onClick={onWishlistClick}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-bold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-95
                     ${
-                      wishlisted
+                      isWishlisted
                         ? "bg-rose-500 border-rose-500 text-white shadow-md shadow-rose-200"
                         : "border-gray-200 text-gray-500 hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50"
                     }`}
                 >
-                  {wishlisted ? (
+                  {isWishlisted ? (
                     <FaHeart className="w-3.5 h-3.5" />
                   ) : (
                     <FaRegHeart className="w-3.5 h-3.5" />
                   )}
-                  {wishlisted ? "Saved" : "Wishlist"}
+                  {isWishlisted ? "Saved" : "Wishlist"}
                 </button>
               </div>
 
