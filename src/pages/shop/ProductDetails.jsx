@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -11,6 +11,7 @@ import ReviewSection from '../../components/sections/ReviewSection';
 import { useCart } from '../../context/CartContext';
 import ReadyToStart from "../../components/ReadyToStart";
 import { useProduct } from "../../hooks/useProduct"; 
+import { WishlistContext } from '../../context/WishlistContext';
 
 const MAX_QTY = 10;
 
@@ -64,9 +65,12 @@ export default function ProductDetails() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isZoomed,      setIsZoomed]      = useState(false);
   const [quantity,      setQuantity]      = useState(1);
-  const [wishlisted,    setWishlisted]    = useState(false);
   const [toast,         setToast]         = useState({ message: '', type: 'success', visible: false });
   const toastTimer = useRef(null);
+
+  const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
+  const productId = dbProduct?.p_id || dbProduct?.id;
+  const isWishlisted = wishlistItems?.includes(productId) || false;
 
   useEffect(() => {
     setActiveImageIndex(0);
@@ -140,9 +144,13 @@ export default function ProductDetails() {
     });
   };
 
-  const handleWishlist = () => {
-    setWishlisted(w => !w);
-    showToast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist ❤️', 'wishlist');
+  const onWishlistClick = async () => {
+    if (!productId) return;
+    const result = await handleWishlistToggle(productId);
+    
+    if (result && result.success) {
+      showToast(result.isWishlisted ? 'Saved to wishlist ❤️' : 'Removed from wishlist', 'wishlist');
+    }
   };
 
   const stockBadge = () => {
@@ -303,13 +311,13 @@ export default function ProductDetails() {
                     <FaShoppingCart size={11} /> ADD TO CART
                   </button>
 
-                  <button onClick={handleWishlist}
+                  <button onClick={onWishlistClick}
                     className={`w-12 h-9 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
-                      wishlisted
+                      isWishlisted
                         ? 'border-rose-300 bg-rose-50 text-rose-500 scale-105'
                         : 'border-slate-200 text-slate-400 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-400'
                     }`}>
-                    {wishlisted ? <FaHeart size={13} className="animate-bounce" /> : <FaRegHeart size={13} />}
+                    {isWishlisted ? <FaHeart size={13} className="animate-bounce" /> : <FaRegHeart size={13} />}
                   </button>
                 </div>
               </div>
