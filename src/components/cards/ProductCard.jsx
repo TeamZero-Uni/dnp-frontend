@@ -1,27 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react"; 
 import { Link } from "react-router-dom";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { HiOutlineEye } from "react-icons/hi";
 import { HiArrowRight } from "react-icons/hi2";
-import QuickViewModal from "../sections/Quickviewmodal";
+import QuickViewModal from "../sections/QuickViewModal";
+import { WishlistContext } from '../../context/WishlistContext'; 
 
 function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
   const [showToast, setShowToast] = useState(false);
-
-  // Check out of stock status
+  const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
+  const isWishlisted = wishlistItems?.includes(product.p_id) || false;
   const isOutOfStock = product.p_status !== "IN_STOCK";
   
-  // Stock count logic (null until implemented in database)
+  // Stock count logic
   const stockCount = null; 
 
-  const handleWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlisted((prev) => !prev);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
+  const onWishlistClick = async (e) => {
+    e.preventDefault(); 
+
+    const result = await handleWishlistToggle(product.p_id);
+
+    if (result && result.success) {
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000); 
+    }
   };
 
   return (
@@ -45,32 +48,32 @@ function ProductCard({ product }) {
 
             <div className="relative">
               <button
-                onClick={handleWishlist}
+                onClick={onWishlistClick} 
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-200 border ${
-                  wishlisted
+                  isWishlisted 
                     ? "bg-rose-500 text-white border-rose-500"
                     : "text-gray-500 border-transparent hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200"
                 }`}
               >
-                {wishlisted && (
+                {isWishlisted && (
                   <span className="absolute inset-0 rounded-lg bg-rose-400 animate-ping opacity-30" />
                 )}
-                {wishlisted ? (
+                {isWishlisted ? (
                   <FaHeart className="w-3 h-3 relative z-10" />
                 ) : (
                   <FaRegHeart className="w-3 h-3 relative z-10" />
                 )}
                 <span className="relative z-10">
-                  {wishlisted ? "Saved" : "Wishlist"}
+                  {isWishlisted ? "Saved" : "Wishlist"}
                 </span>
               </button>
 
               <div
                 className={`absolute top-9 right-0 z-30 px-3 py-1.5 rounded-lg text-[11px] font-bold shadow-lg whitespace-nowrap pointer-events-none transition-all duration-300 ${
-                  wishlisted ? "bg-rose-500 text-white" : "bg-gray-800 text-white"
+                  isWishlisted ? "bg-rose-500 text-white" : "bg-gray-800 text-white"
                 } ${showToast ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"}`}
               >
-                {wishlisted ? "❤️ Added to Wishlist" : "🤍 Removed"}
+                {isWishlisted ? "❤️ Added to Wishlist" : "🤍 Removed"}
               </div>
             </div>
           </div>

@@ -88,8 +88,8 @@ export const createReview = async (reviewData) => {
     return response.data;
 }
 
-export const voteReviewAPI = async (reviewId, likesChange, dislikesChange) => {
-    const response = await api.post(`/reviews/${reviewId}/vote`, { likesChange, dislikesChange });
+export const voteReviewAPI = async (reviewId, userId, voteType) => {
+    const response = await api.post(`/reviews/${reviewId}/vote`, { userId, voteType });
     return response.data;
 }
 export const getYoutubeVideos = async (maxResults = 12, pageToken = '') => {
