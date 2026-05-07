@@ -5,17 +5,25 @@ import ProductSection from "../components/sections/home/ProductSection"
 import HowItWorks from "../components/sections/home/HowItWorks"
 import FeedbackSection from "../components/sections/home/FeedbackSection"
 import AboutSection from "../components/sections/home/AboutSection"
+import WhoWeAre from "../components/sections/home/WhoWeAre"
+import OurWork from "../components/sections/home/OurWork"
+import IlluminatedSigns from "../components/sections/home/IlluminatedSigns"
+import FunFact from "../components/sections/home/FunFact"
 
 export default function Home() {
   return (
     <div>
-      <Hero />
-      <ServiceSection />
-      <AboutSection />
-      <ProductSection />
-      <HowItWorks />
+      <Hero />           
+      <WhoWeAre />       
+      <FunFact />        
+      <ServiceSection /> 
+      <ProductSection /> 
+      <IlluminatedSigns />
+      <HowItWorks />     
+      <OurWork />        
+      <AboutSection />   
       <FeedbackSection />
-      <ReadyToStart />
+      <ReadyToStart /> 
     </div>
   )
 }

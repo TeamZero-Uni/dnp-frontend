@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 
 export default function ReadyToStart() {
+  const navigate = useNavigate();
   return (
     <section className="relative mx-[6%] mt-5 mb-5 overflow-hidden rounded-3xl bg-linear-to-br from-[#dbeafe] via-[#eff6ff] to-[#e0f2fe] py-20 text-center">
       
@@ -27,6 +29,7 @@ export default function ReadyToStart() {
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <button
             className="group flex items-center gap-2 rounded-xl  px-8 py-4 text-base font-bold btn-color shadow-[0_8px_24px_rgba(90,70,194,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(90,70,194,0.45)]"
+            onClick={() => navigate("/quote")}
           >
             Request Quote
             <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,6 +39,7 @@ export default function ReadyToStart() {
 
           <button
             className="rounded-xl border-[1.5px] border-[#5a46c2]/30 bg-[#5a46c2]/10 px-8 py-4 text-base font-semibold text-[#4838a3] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#5a46c2]/15"
+            onClick={() => navigate("/contact")}
           >
             Contact Us
           </button>

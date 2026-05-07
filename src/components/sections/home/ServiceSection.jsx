@@ -3,52 +3,64 @@ import { ArrowUpRight } from 'lucide-react';
 
 const services = [
   {
-    category: 'Printing',
-    title: '3D Printing',
-    description: 'Create complex geometries with incredible precision and detail using cutting-edge additive manufacturing.',
-    image: 'https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=800&h=600&fit=crop',
-    number: '01',
-    tag: 'Most Popular',
+    category: "3D Printing",
+    title: "3D Printing",
+    description:
+      "Create complex geometries with incredible precision and detail using cutting-edge additive manufacturing.",
+    image:
+      "assets/images/home/1.jpg",
+    number: "01",
+    tag: "FDM/Resin",
   },
   {
-    category: 'Engraving',
-    title: 'Engraving',
-    description: 'Add detail and personalization to your work with laser precision on metal, wood, and more.',
-    image: 'https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=800&h=600&fit=crop',
-    number: '02',
-    tag: null,
+    category: "Modeling & Design",
+    title: "Modeling & Design",
+    description:
+      "Professional 3D modeling and CAD design services for prototypes, products, and custom projects.",
+    image:
+      "assets/images/home/2.png",
+    number: "02",
+    tag: "3D Modeling/CAD",
   },
   {
-    category: 'Specialty',
-    title: 'Wood Printing',
-    description: 'Unique finishes and textures on natural wood substrates for a premium look.',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    number: '03',
-    tag: null,
+    category: "Cutting & Engraving",
+    title: "Cutting & Engraving",
+    description:
+      "Precision laser cutting and engraving services for acrylic, wood, metal, and other materials.",
+    image:
+      "assets/images/home/3.webp",
+    number: "03",
+    tag: "Laser Cutting/Engraving",
   },
   {
-    category: 'Cutting',
-    title: 'Laser Cutting',
-    description: 'Clean, precise cuts on a wide range of materials with micron-level accuracy.',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop',
-    number: '04',
-    tag: null,
+    category: "Production & Signage",
+    title: "Production & Signage",
+    description:
+      "Custom signage and production solutions including LED signs, branding displays, and fabrication.",
+    image:
+      "assets/images/home/4.png",
+    number: "04",
+    tag: "Injection Molding/LED Signage",
   },
   {
-    category: 'Machining',
-    title: 'CNC Machining',
-    description: 'High-precision subtractive manufacturing at scale for complex industrial parts.',
-    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=600&fit=crop',
-    number: '05',
-    tag: null,
+    category: "Robotic Project",
+    title: "Robotic Project",
+    description:
+      "Innovative robotic and automation projects designed for education, research, and industrial applications.",
+    image:
+      "assets/images/home/5.webp",
+    number: "05",
+    tag: "Automation/IoT",
   },
   {
-    category: 'Design',
-    title: 'Wall Art Design',
-    description: 'Custom installations crafted beautifully for any residential or commercial space.',
-    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&h=600&fit=crop',
-    number: '06',
-    tag: null,
+    category: "Light Letters",
+    title: "Light Letters",
+    description:
+      "Custom illuminated light letters and branding solutions for shops, offices, and events.",
+    image:
+      "assets/images/home/6.png",
+    number: "06",
+    tag: "LED Letters/Sign Boards",
   },
 ];
 
@@ -56,7 +68,7 @@ export default function ServiceSection() {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="py-10 px-6">
+    <section className="py-10 px-6 animate-appear">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-widest mb-4 bg-[#5a46c2]/10 text-[#5a46c2] border border-[#5a46c2]/20">
@@ -93,9 +105,6 @@ export default function ServiceSection() {
               <p className="text-purple-200 text-sm leading-relaxed max-w-xs">
                 {services[active].description}
               </p>
-              <button className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-105 btn-color shadow-[0_6px_20px_rgba(90,70,194,0.5)]">
-                Explore Service <ArrowUpRight className="w-4 h-4" />
-              </button>
             </div>
 
             <div className="absolute top-5 right-5 w-10 h-10 rounded-full flex items-center justify-center text-xs font-black bg-white/15 text-white backdrop-blur-md border border-white/25">

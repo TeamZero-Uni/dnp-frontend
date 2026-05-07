@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 
 const IMAGES = [
   "assets/images/home/img1.jpg",
@@ -14,12 +15,7 @@ const THUMBS = [
   "assets/images/home/img4.jpg",
 ];
 
-const KEYWORDS = [
-  "Reality",
-  "Innovation",
-  "Precision",
-  "Perfection",
-];
+const KEYWORDS = ["Reality", "Innovation", "Precision", "Perfection"];
 
 const REVIEW_AVATARS = [
   "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face",
@@ -29,49 +25,66 @@ const REVIEW_AVATARS = [
 
 const STORE_LINKS = [
   {
-    href: "#",
+    href: "https://www.facebook.com/marketplace/profile/100012992049815/?ref=permalink&mibextid=dXMIcH",
     sub: "Visit our",
     label: "Facebook Store",
     icon: (
       <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="24" fill="#1877F2" />
-        <path d="M28 13h-3a5 5 0 0 0-5 5v3h-3v5h3v12h5V26h3l1-5h-4v-3a1 1 0 0 1 1-1h3V13z" fill="#fff" />
+        <path
+          d="M28 13h-3a5 5 0 0 0-5 5v3h-3v5h3v12h5V26h3l1-5h-4v-3a1 1 0 0 1 1-1h3V13z"
+          fill="#fff"
+        />
       </svg>
     ),
   },
   {
-    href: "#",
+    href: "https://www.youtube.com/@nkoralage9386?si=8z8Q2VroQEzKYn8U",
     sub: "Watch on",
     label: "YouTube",
     icon: (
       <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="24" fill="#FF0000" />
-        <path d="M36.5 17.5a3 3 0 0 0-2.1-2.1C32.5 15 24 15 24 15s-8.5 0-10.4.4a3 3 0 0 0-2.1 2.1C11 19.4 11 24 11 24s0 4.6.5 6.5a3 3 0 0 0 2.1 2.1C15.5 33 24 33 24 33s8.5 0 10.4-.4a3 3 0 0 0 2.1-2.1C37 28.6 37 24 37 24s0-4.6-.5-6.5z" fill="#fff" />
+        <path
+          d="M36.5 17.5a3 3 0 0 0-2.1-2.1C32.5 15 24 15 24 15s-8.5 0-10.4.4a3 3 0 0 0-2.1 2.1C11 19.4 11 24 11 24s0 4.6.5 6.5a3 3 0 0 0 2.1 2.1C15.5 33 24 33 24 33s8.5 0 10.4-.4a3 3 0 0 0 2.1-2.1C37 28.6 37 24 37 24s0-4.6-.5-6.5z"
+          fill="#fff"
+        />
         <path d="M21 28l7-4-7-4v8z" fill="#FF0000" />
       </svg>
     ),
   },
   {
-    href: "#",
+    href: "https://s.daraz.lk/s.re58",
     sub: "Buy on",
     label: "Daraz Store",
     icon: (
       <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="24" fill="#F57224" />
-        <text x="24" y="31" textAnchor="middle" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#fff">
+        <text
+          x="24"
+          y="31"
+          textAnchor="middle"
+          fontFamily="Arial"
+          fontWeight="900"
+          fontSize="14"
+          fill="#fff"
+        >
           dz
         </text>
       </svg>
     ),
   },
   {
-    href: "#",
+    href: "https://wa.me/94771509562?text=Hi%20DNP%203D%2C%20I%27d%20like%20a%20quote.",
     sub: "Chat on",
     label: "WhatsApp",
     icon: (
       <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
         <circle cx="24" cy="24" r="24" fill="#25D366" />
-        <path d="M24 13a11 11 0 0 0-9.54 16.47l-1.46 4.93 5.06-1.43A11 11 0 1 0 24 13zm0 20a9 9 0 0 1-4.58-1.25l-.33-.19-3.4.96.97-3.5-.22-.35A9 9 0 1 1 24 33zm4.93-6.55c-.27-.14-1.6-.79-1.84-.88-.25-.09-.43-.14-.61.14-.18.27-.69.88-.84 1.06-.16.18-.31.2-.58.07a7.32 7.32 0 0 1-3.62-3.16c-.27-.47.27-.43.77-1.44.08-.18.04-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.45-.61-.46h-.52c-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29s.98 2.65 1.12 2.84c.14.18 1.93 2.95 4.68 4.14.65.28 1.16.45 1.56.57.66.2 1.26.17 1.73.1.53-.08 1.6-.65 1.82-1.28.22-.63.22-1.16.16-1.28-.08-.11-.26-.18-.53-.31z" fill="#fff" />
+        <path
+          d="M24 13a11 11 0 0 0-9.54 16.47l-1.46 4.93 5.06-1.43A11 11 0 1 0 24 13zm0 20a9 9 0 0 1-4.58-1.25l-.33-.19-3.4.96.97-3.5-.22-.35A9 9 0 1 1 24 33zm4.93-6.55c-.27-.14-1.6-.79-1.84-.88-.25-.09-.43-.14-.61.14-.18.27-.69.88-.84 1.06-.16.18-.31.2-.58.07a7.32 7.32 0 0 1-3.62-3.16c-.27-.47.27-.43.77-1.44.08-.18.04-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.45-.61-.46h-.52c-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29s.98 2.65 1.12 2.84c.14.18 1.93 2.95 4.68 4.14.65.28 1.16.45 1.56.57.66.2 1.26.17 1.73.1.53-.08 1.6-.65 1.82-1.28.22-.63.22-1.16.16-1.28-.08-.11-.26-.18-.53-.31z"
+          fill="#fff"
+        />
       </svg>
     ),
   },
@@ -80,7 +93,7 @@ const STORE_LINKS = [
 const STATS = [
   { value: "500+", label: "Orders Delivered" },
   { value: "4.9★", label: "Customer Rating" },
-  { value: "48h",  label: "Fast Turnaround"  },
+  { value: "48h", label: "Fast Turnaround" },
 ];
 
 const KEYFRAMES = `
@@ -93,7 +106,16 @@ const KEYFRAMES = `
 `;
 
 const IconCart = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <circle cx="9" cy="21" r="1" />
     <circle cx="20" cy="21" r="1" />
     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -101,19 +123,46 @@ const IconCart = () => (
 );
 
 const IconPlay = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
 
 const IconShield = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a46c2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#5a46c2"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 
 const IconTruck = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4537e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#d4537e"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="1" y="3" width="15" height="13" rx="2" />
     <path d="M16 8h4l3 3v5h-7V8z" />
     <circle cx="5.5" cy="18.5" r="2.5" />
@@ -123,13 +172,12 @@ const IconTruck = () => (
 
 export default function Hero() {
   const [currentIdx, setCurrentIdx] = useState(0);
-
   const setImage = useCallback((idx) => setCurrentIdx(idx), []);
 
   useEffect(() => {
     const t = setInterval(
       () => setCurrentIdx((p) => (p + 1) % IMAGES.length),
-      4000
+      4000,
     );
     return () => clearInterval(t);
   }, []);
@@ -139,14 +187,11 @@ export default function Hero() {
       <style>{KEYFRAMES}</style>
 
       <section className="relative grid grid-cols-1 lg:grid-cols-[1fr_700px] min-h-screen bg-[#f7f5ff] overflow-hidden">
-
         <div className="relative flex flex-col justify-center px-8 py-24 sm:px-14 lg:px-16 xl:px-20 z-10 overflow-hidden">
-
           <div className="absolute -top-28 -left-16 w-100 h-100 rounded-full bg-[#ddd8ff] opacity-55 pointer-events-none" />
           <div className="absolute -bottom-16 -right-10 w-60 h-60 rounded-full bg-[#ece8ff] opacity-70 pointer-events-none" />
 
           <div className="relative z-10 max-w-2xl w-full">
-
             <div
               className="inline-flex items-center gap-2 bg-[#ece8ff] border border-[#c4b8f8] rounded-full px-4 py-1.5 mb-7 w-fit"
               style={{ animation: "fadeUp .7s ease both" }}
@@ -187,29 +232,29 @@ export default function Hero() {
               style={{ animation: "fadeUp .7s ease .16s both" }}
             >
               Premium 3D printing, custom manufacturing &amp; ready-to-ship
-              products. From your imagination to your hands — fast, precise,
-              and built to impress.
+              products. From your imagination to your hands — fast, precise, and
+              built to impress.
             </p>
 
             <div
               className="flex flex-wrap gap-3 mb-10"
               style={{ animation: "fadeUp .7s ease .24s both" }}
             >
-              <a
-                href="#"
+              <Link
+                to="/shop"
                 className="inline-flex items-center gap-2 bg-[#5a46c2] text-white text-sm font-semibold px-6 py-3.5 rounded-xl no-underline transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#4838a3] active:translate-y-0"
                 style={{
                   boxShadow: "0 2px 0 #3a2f99, 0 6px 20px rgba(90,70,194,.3)",
                 }}
               >
                 <IconCart /> Shop Now
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="quote"
                 className="inline-flex items-center gap-2 bg-white text-[#4838a3] text-sm font-semibold px-6 py-3.5 rounded-xl border border-[#c4b8f8] no-underline transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#f0ecff] hover:border-[#5a46c2]"
               >
                 <IconPlay /> Get a Quote
-              </a>
+              </Link>
             </div>
 
             <div
@@ -220,12 +265,18 @@ export default function Hero() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2.5 bg-white border border-[#e0d9ff] rounded-[14px] px-4 py-2.5 no-underline transition-all duration-150 hover:-translate-y-0.5 hover:border-[#5a46c2] hover:bg-[#f5f2ff]"
                 >
                   {icon}
                   <div className="flex flex-col text-left">
-                    <span className="text-[9px] text-[#9088c8] leading-none">{sub}</span>
-                    <span className="text-[12px] font-bold text-[#2d1f6b] leading-snug">{label}</span>
+                    <span className="text-[9px] text-[#9088c8] leading-none">
+                      {sub}
+                    </span>
+                    <span className="text-[12px] font-bold text-[#2d1f6b] leading-snug">
+                      {label}
+                    </span>
                   </div>
                 </a>
               ))}
@@ -251,7 +302,6 @@ export default function Hero() {
                 </div>
               ))}
             </div>
-
           </div>
         </div>
 
@@ -274,7 +324,9 @@ export default function Hero() {
 
           <div
             className="absolute top-0 left-0 w-28 h-full z-2 pointer-events-none hidden lg:block"
-            style={{ background: "linear-gradient(to right, #f7f5ff, transparent)" }}
+            style={{
+              background: "linear-gradient(to right, #f7f5ff, transparent)",
+            }}
           />
 
           <div
@@ -299,14 +351,18 @@ export default function Hero() {
             <div>
               <div className="flex gap-px">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400 text-[11px]">★</span>
+                  <span key={i} className="text-yellow-400 text-[11px]">
+                    ★
+                  </span>
                 ))}
               </div>
               <div className="text-[9px] text-[#9088c8] leading-none">
                 500+ happy customers
               </div>
             </div>
-            <span className="text-[11px] font-semibold text-[#2d1f6b]">Trusted</span>
+            <span className="text-[11px] font-semibold text-[#2d1f6b]">
+              Trusted
+            </span>
           </div>
 
           <div
@@ -317,8 +373,12 @@ export default function Hero() {
               <IconShield />
             </div>
             <div>
-              <div className="text-[13px] font-bold text-[#1a1040] leading-none">Quality</div>
-              <div className="text-[10px] text-[#9088c8] mt-0.5">Guaranteed</div>
+              <div className="text-[13px] font-bold text-[#1a1040] leading-none">
+                Quality
+              </div>
+              <div className="text-[10px] text-[#9088c8] mt-0.5">
+                Guaranteed
+              </div>
             </div>
           </div>
 
@@ -330,8 +390,12 @@ export default function Hero() {
               <IconTruck />
             </div>
             <div>
-              <div className="text-[13px] font-bold text-[#1a1040] leading-none">Fast Delivery</div>
-              <div className="text-[10px] text-[#9088c8] mt-0.5">48h turnaround</div>
+              <div className="text-[13px] font-bold text-[#1a1040] leading-none">
+                Fast Delivery
+              </div>
+              <div className="text-[10px] text-[#9088c8] mt-0.5">
+                48h turnaround
+              </div>
             </div>
           </div>
 
@@ -363,7 +427,6 @@ export default function Hero() {
               />
             ))}
           </div>
-
         </div>
       </section>
     </>

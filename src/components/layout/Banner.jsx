@@ -26,9 +26,9 @@ function Banner({
       <div className="absolute inset-0 z-0" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 100%, #7c3aed 0%, #c4b5fd 45%, white 72%)" }} />
       <div className="relative z-10  max-w-7xl mx-auto px-6 lg:px-16 flex flex-col lg:flex-row items-center justify-between min-h-140 py-14">
         <div className="flex-1 max-w-xl">
-          <div className="flex items-center w-40 gap-2 mt-5 text-sm mb-5 text-violet-600 border border-violet-400 rounded-full px-3 py-1">
+          <div className="flex items-center w-50 gap-2 mt-5 text-sm mb-5 text-violet-600 border border-violet-400 rounded-full px-3 py-1">
             <Link
-              to="/home"
+              to="/"
               className="flex items-center gap-1 font-medium hover:text-violet-800"
             >
               <FiHome size={14} />
