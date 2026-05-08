@@ -1,87 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Trash2,
-  Eye,
   Search,
   Grid3X3,
   LayoutList,
   ImageOff,
-  Filter,
   CheckSquare,
   Square,
-  SlidersHorizontal,
 } from "lucide-react";
 import Modal from "../../model/Modal";
 import AddImageView from "../../components/view/AddImageView";
 import DeleteImage from "../../components/view/DeleteImage";
-
-const CATEGORIES = [
-  "All",
-  "Nature",
-  "Architecture",
-  "Portraits",
-  "Abstract",
-  "Travel",
-  "Events",
-];
-
-const INITIAL_IMAGES = [
-  {
-    id: 1,
-    title: "Mountain Sunrise.jpg",
-    category: "Nature",
-    thumb:
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop",
-  },
-  {
-    id: 2,
-    title: "Glass Tower.jpg",
-    category: "Architecture",
-    thumb:
-      "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=300&h=300&fit=crop",
-  },
-  {
-    id: 3,
-    title: "Studio Portrait.jpg",
-    category: "Portraits",
-    thumb:
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop",
-  },
-  {
-    id: 4,
-    title: "Chromatic Bloom.jpg",
-    category: "Abstract",
-    thumb:
-      "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&h=300&fit=crop",
-  },
-  {
-    id: 5,
-    title: "Desert Dunes.jpg",
-    category: "Travel",
-    thumb:
-      "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=300&h=300&fit=crop",
-  },
-  {
-    id: 6,
-    title: "City Lights.jpg",
-    category: "Travel",
-    thumb:
-      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=300&fit=crop",
-  },
-];
+import { useProduct } from "../../hooks/useProduct";
+import { getAllGalleries } from "../../api/galleryApi";
 
 export default function GalleryManagement() {
-  const [images] = useState(INITIAL_IMAGES);
+  const [images, setImages] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
   const [modal, setModal] = useState(null);
+  const { categories } = useProduct();
+
+  useEffect(() => {
+    fetchGalleries();
+  }, []);
+
+  const fetchGalleries = async () => {
+    try {
+      const res = await getAllGalleries();
+      setImages(res.data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
   const filtered = images.filter((img) => {
     const matchCat =
-      activeCategory === "All" || img.category === activeCategory;
+      activeCategory === "All" || img.category.c_type === activeCategory;
     const matchSearch = img.title.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
@@ -92,16 +50,20 @@ export default function GalleryManagement() {
     if (modal === "add")
       return (
         <Modal title="Add New Image" onClose={closeModal}>
-          <AddImageView />
+          <AddImageView onClose={closeModal} onSuccess={fetchGalleries} />
         </Modal>
       );
     if (modal === "delete")
       return (
         <Modal title="Delete Image" onClose={closeModal}>
           <DeleteImage
-            image={filtered.find((i) => i.id === selected[0])}
+            images={filtered.filter((i) => selected.includes(i.id))}
             onCancel={closeModal}
-            onDelete={() => setModal(null)}
+            onDelete={() => {
+              setSelected([]);
+              setModal(null);
+              fetchGalleries(); 
+            }}
           />
         </Modal>
       );
@@ -121,9 +83,7 @@ export default function GalleryManagement() {
   const isSelected = (id) => selected.includes(id);
 
   const handleAdd = () => setModal("add");
-  const handleDelete = (ids) => {
-    setModal("delete");
-  };
+  const handleDelete = () => setModal("delete");
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -145,7 +105,7 @@ export default function GalleryManagement() {
         <div className="flex items-center gap-2">
           {selected.length > 0 && (
             <button
-              onClick={() => handleDelete(selected)}
+              onClick={handleDelete}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 text-red-500 text-xs font-semibold border border-red-100 hover:bg-red-100 transition-colors"
             >
               <Trash2 size={13} />
@@ -154,7 +114,7 @@ export default function GalleryManagement() {
           )}
           <button
             onClick={handleAdd}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg btn-color  text-sm font-semibold transition-colors shadow-sm shadow-violet-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg btn-color text-white text-sm font-semibold transition-colors shadow-sm shadow-violet-200"
           >
             <Plus size={15} />
             Add Image
@@ -188,7 +148,7 @@ export default function GalleryManagement() {
             },
             {
               label: "Categories",
-              value: CATEGORIES.length - 1,
+              value: categories.length,
               color: "text-emerald-600",
               bg: "bg-emerald-50",
               border: "border-emerald-100",
@@ -196,7 +156,7 @@ export default function GalleryManagement() {
           ].map((s) => (
             <div
               key={s.label}
-              className={`rounded-xl p-4 border ${s.bg} ${s.border} flex items-center gap-3 `}
+              className={`rounded-xl p-4 border ${s.bg} ${s.border} flex items-center gap-3`}
             >
               <span className={`text-3xl font-black ${s.color} leading-none`}>
                 {s.value}
@@ -241,7 +201,11 @@ export default function GalleryManagement() {
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
-                className={`p-2.5 transition-colors ${viewMode === mode ? "btn-color" : "bg-white text-slate-400 hover:bg-slate-50"}`}
+                className={`p-2.5 transition-colors ${
+                  viewMode === mode
+                    ? "btn-color text-white"
+                    : "bg-white text-slate-400 hover:bg-slate-50"
+                }`}
               >
                 <Icon size={15} />
               </button>
@@ -250,7 +214,7 @@ export default function GalleryManagement() {
         </div>
 
         <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1">
-          {CATEGORIES.map((cat) => (
+          {["All", ...categories.map((c) => c.c_type)].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -278,18 +242,25 @@ export default function GalleryManagement() {
               <div
                 key={img.id}
                 className={`group relative rounded-2xl overflow-hidden bg-white border-2 transition-all cursor-pointer
-                  ${isSelected(img.id) ? "border-violet-500 shadow-lg shadow-violet-100" : "border-slate-100 hover:border-violet-200 hover:shadow-md hover:shadow-slate-100"}`}
+                  ${
+                    isSelected(img.id)
+                      ? "border-violet-500 shadow-lg shadow-violet-100"
+                      : "border-slate-100 hover:border-violet-200 hover:shadow-md hover:shadow-slate-100"
+                  }`}
               >
                 <div className="relative aspect-square overflow-hidden bg-slate-100">
                   <img
-                    src={img.thumb}
+                    src={img.image_url}
                     alt={img.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
 
                   <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                     <button
-                      onClick={() => handleDelete([img.id])}
+                      onClick={() => {
+                        setSelected([img.id]);
+                        handleDelete();
+                      }}
                       className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-red-500 hover:bg-white hover:scale-110 transition-all"
                     >
                       <Trash2 size={15} />
@@ -318,7 +289,7 @@ export default function GalleryManagement() {
                     {img.title}
                   </p>
                   <span className="mt-1.5 inline-block text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
-                    {img.category}
+                    {img.category.c_type}
                   </span>
                 </div>
               </div>
@@ -344,8 +315,7 @@ export default function GalleryManagement() {
 
                 <button
                   onClick={() => toggleSelect(img.id)}
-                  className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-all duration-150
-                    border-slate-200 hover:border-violet-400 bg-white"
+                  className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-all duration-150 border-slate-200 hover:border-violet-400 bg-white"
                   style={{
                     borderColor: isSelected(img.id) ? "#7c3aed" : undefined,
                     background: isSelected(img.id) ? "#7c3aed" : undefined,
@@ -360,7 +330,7 @@ export default function GalleryManagement() {
 
                 <div className="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-slate-100 shadow-sm">
                   <img
-                    src={img.thumb}
+                    src={img.image_url}
                     alt={img.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -371,20 +341,19 @@ export default function GalleryManagement() {
                     {img.title}
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5 truncate">
-                    Image · JPG
+                    Image · {img.title.split(".").pop().toUpperCase()}
                   </p>
                 </div>
 
                 <div className="hidden sm:flex shrink-0">
                   <span
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border
-                    ${
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
                       isSelected(img.id)
                         ? "text-violet-700 bg-violet-100 border-violet-200"
                         : "text-slate-500 bg-slate-50 border-slate-200 group-hover:text-violet-600 group-hover:bg-violet-50 group-hover:border-violet-200"
                     } transition-colors`}
                   >
-                    {img.category}
+                    {img.category.c_type}
                   </span>
                 </div>
 
@@ -392,7 +361,10 @@ export default function GalleryManagement() {
 
                 <div className="shrink-0">
                   <button
-                    onClick={() => handleDelete([img.id])}
+                    onClick={() => {
+                      setSelected([img.id]);
+                      handleDelete();
+                    }}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 bg-slate-100 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
                     <Trash2 size={12} />
@@ -427,6 +399,7 @@ export default function GalleryManagement() {
           </div>
         )}
       </div>
+
       {renderModal()}
     </div>
   );

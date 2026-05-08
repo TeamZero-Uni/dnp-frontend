@@ -11,17 +11,17 @@ import {
 
 function Footer() {
   const services = [
-    { name: "3D Printing", path: "/service/3d-printing" },
-    { name: "3D Resin Printing", path: "/service/resin-printing" },
-    { name: "3D Modeling", path: "/service/3d-modeling" },
-    { name: "Laser Engraving", path: "/service/laser-engraving" },
-    { name: "PCB CNC", path: "/service/pcb-cnc" },
-    { name: "Injection Molding", path: "/service/injection-molding" },
+    { name: "3D Printing", path: "/service" },
+    { name: "3D Resin Printing", path: "/service" },
+    { name: "3D Modeling", path: "/service" },
+    { name: "Laser Engraving", path: "/service" },
+    { name: "PCB CNC", path: "/service" },
+    { name: "Injection Molding", path: "/service" },
   ];
 
   const quickLinks = [
     { name: "Home", path: "/" },
-    { name: "Services", path: "/services" },
+    { name: "Services", path: "/service" },
     { name: "Our Shop", path: "/shop" },
     { name: "About Us", path: "/about" },
     { name: "Portfolio", path: "/portfolio" },

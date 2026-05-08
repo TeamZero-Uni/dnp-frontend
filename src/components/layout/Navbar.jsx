@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiShoppingCart,
   FiUser,
@@ -12,8 +12,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 const NAV = [
   { label: "Home", path: "/" },
-  { label: "Services", path: "/service" },
-
+  { label: "Shop", path: "/shop" },
   {
     label: "Works",
     links: [
@@ -22,7 +21,6 @@ const NAV = [
       { label: "Portfolio", path: "/portfolio" },
     ],
   },
-
   {
     label: "About",
     links: [
@@ -30,8 +28,7 @@ const NAV = [
       { label: "Contact", path: "/contact" },
     ],
   },
-
-  { label: "Shop", path: "/shop" },
+  { label: "Services", path: "/service" },
 ];
 
 export default function Navbar() {
@@ -43,6 +40,9 @@ export default function Navbar() {
   const { cartItems } = useCart();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -86,24 +86,21 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18">
+          <div className="flex items-center justify-between h-19">
+
             <Link
               to="/"
               onClick={closeAll}
               className="flex items-center gap-1.5 group shrink-0"
             >
               <div className="group-hover:rotate-12 transition-transform duration-300">
-                <img
-                  src="/assets/images/logo.png"
-                  alt="Logo"
-                  className="h-9 w-auto"
-                />
+                <img src="/assets/images/logo.png" alt="Logo" className="h-10 w-auto" />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-[22px] font-extrabold text-black tracking-tight">
+                <span className="text-[25px] font-extrabold text-black tracking-tight">
                   DNP <span className="text-[#5743be]">3D</span>
                 </span>
-                <span className="text-[8.5px] font-black text-gray-400 tracking-[0.18em] uppercase mt-0.5">
+                <span className="text-[9px] font-black text-gray-400 tracking-[0.18em] uppercase mt-0.5">
                   Hobby Lobby
                 </span>
               </div>
@@ -115,7 +112,7 @@ export default function Navbar() {
                   <Link
                     key={item.label}
                     to={item.path}
-                    className="relative px-4 py-2 text-[14.5px] font-semibold text-slate-800 hover:text-[#5743be] transition-colors group"
+                    className="relative px-4 py-2 text-[15.5px] font-semibold text-slate-800 hover:text-[#5743be] transition-colors group"
                   >
                     {item.label}
                     <span className="absolute bottom-1.5 left-4 right-4 h-0.5 rounded-full bg-[#5743be] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
@@ -128,7 +125,7 @@ export default function Navbar() {
                     onMouseLeave={() => setActive(null)}
                   >
                     <button
-                      className={`flex items-center gap-1 px-4 py-2 text-[14.5px] font-semibold transition-colors ${
+                      className={`flex items-center gap-1 px-4 py-2 text-[15.5px] font-semibold transition-colors ${
                         active === item.label
                           ? "text-[#5743be]"
                           : "text-slate-800 hover:text-[#5743be]"
@@ -146,19 +143,12 @@ export default function Navbar() {
                         className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-white rounded-xl overflow-hidden"
                         style={{
                           minWidth: 180,
-                          boxShadow:
-                            "0 8px 30px rgba(90,70,194,.13), 0 1px 4px rgba(0,0,0,.07)",
+                          boxShadow: "0 8px 30px rgba(90,70,194,.13), 0 1px 4px rgba(0,0,0,.07)",
                           animation: "fadeDown .15s ease both",
                           border: "1px solid rgba(90,70,194,.12)",
                         }}
                       >
-                        <div
-                          className="h-0.75"
-                          style={{
-                            background:
-                              "linear-gradient(90deg,#5a46c2,#7c66e3)",
-                          }}
-                        />
+                        <div className="h-0.75" style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }} />
                         <div className="py-1.5">
                           {item.links.map((link, i) => (
                             <Link
@@ -166,9 +156,7 @@ export default function Navbar() {
                               to={link.path}
                               onClick={() => setActive(null)}
                               className="flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-[#5743be] hover:bg-violet-50 transition-colors group/link"
-                              style={{
-                                animation: `slideRight .2s ease ${i * 0.04}s both`,
-                              }}
+                              style={{ animation: `slideRight .2s ease ${i * 0.04}s both` }}
                             >
                               {link.label}
                               <span className="w-1 h-1 rounded-full bg-[#5a46c2] opacity-0 group-hover/link:opacity-100 transition-opacity" />
@@ -178,22 +166,39 @@ export default function Navbar() {
                       </div>
                     )}
                   </div>
-                ),
+                )
               )}
             </div>
 
-            <div className="hidden md:flex items-center gap-1.5">
-              <Link
-                to="/cart"
-                className="relative p-2.5 rounded-full text-slate-600 hover:text-[#5a46c2] hover:bg-violet-50 transition-all"
-              >
-                <FiShoppingCart size={19} />
-                {cartItems.length > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black rounded-full h-4 w-4 flex items-center justify-center ring-2 ring-white">
-                    {cartItems.length}
-                  </span>
-                )}
-              </Link>
+            <div className="hidden md:flex items-center gap-2">
+
+              {isHome ? (
+                <Link
+                  to="/cart"
+                  className={`relative p-2.5 rounded-full transition-all ${
+                    scrolled ? "text-slate-600 hover:text-[#5a46c2]" : "text-white hover:text-[#5a46c2]"
+                  }`}
+                >
+                  <FiShoppingCart size={19} />
+                  {cartItems.length > 0 && (
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black rounded-full h-4 w-4 flex items-center justify-center ring-2 ring-white">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+              ) : (
+                <Link
+                  to="/cart"
+                  className="relative p-2.5 rounded-full transition-all text-black hover:text-[#5a46c2]"
+                >
+                  <FiShoppingCart size={19} />
+                  {cartItems.length > 0 && (
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black rounded-full h-4 w-4 flex items-center justify-center ring-2 ring-white">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {isAuthenticated ? (
                 <button
@@ -201,23 +206,57 @@ export default function Navbar() {
                     if (user?.role === "ADMIN") navigate("/dash");
                     else navigate("/customer-profile");
                   }}
-                  className="p-1 ml-0.5 hover:ring-2 ring-[#5a46c2] ring-offset-2 rounded-full transition-all"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group"
                 >
-                  <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+                  <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${
+                    isHome && !scrolled
+                      ? "border-white/40 group-hover:border-[#5a46c2] bg-white/10 text-white group-hover:text-[#5a46c2]"
+                      : "border-[#e0d9ff] group-hover:border-[#5a46c2] bg-violet-80 text-[#5a46c2]"
+                  }`}>
                     <FiUser size={17} />
+                  </div>
+                  <div className="flex flex-col leading-none text-left">
+                    <span className={`text-[10px] font-medium transition-colors ${
+                      isHome && !scrolled ? "text-white/70" : "text-slate-400"
+                    }`}>
+                      Welcome back
+                    </span>
+                    <span className={`text-[13px] font-bold group-hover:text-[#5a46c2] transition-colors mt-0.5 ${
+                      isHome && !scrolled ? "text-white" : "text-slate-800"
+                    }`}>
+                      My Account
+                    </span>
                   </div>
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-[13px] font-bold text-slate-700 hover:text-[#5a46c2] transition-colors"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group"
                 >
-                  Sign In
+                  <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${
+                    isHome && !scrolled
+                      ? "border-white/40 group-hover:border-[#5a46c2] bg-white/10 text-white group-hover:text-white"
+                      : "border-slate-500 group-hover:border-[#5a46c2] text-slate-500 group-hover:text-[#5a46c2]"
+                  }`}>
+                    <FiUser size={17} />
+                  </div>
+                  <div className="flex flex-col leading text-left">
+                    <span className={`text-[10px] font-medium transition-colors ${
+                      isHome && !scrolled ? "text-white/90" : "text-slate-600"
+                    }`}>
+                      Welcome
+                    </span>
+                    <span className={`text-[13px] font-bold group-hover:text-[#5a46c2] transition-colors mt-0.5 ${
+                      isHome && !scrolled ? "text-white" : "text-slate-800"
+                    }`}>
+                      Sign in / Register
+                    </span>
+                  </div>
                 </Link>
               )}
 
               <button
-              onClick={() => {navigate('/quote')}}
+                onClick={() => navigate("/quote")}
                 className="ml-1 px-5 py-2.5 rounded-full text-[13px] font-bold text-white transition-all active:scale-95"
                 style={{
                   background: "linear-gradient(135deg,#5a46c2,#4838a3)",
@@ -259,10 +298,7 @@ export default function Navbar() {
             boxShadow: "0 12px 40px rgba(0,0,0,.08)",
           }}
         >
-          <div
-            className="h-0.75"
-            style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }}
-          />
+          <div className="h-0.75" style={{ background: "linear-gradient(90deg,#5a46c2,#7c66e3)" }} />
 
           <div className="px-4 py-3 space-y-0.5">
             {NAV.map((item, idx) =>
@@ -272,11 +308,7 @@ export default function Navbar() {
                   to={item.path}
                   onClick={closeAll}
                   className="flex items-center justify-between px-4 py-3.5 rounded-xl text-[15.5px] font-bold text-slate-700 hover:text-[#5a46c2] hover:bg-violet-50 transition-colors"
-                  style={{
-                    animation: mobileOpen
-                      ? `slideRight .3s ease ${idx * 0.04}s both`
-                      : "none",
-                  }}
+                  style={{ animation: mobileOpen ? `slideRight .3s ease ${idx * 0.04}s both` : "none" }}
                 >
                   {item.label}
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
@@ -284,16 +316,10 @@ export default function Navbar() {
               ) : (
                 <div
                   key={item.label}
-                  style={{
-                    animation: mobileOpen
-                      ? `slideRight .3s ease ${idx * 0.04}s both`
-                      : "none",
-                  }}
+                  style={{ animation: mobileOpen ? `slideRight .3s ease ${idx * 0.04}s both` : "none" }}
                 >
                   <button
-                    onClick={() =>
-                      setMobileExp(mobileExp === item.label ? null : item.label)
-                    }
+                    onClick={() => setMobileExp(mobileExp === item.label ? null : item.label)}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[15.5px] font-bold transition-colors ${
                       mobileExp === item.label
                         ? "text-[#5a46c2] bg-violet-50"
@@ -326,7 +352,7 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ),
+              )
             )}
 
             <div className="pt-3 mt-1 border-t border-slate-100 space-y-2">
@@ -338,33 +364,35 @@ export default function Navbar() {
                 >
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0"
-                    style={{
-                      background: "linear-gradient(135deg,#5a46c2,#4838a3)",
-                    }}
+                    style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}
                   >
                     <FiUser size={16} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900 leading-none">
-                      My Account
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Profile & settings
-                    </p>
+                    <p className="text-sm font-bold text-slate-900 leading-none">My Account</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Profile &amp; settings</p>
                   </div>
                 </Link>
               ) : (
                 <Link
                   to="/login"
                   onClick={closeAll}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 hover:text-[#5a46c2] hover:bg-violet-50 transition-all w-full"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-violet-50 hover:border-violet-100 transition-all group"
                 >
-                  <FiUser size={15} />
-                  Sign In
+                  <div className="w-9 h-9 rounded-full border-2 border-slate-200 group-hover:border-[#5a46c2] bg-white flex items-center justify-center text-slate-500 group-hover:text-[#5a46c2] transition-all shrink-0">
+                    <FiUser size={16} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-400 font-medium leading-none">Welcome</p>
+                    <p className="text-[14px] font-bold text-slate-800 group-hover:text-[#5a46c2] transition-colors mt-0.5">
+                      Sign in / Register
+                    </p>
+                  </div>
                 </Link>
               )}
+
               <button
-                onClick={() => {navigate('/quote'); closeAll();}}
+                onClick={() => { navigate("/quote"); closeAll(); }}
                 className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg,#5a46c2,#4838a3)",

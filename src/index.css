@@ -78,6 +78,23 @@ input[type="range"]::-webkit-slider-thumb {
   color: white;
 }
 
+.animate-appear {
+    animation: appear linear;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        scale :0.5;
+    }
+    to {
+        opacity: 1;
+        scale: 1;
+    }
+}
+
 @keyframes float {
   from {
     transform: translateY(0px);
