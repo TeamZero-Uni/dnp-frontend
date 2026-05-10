@@ -204,7 +204,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     if (user?.role === "ADMIN") navigate("/dash");
-                    else navigate("/customer-profile");
+                   else navigate("/account/dashboard");
                   }}
                   className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all group"
                 >
@@ -358,7 +358,7 @@ export default function Navbar() {
             <div className="pt-3 mt-1 border-t border-slate-100 space-y-2">
               {isAuthenticated ? (
                 <Link
-                  to={user?.role === "ADMIN" ? "/dash" : "/customer-profile"}
+                  to={user?.role === "ADMIN" ? "/dash" : "/account/dashboard"}
                   onClick={closeAll}
                   className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all"
                 >

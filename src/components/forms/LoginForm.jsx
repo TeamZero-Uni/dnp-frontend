@@ -27,7 +27,7 @@ const LoginForm = ({ setActiveForm }) => {
   try {
     const res = await loginUser(formData);
     if(res.role === "ADMIN") navaigate("/dash");
-    else navaigate("/customer-profile");
+    else navaigate("/account/dashboard");
   } catch (err) {
     console.log(err.message); 
     setError(err.message);    
