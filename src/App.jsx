@@ -46,6 +46,7 @@ import RequestQuote from './pages/RequestQuote';
 import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
+import GoogleSuccess from "./layouts/GoogleSuccess ";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -65,6 +66,7 @@ const router = createBrowserRouter(
         <Route path="innovation" element={<Innovation />} />
 
       <Route path="login" element={<Login />} />
+      <Route path="google-success" element={<GoogleSuccess />} />
 
       <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
         <Route path="account" element={<UserPanelLayout />}>

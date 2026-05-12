@@ -3,6 +3,7 @@ import { useProduct } from "../../hooks/useProduct";
 import { uploadMultipleImages } from "../../api/api";
 import { createGallery } from "../../api/galleryApi";
 import toast from "react-hot-toast";
+const MAX_SIZE = 1 * 1024 * 1024;
 
 function AddImageView({ onClose, onSuccess  }) {
   const [formData, setFormData] = useState({
@@ -14,22 +15,37 @@ function AddImageView({ onClose, onSuccess  }) {
   const { categories } = useProduct();
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      const newFiles = Array.from(files);
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, ...newFiles],
-      }));
-      setPreviews((prev) => [
-        ...prev,
-        ...newFiles.map((file) => URL.createObjectURL(file)),
-      ]);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+const handleChange = (e) => {
+  const { name, value, files } = e.target;
+
+  if (files) {
+    const selectedFiles = Array.from(files);
+
+    const validFiles = [];
+    const validPreviews = [];
+
+    selectedFiles.forEach((file) => {
+      if (file.size > MAX_SIZE) {
+        toast.error(`Image Size exceeds 1MB limit`);
+      } else {
+        validFiles.push(file);
+        validPreviews.push(URL.createObjectURL(file));
+      }
+    });
+
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...validFiles],
+    }));
+
+    setPreviews((prev) => [...prev, ...validPreviews]);
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+};
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -57,40 +73,61 @@ function AddImageView({ onClose, onSuccess  }) {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const data = new FormData();
-      formData.images.forEach((img) => data.append("images", img));
-      const uploadRes = await uploadMultipleImages(data);
-      const uploadedUrls = uploadRes.data;
+  const oversizedImages = formData.images.filter(
+    (img) => img.size > MAX_SIZE
+  );
 
-      await Promise.all(
-        uploadedUrls.map((image_url, index) =>
-          createGallery({
-            title: formData.images[index].name,
-            image_url,
-            category_id: formData.category,
-          }),
-        ),
-      );
+  if (oversizedImages.length > 0) {
+    toast.error("Each image must be less than 1MB");
+    return;
+  }
 
-      toast.success("Images uploaded successfully!");
-      setFormData({ category: "", images: [] });
-      setPreviews([]);
-      onSuccess();
-      onClose();
-    } catch (err) {
-      toast.error(
-        err?.response?.data?.message ||
-          "Failed to upload images. Please try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+
+  try {
+    const data = new FormData();
+
+    formData.images.forEach((img) =>
+      data.append("images", img)
+    );
+
+    const uploadRes = await uploadMultipleImages(data);
+
+    const uploadedUrls = uploadRes.data;
+
+    await Promise.all(
+      uploadedUrls.map((image_url, index) =>
+        createGallery({
+          title: formData.images[index].name,
+          image_url,
+          category_id: formData.category,
+        })
+      )
+    );
+
+    toast.success("Images uploaded successfully!");
+
+    setFormData({
+      category: "",
+      images: [],
+    });
+
+    setPreviews([]);
+
+    onSuccess();
+    onClose();
+  } catch (err) {
+    toast.error(
+      err?.response?.data?.message ||
+        "Failed to upload images. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div>

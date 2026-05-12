@@ -309,7 +309,7 @@ export default function CodOrderView({ order, onClose, onUpdated }) {
                         </p>
                       </div>
                       <p className="text-sm font-bold text-indigo-600">
-                        $
+                        Rs.  
                         {parseFloat(
                           item.price ?? item.product?.p_price ?? 0,
                         ).toFixed(2)}
@@ -324,7 +324,7 @@ export default function CodOrderView({ order, onClose, onUpdated }) {
                   Order Total
                 </p>
                 <p className="text-sm font-bold text-indigo-700">
-                  ${parseFloat(order.total_amount || 0).toFixed(2)}
+                  Rs {parseFloat(order.total_amount || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function CodOrderView({ order, onClose, onUpdated }) {
                     </>
                   ) : (
                     <>
-                      <Banknote size={15} /> Collect $
+                      <Banknote size={15} /> Collect Rs.
                       {parseFloat(order.total_amount || 0).toFixed(2)} Cash
                     </>
                   )}

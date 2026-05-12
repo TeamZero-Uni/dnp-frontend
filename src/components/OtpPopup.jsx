@@ -1,10 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaTimes, FaKey } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { verifyOtp, getOtp } from '../api/api';
 
 const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  useEffect(() => {
+    document.getElementById('otp-0')?.focus();
+    setResendTimer(59);
+  }, []);
 
   const handleChange = (index, value) => {
     if (value.length > 1) value = value[0];
@@ -13,6 +32,7 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setOtpError('');
 
     if (value && index < 5) {
       document.getElementById(`otp-${index + 1}`).focus();
@@ -28,11 +48,15 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    if (!/^\d+$/.test(pastedData)) return;
+    if (!/^\d+$/.test(pastedData)) {
+      setOtpError('Please paste only numbers');
+      return;
+    }
 
     const newOtp = pastedData.split('');
     while (newOtp.length < 6) newOtp.push('');
     setOtp(newOtp);
+    setOtpError('');
 
     const lastIndex = Math.min(pastedData.length, 5);
     document.getElementById(`otp-${lastIndex}`).focus();
@@ -40,11 +64,12 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setOtpError('');
+
     const otpValue = otp.join('');
 
     if (otpValue.length !== 6) {
-      alert('Please enter all 6 digits');
+      setOtpError('Please enter all 6 digits');
       return;
     }
 
@@ -52,55 +77,68 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
       setIsVerifying(true);
       await verifyOtp({
         otp: otpValue,
-        email: purpose.email,   // ✅ important
-      }); 
-      alert('OTP verified successfully!');
-      if(purpose.type === 'forgot') {
+        email: purpose.email,
+      });
+      toast.success('OTP verified successfully!');
+      if (purpose.type === 'forgot') {
         setActiveForm({ type: 'change', email: purpose.email });
-      } else if(purpose.type === 'register') {
-        setActiveForm({type:'login'});
+      } else if (purpose.type === 'register') {
+        setActiveForm({ type: 'login' });
       }
       onClose();
     } catch (error) {
-      console.error('OTP verification failed:', error);
+      const message = error?.response?.data?.message || 'OTP verification failed. Please try again.';
+      setOtpError(message);
+      toast.error(message);
     } finally {
       setIsVerifying(false);
     }
   };
 
   const handleResend = async () => {
-  try {
-    
-    await getOtp(purpose.email);
-    
-    
-    alert("OTP resent successfully!");
-    setOtp(['', '', '', '', '', '']);
-    document.getElementById('otp-0').focus();
+    if (resendTimer > 0) return;
 
-  } catch (err) {
-    alert(err?.response?.data?.message || "Failed to resend OTP");
-  }
-};
+    try {
+      setIsResending(true);
+      await getOtp(purpose.email);
+      toast.success('OTP resent successfully!');
+      setOtp(['', '', '', '', '', '']);
+      setOtpError('');
+      setResendTimer(59);
+      document.getElementById('otp-0')?.focus();
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Failed to resend OTP. Please try again.';
+      toast.error(message);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const hasError = Boolean(otpError);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-fadeIn">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
           <FaTimes className="text-xl" />
         </button>
 
         <div className="flex justify-center mb-6">
-          <div className="bg-blue-100 p-4 rounded-full">
-            <FaKey className="text-blue-600 text-3xl" />
+          <div className="bg-indigo-100 p-4 rounded-full">
+            <FaKey className="text-[#5a46c2] text-3xl" />
           </div>
         </div>
 
-        <h3 className="text-2xl font-bold text-gray-800 text-center mb-2">
-          Enter Verification Code
-        </h3>
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-800">
+            Enter Verification Code
+          </h3>
+        </div>
         <p className="text-gray-600 text-center mb-8">
-          We've sent a 6-digit code to your email address
+          We've sent a 6-digit code to <span className="font-medium text-gray-800">{purpose.email}</span>
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -116,16 +154,26 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
-                className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5a46c2] focus:border-[#5a46c2] transition-all outline-none"
+                className={`w-12 h-14 text-center text-2xl font-bold border-2 rounded-lg transition-all outline-none ${
+                  hasError
+                    ? 'border-red-400 focus:ring-2 focus:ring-red-300 focus:border-red-400 bg-red-50'
+                    : 'border-gray-300 focus:ring-2 focus:ring-[#5a46c2] focus:border-[#5a46c2]'
+                }`}
                 required
               />
             ))}
           </div>
 
+          {hasError && (
+            <p className="mb-4 text-sm text-red-500 flex items-center gap-2 justify-center">
+              <span>⚠</span> {otpError}
+            </p>
+          )}
+
           <button
             type="submit"
-            disabled={isVerifying}
-            className="w-full btn-color py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isVerifying || otp.join('').length !== 6}
+            className="w-full btn-color py-3 rounded-lg font-semibold focus:ring-4 focus:ring-indigo-200 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isVerifying ? 'Verifying...' : 'Verify Code'}
           </button>
@@ -134,8 +182,17 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
         <div className="text-center mt-6">
           <p className="text-gray-600 text-sm">
             Didn't receive the code?{' '}
-            <button type="button" onClick={handleResend} className="text-[#5a46c2] font-semibold transition-colors">
-              Resend
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendTimer > 0 || isResending}
+              className={`font-semibold transition-all ${
+                resendTimer > 0
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-[#5a46c2] hover:text-[#4838a3]'
+              }`}
+            >
+              {isResending ? 'Sending...' : resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend'}
             </button>
           </p>
         </div>
@@ -144,4 +201,4 @@ const OtpPopup = ({ onClose, purpose, setActiveForm }) => {
   );
 };
 
-export default OtpPopup
+export default OtpPopup;
