@@ -12,9 +12,9 @@ const navGroups = [
     label: "General",
     items: [
       { label: "Dashboard",  path: "/account/dashboard", icon: <MdDashboard /> },
-      { label: "My Profile", path: "/account/profile",   icon: <FaUser /> },
       { label: "My Orders",  path: "/account/orders",    icon: <FaBoxOpen /> },
       { label: "Wishlist",   path: "/account/wishlist",  icon: <FaHeart /> },
+      { label: "My Profile", path: "/account/profile",   icon: <FaUser /> },
     ],
   },
   {
@@ -53,7 +53,7 @@ function UserPanelLayout() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+     <div className="w-full px-4 sm:px-6 py-6">
 
         {/* ── MOBILE ── */}
         <div className="lg:hidden mb-4">
