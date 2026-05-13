@@ -24,6 +24,7 @@ export default function ReviewSection({ productId }) {
     }
   }, [isAuthenticated, user]);
 
+  // Fetch reviews from backend
   const fetchReviews = useCallback(async () => {
     if (!productId) return;
     setIsLoading(true);
@@ -43,6 +44,7 @@ export default function ReviewSection({ productId }) {
     fetchReviews();
   }, [fetchReviews]);
 
+  // Handle new review submission
   const handlePostReview = async () => {
     if (!isAuthenticated || !user) {
       alert("Please log in to post a review!");
@@ -77,28 +79,21 @@ export default function ReviewSection({ productId }) {
     }
   };
 
-    // INSTANT UPDATE (OPTIMISTIC UI) VOTE LOGIC
-    const handleVote = async (reviewId, type) => {
+  // INSTANT UPDATE (OPTIMISTIC UI) VOTE LOGIC
+  const handleVote = async (reviewId, type) => {
     if (!isAuthenticated || !user?.userId) {
       alert("Please sign in to vote on reviews!");
       return;
     }
 
     const currentVote = votedReviews[reviewId];
+    let newVoteState = currentVote === type ? null : type; 
 
-    let newVoteState = null;
-    if (currentVote === type) {
-      newVoteState = null; 
-    } else {
-      newVoteState = type; 
-    }
-
+    // 1. Update local storage & state for UI colors
     const newVotes = { ...votedReviews };
-    if (newVoteState) {
-      newVotes[reviewId] = newVoteState;
-    } else {
-      delete newVotes[reviewId];
-    }
+    if (newVoteState) newVotes[reviewId] = newVoteState;
+    else delete newVotes[reviewId];
+    
     setVotedReviews(newVotes);
     localStorage.setItem(`userVotes_${user.userId}`, JSON.stringify(newVotes));
 
@@ -106,12 +101,14 @@ export default function ReviewSection({ productId }) {
       const response = await voteReviewAPI(reviewId, user.userId, type);
 
       if (response && response.success) {
+        const updatedData = response.data || response;
+
         setReviews(prevReviews => prevReviews.map(r => {
           if (r.id === reviewId) {
             return { 
               ...r, 
-              likes: response.likes, 
-              dislikes: response.dislikes 
+              likes: updatedData.likes || 0,       
+              dislikes: updatedData.dislikes || 0  
             };
           }
           return r;
@@ -119,11 +116,12 @@ export default function ReviewSection({ productId }) {
       }
     } catch (error) {
       console.error("Vote failed:", error);
+      // Revert if failed
       setVotedReviews(votedReviews);
       localStorage.setItem(`userVotes_${user.userId}`, JSON.stringify(votedReviews));
       alert("Something went wrong while voting!");
     }
-    };
+  };
 
   // --- CHART CALCULATIONS ---
   const totalReviews = reviews?.length || 0;

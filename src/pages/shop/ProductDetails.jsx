@@ -4,6 +4,7 @@ import axios from 'axios';
 import {
   FaShoppingCart, FaBolt, FaTruck, FaMapMarkerAlt,
   FaMoneyBillAlt, FaUndo, FaHeart, FaRegHeart, FaCheckCircle,
+  FaChevronLeft, FaChevronRight 
 } from 'react-icons/fa';
 import { FiPackage, FiTag } from 'react-icons/fi';
 import ProductCard from '../../components/cards/ProductCard';
@@ -67,6 +68,8 @@ export default function ProductDetails() {
   const [quantity,      setQuantity]      = useState(1);
   const [toast,         setToast]         = useState({ message: '', type: 'success', visible: false });
   const toastTimer = useRef(null);
+  
+  const scrollRef = useRef(null);
 
   const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
   const productId = dbProduct?.p_id || dbProduct?.id;
@@ -129,19 +132,32 @@ export default function ProductDetails() {
     category: productCategory,
   });
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!inStock) return;
-    addToCart(getCartProductObj(), quantity, selectedColor);
-    showToast('Added to cart!');
+    
+    const result = await addToCart(getCartProductObj(), quantity, selectedColor);
+    
+    if (result && result.success) {
+      showToast('Added to cart successfully!');
+    } else if (result) {
+      showToast(result.message, 'error');
+    }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!inStock) return;
-    navigate('/checkout', { 
-      state: { 
-        buyNowItem: { ...getCartProductObj(), quantity, selectedColor } 
-      } 
-    });
+
+    const result = await addToCart(getCartProductObj(), quantity, selectedColor);
+
+    if (result && result.success) {
+      navigate('/checkout', { 
+        state: { 
+          buyNowItem: { ...getCartProductObj(), quantity, selectedColor } 
+        } 
+      });
+    } else if (result) {
+      showToast(result.message, 'error');
+    }
   };
 
   const onWishlistClick = async () => {
@@ -160,8 +176,14 @@ export default function ProductDetails() {
   const { label: stockLabel, cls: stockCls } = stockBadge();
 
   const relatedProducts = products
-    .filter(p => (p.category?.c_type === productCategory || p.category === productCategory) && (p.p_id !== id && p.id !== id))
-    .slice(0, 4);
+    .filter(p => (p.category?.c_type === productCategory || p.category === productCategory) && (p.p_id !== id && p.id !== id));
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320; 
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   if (!dbProduct) {
     return (
@@ -351,16 +373,45 @@ export default function ProductDetails() {
       <ReviewSection productId={dbProduct?.p_id || dbProduct?.id} />
 
       {relatedProducts.length > 0 && (
-        <div className="max-w-7xl mx-auto mt-16 border-t border-slate-100 pt-10">
+        <div className="max-w-7xl mx-auto mt-16 border-t border-slate-100 pt-10 px-2 sm:px-0">
+          
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-black text-slate-800 flex items-center gap-3 uppercase tracking-tighter">
               <span className="w-2 h-8 bg-accent rounded-full" />
               Related Products
             </h3>
-            <button className="text-accent font-black text-[10px] hover:underline uppercase tracking-widest">View All</button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {relatedProducts.map(item => <ProductCard key={item.id || item.p_id} product={item} />)}
+
+          <div className="relative group">
+            
+            {/* left side arrow */}
+            <button 
+              onClick={() => scroll('left')} 
+              className="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-slate-100 shadow-xl flex items-center justify-center text-slate-500 hover:bg-[#5a46c2] hover:text-white hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+            >
+              <FaChevronLeft size={16} className="-ml-1" />
+            </button>
+
+            <div 
+              ref={scrollRef} 
+              className="flex gap-5 overflow-x-auto snap-x scrollbar-hide pb-6 pt-2 px-1 [&::-webkit-scrollbar]:hidden"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {relatedProducts.map(item => (
+                <div key={item.id || item.p_id} className="min-w-[260px] md:min-w-[280px] snap-start flex-shrink-0">
+                  <ProductCard product={item} />
+                </div>
+              ))}
+            </div>
+
+            {/* right side arrow */}
+            <button 
+              onClick={() => scroll('right')} 
+              className="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-slate-100 shadow-xl flex items-center justify-center text-slate-500 hover:bg-[#5a46c2] hover:text-white hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+            >
+              <FaChevronRight size={16} className="-mr-1" />
+            </button>
+
           </div>
         </div>
       )}
