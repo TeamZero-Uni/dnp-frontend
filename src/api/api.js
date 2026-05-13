@@ -123,3 +123,32 @@ export const getYoutubeVideos = async (maxResults = 12, pageToken = '') => {
     return response.data;
 };
 
+export const addToCartAPI = async (payload) => {
+    const response = await api.post("/cart/add", payload);
+    return response.data;
+};
+
+export const getCartItemsAPI = async () => {
+    const response = await api.get("/cart");
+    return response.data;
+};
+
+export const removeFromCartAPI = async (p_id) => {
+    const response = await api.delete(`/cart/${p_id}`);
+    return response.data;
+};
+
+export const updateCartQuantityAPI = async (p_id, quantity) => {
+    const response = await api.put(`/cart/${p_id}`, { quantity });
+    return response.data;
+};
+
+export const getWishlistAPI = async () => {
+    const response = await api.get("/wishlist");
+    return response.data;
+};
+
+export const toggleWishlistAPI = async (payload) => {
+    const response = await api.post("/wishlist/toggle", payload);
+    return response.data;
+};
