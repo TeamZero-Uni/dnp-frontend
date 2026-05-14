@@ -11,7 +11,7 @@ const getStatusBadge = (status) => {
     CANCELLED:  "bg-red-50 text-red-500 border-red-100 dot-red-500",
     RETURNED:   "bg-orange-50 text-orange-500 border-orange-100 dot-orange-500",
   }
-//set color of badge
+
   const statusKey = String(status || "").toUpperCase()
   const active = styles[statusKey] || "bg-slate-50 text-slate-500 border-slate-100 dot-slate-400"
   const dotColor = active.split(" ").pop().replace("dot-", "bg-")
@@ -34,9 +34,9 @@ const ViewIcon = () => (
 
 // ── transform API data to match your modal's expected shape ──
 const transformOrder = (order) => {
-  const firstItem = order.items?.[0]
+  const items = order.items || []
+  const firstItem = items[0]
   const product = firstItem?.product
-  const image = product?.images?.[0]?.img_url || ""
 
   return {
     order_id: order.order_id,
@@ -45,8 +45,10 @@ const transformOrder = (order) => {
           month: "short", day: "numeric", year: "numeric"
         })
       : "N/A",
-    status: order.status.charAt(0) + order.status.slice(1).toLowerCase(),
-    total_amount: parseFloat(order.total_amount),
+    status: order.status
+      ? order.status.charAt(0) + order.status.slice(1).toLowerCase()
+      : "Unknown",
+    total_amount: parseFloat(order.total_amount) || 0,
     payment_method: order.payment_method,
 
     // for list view
@@ -57,16 +59,16 @@ const transformOrder = (order) => {
       ? `${order.shippingAddress.cus_address}, ${order.shippingAddress.cus_city}, ${order.shippingAddress.cus_state} ${order.shippingAddress.cus_postal_code}`
       : "No address available",
 
-    // for modal — items detail
-    items_detail: order.items.map(item => ({
+    // for modal — items detail (guarded against empty array)
+    items_detail: items.map(item => ({
       name: item.product?.p_name || "Product",
       quantity: item.quantity,
-      price: parseFloat(item.price),
+      price: parseFloat(item.price) || 0,
       img_url: item.product?.images?.[0]?.img_url || "",
     })),
 
     // for modal — timeline
-    timeline: order.timeline.map(t => ({
+    timeline: (order.timeline || []).map(t => ({
       label: t.label === "Pending" ? "Order placed" : t.label,
       date: t.date
         ? new Date(t.date).toLocaleDateString("en-US", {
@@ -78,17 +80,31 @@ const transformOrder = (order) => {
   }
 }
 
+// ── Placeholder image component when no image is available ──
+const ProductImage = ({ src, alt, className }) => (
+  <img
+    src={src || "https://placehold.co/100x100?text=No+Image"}
+    alt={alt || "Product"}
+    className={className}
+    onError={(e) => {
+      e.target.onerror = null
+      e.target.src = "https://placehold.co/100x100?text=No+Image"
+    }}
+  />
+)
+
 export default function MyOrders() {
-  const [orders, setOrders]           = useState([])
-  const [loading, setLoading]         = useState(true)
-  const [error, setError]             = useState(null)
+  const [orders, setOrders]               = useState([])
+  const [loading, setLoading]             = useState(true)
+  const [error, setError]                 = useState(null)
   const [selectedOrder, setSelectedOrder] = useState(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const data = await getMyOrdersAPI()
-        const transformed = data.map(transformOrder)
+        console.log("RAW API DATA:", JSON.stringify(data[0], null, 2))
+        const transformed = (data || []).map(transformOrder)
         setOrders(transformed)
       } catch (err) {
         setError("Failed to load orders. Please try again.")
@@ -144,49 +160,52 @@ export default function MyOrders() {
 
         {/* ── MOBILE VIEW ── */}
         <div className="space-y-4 sm:hidden">
-          {orders.map((order) => (
-            <div key={order.order_id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-              <div className="flex justify-between items-start gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Product</p>
-                  <p className="font-bold text-slate-800 text-sm truncate">{order.items_summary}</p>
+          {orders.map((order) => {
+            const firstItem = order.items_detail[0]
+            return (
+              <div key={order.order_id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Product</p>
+                    <p className="font-bold text-slate-800 text-sm truncate">{order.items_summary}</p>
+                  </div>
+                  {getStatusBadge(order.status)}
                 </div>
-                {getStatusBadge(order.status)}
-              </div>
 
-              <div className="flex items-center gap-3 border-t border-slate-50 pt-3">
-                <img
-                  src={order.items_detail[0].img_url}
-                  alt={order.items_detail[0].name}
-                  className="w-14 h-14 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{order.items_summary}</p>
+                <div className="flex items-center gap-3 border-t border-slate-50 pt-3">
+                  <ProductImage
+                    src={firstItem?.img_url}
+                    alt={firstItem?.name}
+                    className="w-14 h-14 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{order.items_summary}</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-1">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</p>
-                  <p className="text-xs font-medium">{order.order_date}</p>
+                <div className="grid grid-cols-2 gap-4 pt-1">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</p>
+                    <p className="text-xs font-medium">{order.order_date}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</p>
+                    <p className="text-xs font-bold text-slate-800">Rs {order.total_amount.toFixed(2)}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</p>
-                  <p className="text-xs font-bold text-slate-800">${order.total_amount.toFixed(2)}</p>
-                </div>
-              </div>
 
-              <div className="pt-2 border-t border-slate-50 flex justify-between items-center">
-                <p className="text-xs text-slate-500 truncate pr-4">{order.items_summary}</p>
-                <button
-                  onClick={() => setSelectedOrder(order)}
-                  className="text-indigo-500 font-bold text-xs flex items-center gap-1 shrink-0 bg-indigo-50 px-2 py-1 rounded-md"
-                >
-                  <ViewIcon /> View
-                </button>
+                <div className="pt-2 border-t border-slate-50 flex justify-between items-center">
+                  <p className="text-xs text-slate-500 truncate pr-4">{order.items_summary}</p>
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="text-indigo-500 font-bold text-xs flex items-center gap-1 shrink-0 bg-indigo-50 px-2 py-1 rounded-md"
+                  >
+                    <ViewIcon /> View
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* ── DESKTOP VIEW ── */}
@@ -202,32 +221,35 @@ export default function MyOrders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {orders.map((order) => (
-                <tr key={order.order_id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-5">
-                    <img
-                      src={order.items_detail[0].img_url}
-                      alt={order.items_detail[0].name}
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-slate-50"
-                    />
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-700 font-medium">
-                    <div>
-                      <p>{order.items_summary}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">{getStatusBadge(order.status)}</td>
-                  <td className="px-6 py-5 font-bold text-slate-800 text-sm">${order.total_amount.toFixed(2)}</td>
-                  <td className="px-6 py-5">
-                    <button
-                      onClick={() => setSelectedOrder(order)}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-500 hover:text-indigo-700 transition-colors"
-                    >
-                      <ViewIcon /> View
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {orders.map((order) => {
+                const firstItem = order.items_detail[0]
+                return (
+                  <tr key={order.order_id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-5">
+                      <ProductImage
+                        src={firstItem?.img_url}
+                        alt={firstItem?.name}
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-slate-50"
+                      />
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-700 font-medium">
+                      <div>
+                        <p>{order.items_summary}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">{getStatusBadge(order.status)}</td>
+                    <td className="px-6 py-5 font-bold text-slate-800 text-sm">Rs {order.total_amount.toFixed(2)}</td>
+                    <td className="px-6 py-5">
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-500 hover:text-indigo-700 transition-colors"
+                      >
+                        <ViewIcon /> View
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
