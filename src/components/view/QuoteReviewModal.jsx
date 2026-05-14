@@ -3,6 +3,7 @@ import {
   CheckCircle, Download, Layers, Truck, FileText, Hash, Coins
 } from "lucide-react";
 import { updateQuotetion } from '../../api/quoteApi';
+import toast from "react-hot-toast";
 
 const STATUS_CFG = {
   PENDING: { dot: "bg-amber-400", pill: "bg-amber-50 text-amber-700 border-amber-200", label: "Pending" },
@@ -49,7 +50,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
 
   const allFiles = quote.items?.flatMap((item) => item.files ?? []) ?? [];
 
-  // ── File Download Handlers ──
   const handleDownload = (file) => {
     const href = file?.url ?? file?.path ?? file?.file_url;
     if (!href) return;
@@ -78,7 +78,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
     document.body.removeChild(a);
   };
 
-  // ── Build Payload Based on Action Type ──
   const buildPayload = (actionType) => {
     const basePayload = { q_id: quote.q_id };
 
@@ -117,18 +116,16 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
     }
   };
 
-  // ── Handle Action Submit ──
   const handleSubmit = async (actionType) => {
     setLoading(true);
     try {
       const payload = buildPayload(actionType);
       const response = await updateQuotetion(payload);
-      console.log("Quote updated:", response);
+      toast.success(response.message || "Quote updated successfully!");
       onClose();
       onSuccess();
     } catch (error) {
-      console.error("Error updating quote:", error);
-      alert("Failed to update quote. Please try again.");
+      toast.error(error?.response?.data?.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -186,7 +183,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
 
         <div className="border-t border-slate-100" />
 
-        {/* Shipping Details */}
         <Section icon={Truck} title="Shipping Details">
           <div className="grid grid-cols-3 gap-2">
             <InfoCell label="Full Name" value={quote.shipping?.cus_name} />
@@ -231,12 +227,12 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
                     </span>
                   ))}
                 </div>
+                <div className="text-[14px] ml-2 text-slate-600 mt-2">{item.description}</div>
               </div>
             ))}
           </div>
         </Section>
 
-        {/* Files */}
         {allFiles.length > 0 && (
           <>
             <div className="border-t border-slate-100" />
@@ -264,7 +260,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
 
         <div className="border-t border-slate-100" />
 
-        {/* Admin Actions */}
         <Section icon={CheckCircle} title="Admin Actions">
 
           {status === "PENDING" && (
@@ -334,7 +329,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
         </Section>
       </div>
 
-      {/* Footer */}
       <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
