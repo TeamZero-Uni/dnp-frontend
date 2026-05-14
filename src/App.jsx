@@ -39,6 +39,7 @@ import RequestQuote from './pages/RequestQuote';
 import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
+import Feedback from "./pages/Feedback";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -56,6 +57,7 @@ const router = createBrowserRouter(
        <Route path="quote" element={<RequestQuote />} />
         <Route path="gallery" element={<Gallery />} />
         <Route path="innovation" element={<Innovation />} />
+        <Route path="feedback" element={<Feedback />} />
 
       <Route path="login" element={<Login />} />
 
