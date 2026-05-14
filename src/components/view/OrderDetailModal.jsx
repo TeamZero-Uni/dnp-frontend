@@ -43,7 +43,7 @@ export default function OrderDetailModal({ order, onClose }) {
   const completedIndex = getCompletedTimelineIndex(order.status);
 
   return (
-    <Modal title={`Order #${order.order_id}`} onClose={onClose}>
+   <Modal title="Order Details" onClose={onClose}>
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-4 items-start">
           <div className="w-full h-36 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
@@ -101,7 +101,7 @@ export default function OrderDetailModal({ order, onClose }) {
         <section>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Shipping Address</p>
           <div className="flex items-start gap-3 p-4 border border-slate-200 rounded-2xl bg-white text-slate-700 text-sm leading-relaxed">
-            <span className="mt-0.5 shrink-0 text-slate-400">📍</span>
+            <span className="mt-0.5 shrink-0 text-slate-400"></span>
             <span>{order.shipping_address}</span>
           </div>
         </section>
