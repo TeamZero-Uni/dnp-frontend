@@ -269,7 +269,7 @@ export default function OnlineOrderView({ order, onUpdated }) {
                       <p className="text-sm font-bold text-indigo-600">
                         Rs{" "}
                         {(
-                          parseFloat(item.unit_price ?? 0) *
+                          parseFloat(item.price ?? 0) *
                           (item.quantity ?? 1)
                         ).toFixed(2)}
                       </p>
