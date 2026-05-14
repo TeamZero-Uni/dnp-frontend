@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaFilter, FaTimes, FaCheckCircle, FaList, FaTags, FaDollarSign, FaChevronDown } from "react-icons/fa";
+import { FiSearch } from "react-icons/fi";
 import Banner from "../components/layout/Banner";
 import ProductCard from "../components/cards/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,7 +56,11 @@ function Product() {
     };
   });
 
-  const dynamicTagsList = [...new Set(productList.map((product) => product.p_tag).filter(tag => tag))];
+  const dynamicTagsList = [...new Set(
+    productList
+      .flatMap((product) => (product.p_tag ? product.p_tag.split(',').map(tag => tag.trim()) : []))
+      .filter(tag => tag)
+  )];
 
   useEffect(() => {
     setCurrentPage(1);
@@ -82,7 +87,10 @@ function Product() {
   const filteredProducts = productList.filter((product) => {
     const matchesPrice = product.p_price >= priceRange[0] && product.p_price <= priceRange[1];
     const matchesCategory = selectedCategories.length === 0 || (product.category && selectedCategories.includes(product.category.c_type));
-    const matchesTag = selectedTags.length === 0 || (product.p_tag && selectedTags.includes(product.p_tag));
+    
+    const productTagsArr = product.p_tag ? product.p_tag.split(',').map(t => t.trim()) : [];
+    const matchesTag = selectedTags.length === 0 || productTagsArr.some(tag => selectedTags.includes(tag));
+    
     const matchesSearch = product.p_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStock = !inStockOnly || product.status === "stock" || product.p_status === "IN_STOCK";
 
@@ -160,9 +168,7 @@ function Product() {
                 <div className="relative mb-6">
                   <input type="text" placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-[#5a46c2] outline-none transition-all" />
                   <button className="absolute right-2 top-1.5 p-1.5 bg-[#5a46c2] text-white rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <FiSearch className="w-4 h-4" />
                   </button>
                 </div>
 

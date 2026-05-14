@@ -89,7 +89,6 @@ export default function ReviewSection({ productId }) {
     const currentVote = votedReviews[reviewId];
     let newVoteState = currentVote === type ? null : type; 
 
-    // 1. Update local storage & state for UI colors
     const newVotes = { ...votedReviews };
     if (newVoteState) newVotes[reviewId] = newVoteState;
     else delete newVotes[reviewId];
