@@ -19,3 +19,8 @@ export const updateUserDetailsAPI = async (payload) => {
   return response.data
 }
 
+export const getWishlistAPI = async () => {
+  const response = await api.get("/user/orders/wishlist/me")
+  return response.data.data
+}
+
