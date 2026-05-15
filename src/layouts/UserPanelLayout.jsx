@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../hooks/useAuth"
 import { RiMenuLine, RiArrowLeftLine } from "react-icons/ri"
 import { MdDashboard } from "react-icons/md"
 import { FaUser, FaBoxOpen, FaHeart } from "react-icons/fa"
 import { IoSettings } from "react-icons/io5"
 import { RiLogoutBoxLine } from "react-icons/ri"
+import { getUserDetailsAPI } from "../api/userOrdersApi"
 
 const navGroups = [
   {
@@ -41,6 +42,24 @@ function UserPanelLayout() {
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U"
 
+  const [profileData, setProfileData] = useState(null)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const data = await getUserDetailsAPI()
+        if (mounted) setProfileData(data)
+      } catch (err) {
+        // ignore
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
+
+  const avatarSrc = profileData?.image_url ?? user?.image_url ?? user?.avatar ?? null
+  const displayName = profileData?.user_name ?? user?.user_name ?? user?.name ?? "Customer"
+
   return (
     <div className="w-full min-h-screen pt-[72px]" style={{ backgroundColor: "var(--color-primary)" }}>
 
@@ -70,17 +89,24 @@ function UserPanelLayout() {
             </button>
 
             <div className="flex items-center gap-3">
-              <div>
-                <p className="text-sm font-semibold text-right" style={{ color: "var(--color-secondary)" }}>
-                  {user?.name ?? "Customer"}
-                </p>
-                <p className="text-xs text-gray-400 text-right">{user?.email}</p>
-              </div>
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{ backgroundColor: "var(--color-charm-subtle)", color: "var(--color-accent)" }}
-              >
-                {initials}
+              <div className="flex items-center gap-3">
+                <div className="overflow-hidden text-right">
+                  <p className="text-sm font-semibold" style={{ color: "var(--color-secondary)" }}>
+                    {displayName}
+                  </p>
+                </div>
+                <div>
+                  {avatarSrc ? (
+                    <img src={avatarSrc} alt={displayName} className="w-10 h-10 rounded-full object-cover" />
+                  ) : (
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                      style={{ backgroundColor: "var(--color-charm-subtle)", color: "var(--color-accent)" }}
+                    >
+                      {initials}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -172,19 +198,24 @@ function UserPanelLayout() {
             {/* User card */}
             <div className="p-5 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0"
-                  style={{ backgroundColor: "var(--color-charm-subtle)", color: "var(--color-accent)" }}
-                >
-                  {initials}
+                  <div className="shrink-0">
+                    {avatarSrc ? (
+                      <img src={avatarSrc} alt={displayName} className="w-11 h-11 rounded-full object-cover" />
+                    ) : (
+                      <div
+                        className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+                        style={{ backgroundColor: "var(--color-charm-subtle)", color: "var(--color-accent)" }}
+                      >
+                        {initials}
+                      </div>
+                    )}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-semibold truncate" style={{ color: "var(--color-secondary)" }}>
+                      {displayName}
+                    </p>
+                  </div>
                 </div>
-                <div className="overflow-hidden">
-                  <p className="text-sm font-semibold truncate" style={{ color: "var(--color-secondary)" }}>
-                    {user?.name ?? "Customer"}
-                  </p>
-                  <p className="text-xs text-gray-400 truncate">{user?.email}</p>
-                </div>
-              </div>
             </div>
 
             {/* Grouped nav */}

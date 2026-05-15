@@ -175,7 +175,7 @@ export default function Innovation() {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const res = await getYoutubeVideos(12);
+        const res = await getYoutubeVideos(50);
         const mapped = res.data.videos.map(mapVideo);
         setVideos(mapped);
       } catch (err) {
