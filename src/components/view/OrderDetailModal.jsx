@@ -36,6 +36,18 @@ const getCompletedTimelineIndex = (status) => {
   return 0;
 };
 
+const getPaymentMethodBadge = (method) => {
+  let label = "Online Payment";
+  if (method && (method.includes("CASH") || method.includes("COD"))) {
+    label = "Cash on Delivery";
+  }
+  return (
+    <div className="text-slate-700 text-sm">
+      <p className="font-medium">{label}</p>
+    </div>
+  );
+};
+
 export default function OrderDetailModal({ order, onClose }) {
   if (!order) return null;
 
@@ -68,7 +80,7 @@ export default function OrderDetailModal({ order, onClose }) {
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total</p>
-                <p className="font-semibold text-slate-800">${order.total_amount.toFixed(2)}</p>
+                <p className="font-semibold text-slate-800">Rs {order.total_amount.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -88,12 +100,12 @@ export default function OrderDetailModal({ order, onClose }) {
                   <p className="font-semibold text-slate-800 text-sm truncate">{item.name}</p>
                   <p className="text-xs text-slate-400">Quantity: {item.quantity}</p>
                 </div>
-                <p className="font-bold text-slate-800 text-sm">${item.price.toFixed(2)}</p>
+                <p className="font-bold text-slate-800 text-sm">Rs {item.price.toFixed(2)}</p>
               </div>
             ))}
             <div className="flex items-center justify-between bg-slate-50 px-4 py-4">
               <span className="font-bold text-slate-700 text-sm">Total</span>
-              <span className="font-bold text-slate-900 text-lg">${order.total_amount.toFixed(2)}</span>
+              <span className="font-bold text-slate-900 text-lg">Rs {order.total_amount.toFixed(2)}</span>
             </div>
           </div>
         </section>
@@ -103,6 +115,13 @@ export default function OrderDetailModal({ order, onClose }) {
           <div className="flex items-start gap-3 p-4 border border-slate-200 rounded-2xl bg-white text-slate-700 text-sm leading-relaxed">
             <span className="mt-0.5 shrink-0 text-slate-400"></span>
             <span>{order.shipping_address}</span>
+          </div>
+        </section>
+
+        <section>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Payment Method</p>
+          <div className="p-4 border border-slate-200 rounded-2xl bg-white">
+            {getPaymentMethodBadge(order.payment_method || "Online")}
           </div>
         </section>
 
