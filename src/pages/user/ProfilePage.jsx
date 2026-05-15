@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import { useAuth } from "../../hooks/useAuth"
 import { getUserDetailsAPI, updateUserDetailsAPI } from "../../api/userOrdersApi"
 import { uploadImageToCloudinary } from "../../api/cloudinaryApi"
+import toast from "react-hot-toast"
 import { MdPerson, MdEmail, MdPhone, MdLocationOn, MdEdit, MdCheck, MdClose, MdCameraAlt } from "react-icons/md"
 
 // ─── Validation rules ───────────────────────────────────────────────
@@ -146,10 +147,11 @@ const handleSave = async () => {
       setOriginalForm({ ...form })
       setSelectedImageFile(null)
       setIsEditing(false)
+      toast.success("Profile updated successfully")
       
     } catch (err) {
       console.error("Save error:", err)
-      alert("Failed to save profile. Please try again.")
+      toast.error("Failed to save profile. Please try again.")
     } finally {
       setIsSaving(false)
     }
