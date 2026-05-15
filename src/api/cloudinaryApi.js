@@ -11,6 +11,7 @@ export const uploadImageToCloudinary = async (file) => {
   if (!response.ok) {
     throw new Error("Failed to reach Cloudinary");
   }
+  //presigned upload
 
   const cloudJson = await response.json();
   
