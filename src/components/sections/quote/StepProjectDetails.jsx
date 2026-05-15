@@ -13,7 +13,7 @@ const COLOR_OPTIONS = [
   { label: "Custom", value: "custom"  },
 ];
 
-function DynamicField({ field, value, onChange, accentColor }) {
+function DynamicField({ field, value, onChange, accentColor }) { // STEP 3 — PROJECT DETAILS
   const accent = accentColor || "#5a46c2";
 
   if (field.type === "select") return (
@@ -44,9 +44,9 @@ function DynamicField({ field, value, onChange, accentColor }) {
         >
           <FiMinus size={14} />
         </button>
-        <span className="w-16 text-center text-lg font-black text-slate-900">{value || 1}</span>
+        <span className="w-16 text-center text-lg font-black text-slate-900">{value || 0}</span>
         <button
-          onClick={() => onChange(field.key, (value || 1) + 1)}
+          onClick={() => onChange(field.key, (value || 0) + 1)}
           className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-600 transition-all"
           onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = "#fff"; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.borderColor = ""; e.currentTarget.style.color = ""; }}
@@ -170,7 +170,7 @@ function StepProjectDetails({ selectedService, details, onDetailChange, contact 
             </a>
 
             <a
-              href="mailto:maleeshasandakalum@gmail.com"
+              href={"mailto:maleeshasandakalum@gmail.com?body="}
               className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold text-slate-700 border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
             >
               <FiMail size={15} /> Email
