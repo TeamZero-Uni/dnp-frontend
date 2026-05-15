@@ -34,12 +34,24 @@ function InfoCell({ label, value, className = "" }) {
   return (
     <div className={`bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 ${className}`}>
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-      <p className="text-xs font-bold text-slate-800 break-words">{value || "—"}</p>
+      <p className="text-xs font-bold text-slate-800 wrap-break-word">{value || "—"}</p>
     </div>
   );
 }
 
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+const formatMoney = (value) => `LKR ${Number(value || 0).toLocaleString("en-LK")}`;
+
+const getInfillPrice = (infill) => {
+  const percent = Number.parseFloat(String(infill ?? "").replace("%", ""));
+  if (Number.isNaN(percent)) return null;
+
+  return percent * 100;
+};
+
+const getQuoteInfillTotal = (items = []) =>
+  items.reduce((sum, item) => sum + (getInfillPrice(item.infill) ?? 0), 0);
 
 export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
   const [status] = useState(quote.status);
@@ -47,6 +59,10 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
   const [notes, setNotes] = useState("");
   const [trackingNo, setTrackingNo] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const infillTotal = getQuoteInfillTotal(quote.items ?? []);
+  const baseAmount = Number.parseFloat(String(amount ?? "").replace(/,/g, "")) || 0;
+  const finalQuotedAmount = baseAmount + infillTotal;
 
   const allFiles = quote.items?.flatMap((item) => item.files ?? []) ?? [];
 
@@ -87,7 +103,7 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
           ...basePayload,
           status: "ACCEPTED",
           payment_status: "PENDING",
-          total_amount: amount,
+          total_amount: finalQuotedAmount,
           internal_notes: notes,
         };
 
@@ -272,6 +288,20 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
                   placeholder="e.g. 8500"
                   className={inputCls}
                 />
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Base Amount</p>
+                    <p className="text-sm font-bold text-slate-800">{formatMoney(baseAmount)}</p>
+                  </div>
+                  <div className="rounded-xl border border-violet-100 bg-violet-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-violet-500">Infill Total</p>
+                    <p className="text-sm font-bold text-violet-700">{formatMoney(infillTotal)}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Total to Store</p>
+                    <p className="text-sm font-bold text-emerald-700">{formatMoney(finalQuotedAmount)}</p>
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Internal Notes</label>
