@@ -9,16 +9,15 @@ import { WishlistContext } from '../../context/WishlistContext';
 function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
-  const isWishlisted = wishlistItems?.includes(product.p_id) || false;
-  const isOutOfStock = product.p_status !== "IN_STOCK";
   
-  // Stock count logic
-  const stockCount = null; 
+  const { wishlistItems, handleWishlistToggle } = useContext(WishlistContext);
+  
+  const isWishlisted = wishlistItems?.includes(product.p_id) || false;
+
+  const isOutOfStock = product.p_status !== "IN_STOCK";
 
   const onWishlistClick = async (e) => {
     e.preventDefault(); 
-
     const result = await handleWishlistToggle(product.p_id);
 
     if (result && result.success) {
@@ -107,25 +106,16 @@ function ProductCard({ product }) {
               {product.p_name}
             </h3>
 
+            {/* Cleaned up stock display logic */}
             {!isOutOfStock && (
               <div className="mb-3">
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                    stockCount && stockCount <= 3
-                      ? "bg-amber-50 text-amber-600 border border-amber-200"
-                      : "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      stockCount && stockCount <= 3 ? "bg-amber-500" : "bg-emerald-500"
-                    } animate-pulse`}
-                  />
-                  {stockCount ? `Only ${stockCount} left` : "In Stock"}
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  In Stock
                 </span>
               </div>
             )}
-
+              
             <div className="mt-auto pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between gap-3">
                 <div>

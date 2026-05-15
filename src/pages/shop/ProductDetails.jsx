@@ -14,7 +14,7 @@ import ReadyToStart from "../../components/ReadyToStart";
 import { useProduct } from "../../hooks/useProduct"; 
 import { WishlistContext } from '../../context/WishlistContext';
 
-const MAX_QTY = 10;
+const MAX_QTY = 100;
 
 function Toast({ message, type, visible }) {
   const bg = type === 'wishlist' ? 'bg-violet-500' : type === 'error' ? 'bg-rose-500' : 'bg-emerald-500';
@@ -91,6 +91,9 @@ export default function ProductDetails() {
   const galleryImages = dbImages.length > 0 ? dbImages.slice(0, 5) : [fallbackImage];
   const activeImage = galleryImages[activeImageIndex] || galleryImages[0];
 
+  const sellingPrice = Number(dbProduct?.p_price || dbProduct?.price || 0);
+  const labelPrice = Number(dbProduct?.p_label_price || dbProduct?.label_price || 0);
+
   useEffect(() => {
     if (galleryImages.length <= 1) return;
     const intervalId = setInterval(() => {
@@ -98,6 +101,11 @@ export default function ProductDetails() {
     }, 3000);
     return () => clearInterval(intervalId);
   }, [galleryImages.length]);
+
+  let discountPercent = 0;
+  if (labelPrice > sellingPrice) {
+    discountPercent = Math.round(((labelPrice - sellingPrice) / labelPrice) * 100);
+  }
 
   let parsedFeatures = [];
   if (dbProduct?.p_features) {
@@ -111,6 +119,11 @@ export default function ProductDetails() {
         parsedFeatures = dbProduct.p_features.split(',').map(f => f.trim());
       }
     }
+  }
+
+  let productTags = [];
+  if (dbProduct?.p_tag) {
+    productTags = [...new Set(dbProduct.p_tag.split(',').map(t => t.trim()).filter(t => t))];
   }
 
   const showToast = (message, type = 'success') => {
@@ -232,11 +245,11 @@ export default function ProductDetails() {
                   {productCategory}
                 </span>
 
-                {dbProduct?.p_tag && (
-                  <span className="bg-indigo-50 text-indigo-500 text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 uppercase tracking-widest">
-                    <FiTag size={10} /> {dbProduct.p_tag}
+                {productTags.length > 0 && productTags.map((tag, idx) => (
+                  <span key={idx} className="bg-indigo-50 text-indigo-500 text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 uppercase tracking-widest">
+                    <FiTag size={10} /> {tag}
                   </span>
-                )}
+                ))}
 
                 <span className={`text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 ${stockCls}`}>
                   <FiPackage size={10} /> {stockLabel}
@@ -244,9 +257,23 @@ export default function ProductDetails() {
               </div>
               
               <h1 className="text-2xl font-extrabold text-slate-800 leading-snug mb-2">{dbProduct?.p_name || dbProduct?.name}</h1>
-              <span className="text-3xl font-black text-accent tracking-tight">
-                Rs. {Number(dbProduct?.p_price || dbProduct?.price || 0).toLocaleString()}
-              </span>
+              
+              <div className="flex items-end gap-3 mb-2">
+                <span className="text-3xl font-black text-[#5a46c2] tracking-tight">
+                  Rs. {sellingPrice.toLocaleString()}
+                </span>
+                
+                {discountPercent > 0 && (
+                  <>
+                    <span className="text-lg font-bold text-slate-400 line-through mb-1">
+                      Rs. {labelPrice.toLocaleString()}
+                    </span>
+                    <span className="bg-rose-100 text-rose-600 text-[11px] font-black px-2 py-1 rounded-lg mb-1.5 uppercase tracking-wider">
+                      {discountPercent}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="h-px bg-slate-100" />
