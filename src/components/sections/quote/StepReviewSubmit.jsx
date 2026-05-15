@@ -1,9 +1,35 @@
 import React from 'react'
+import { FiCheck, FiX, FiUser, FiMail, FiPhone } from "react-icons/fi";
+
+
+const validateEmail = (v) => {
+  if (!v) return "Email is required";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Enter a valid email address";
+  return "";
+};
+
+const validatePhone = (v) => {
+  if (!v) return "";
+  if (!/^\+?[\d\s\-().]{7,20}$/.test(v)) return "Enter a valid phone number";
+  return "";
+};
+
+const validatePostalCode = (code) => {
+   if (!code) return "Postal code is required";
+  if (!/^\d{5}$/.test(code)) return "Enter a valid 5-digit postal code";
+  return "";
+};
+
+const validateAddress = (v) => {
+  if (!v) return "Address is required";
+  if (v.length < 10) return "Address must be at least 10 characters";
+  return "";
+}
 
 
 
 
-function StepReviewSubmit({ selectedService, files, details, contact, onContactChange, touched, onBlur }) {
+function StepReviewSubmit({ selectedService, files, details, contact, onContactChange, touched, onBlur }) { // STEP 4 — REVIEW & SUBMIT
   const emailError = touched.email ? validateEmail(contact.email) : "";
   const phoneError = touched.phone ? validatePhone(contact.phone) : "";
   const accent     = selectedService?.gradientFrom || "#5a46c2";

@@ -47,6 +47,7 @@ import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
 import GoogleSuccess from "./layouts/GoogleSuccess ";
+import Feedback from "./pages/Feedback";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -64,6 +65,7 @@ const router = createBrowserRouter(
        <Route path="quote" element={<RequestQuote />} />
         <Route path="gallery" element={<Gallery />} />
         <Route path="innovation" element={<Innovation />} />
+        <Route path="feedback" element={<Feedback />} />
 
       <Route path="login" element={<Login />} />
       <Route path="google-success" element={<GoogleSuccess />} />

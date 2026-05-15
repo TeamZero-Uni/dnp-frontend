@@ -4,7 +4,7 @@ import {
   FiX, FiMinus, FiPlus, FiSend, FiUser, FiMail, FiPhone,
 } from "react-icons/fi";
 
-function StepSelectService({ service, onSelect, SERVICES }) {
+function StepSelectService({ service, onSelect, SERVICES }) { //   STEP 1 — SELECT SERVICE
   return (
     <div>
       <h2 className="text-lg font-black text-slate-900 mb-1">Select a Service</h2>
