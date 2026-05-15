@@ -63,33 +63,41 @@ function QuickViewModal({ product, onClose }) {
     category: product?.category?.c_type || product?.category || "General",
   });
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
 
-    addToCart(getCartPayload(), qty, selectedColor);
-    setAddedToCart(true);
-
-    setTimeout(() => {
-      smoothExit(() => {
-        onClose();
-        navigate("/cart");
-      });
-    }, 700);
+    const result = await addToCart(getCartPayload(), qty, selectedColor);
+    
+    if (result && result.success) {
+      setAddedToCart(true);
+      setTimeout(() => {
+        smoothExit(() => {
+          onClose();
+          navigate("/cart");
+        });
+      }, 700);
+    } else if (result) {
+      alert(result.message); 
+    }
   };
 
-  const handleBookItNow = (e) => {
+  const handleBookItNow = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
 
-    addToCart(getCartPayload(), qty, selectedColor);
+    const result = await addToCart(getCartPayload(), qty, selectedColor);
 
-    smoothExit(() => {
-      onClose();
-      navigate("/checkout"); 
-    });
+    if (result && result.success) {
+      smoothExit(() => {
+        onClose();
+        navigate("/checkout"); 
+      });
+    } else if (result) {
+      alert(result.message);
+    }
   };
 
   const onWishlistClick = async (e) => {

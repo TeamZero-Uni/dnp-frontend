@@ -7,7 +7,7 @@ import ScrollToTop from "../utils/ScrollToTop";
 function MainLayout() {
   const location = useLocation();
 
-  const hideheaderFooterRoutes = ["/login", "/signup", "/dash"];
+  const hideheaderFooterRoutes = ["/login", "/signup", "/dash", "/account/dashboard"];
 
   const shouldHide = hideheaderFooterRoutes.some((path) =>
     location.pathname.toLowerCase().startsWith(path.toLowerCase())

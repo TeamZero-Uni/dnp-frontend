@@ -1,171 +1,379 @@
 import React, { useState } from 'react'
 import {
-  Grid3X3, Search, Download, Eye, Trash2, X,
-  FileText, Package, User, Mail, Phone, Calendar,
-  AlertTriangle, Archive, Clock, CheckCircle,
-  XCircle, Send, ChevronDown, Plus,
+  CheckCircle, Download, Layers, Truck, FileText, Hash, Coins
 } from "lucide-react";
-
+import { updateQuotetion } from '../../api/quoteApi';
 
 const STATUS_CFG = {
-  Pending:   { dot: "bg-amber-400",   pill: "bg-amber-50 text-amber-700 border-amber-200"         },
-  Reviewing: { dot: "bg-blue-400",    pill: "bg-blue-50 text-blue-700 border-blue-200"            },
-  Approved:  { dot: "bg-emerald-400", pill: "bg-emerald-50 text-emerald-700 border-emerald-200"   },
-  Rejected:  { dot: "bg-red-400",     pill: "bg-red-50 text-red-700 border-red-200"               },
-  Sent:      { dot: "bg-violet-400",  pill: "bg-violet-50 text-violet-700 border-violet-200"      },
+  PENDING: { dot: "bg-amber-400", pill: "bg-amber-50 text-amber-700 border-amber-200", label: "Pending" },
+  ACCEPTED: { dot: "bg-emerald-400", pill: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Approved" },
+  IN_PROGRESS: { dot: "bg-blue-400", pill: "bg-blue-50 text-blue-700 border-blue-200", label: "In Progress" },
+  SHIPPED: { dot: "bg-violet-400", pill: "bg-violet-50 text-violet-700 border-violet-200", label: "Shipped" },
+  DELIVERED: { dot: "bg-emerald-500", pill: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Delivered" },
+  REJECTED: { dot: "bg-red-400", pill: "bg-red-50 text-red-700 border-red-200", label: "Rejected" },
 };
 
+const inputCls = "w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors";
 
-const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function Section({ icon: Icon, title, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
+          <Icon size={12} className="text-violet-600" />
+        </div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
 
-const STATUSES = Object.keys(STATUS_CFG);
-const FILTERS  = ["All", ...STATUSES];
+function InfoCell({ label, value, className = "" }) {
+  return (
+    <div className={`bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 ${className}`}>
+      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
+      <p className="text-xs font-bold text-slate-800 break-words">{value || "—"}</p>
+    </div>
+  );
+}
 
+const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
-export default function QuoteReviewModal(quote, onClose) {
-    const [status, setStatus]   = useState(quote.status);
-    const [amount, setAmount]   = useState(quote.amount || "");
-    const [notes,  setNotes]    = useState(quote.notes  || "");
-    const [open,   setOpen]     = useState(false);
-  
-    const inputCls = "w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none focus:border-violet-400 focus:bg-white transition-colors";
-  
-    return (
-        <>
-        <div className="p-5 space-y-5 overflow-y-auto" style={{ maxHeight: "72vh" }}>
-  
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-base font-black text-slate-900 leading-none">{quote.customer}</p>
-              <p className="text-xs text-slate-400 mt-1">{quote.service}</p>
-            </div>
-            <div status={status} />
+export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
+  const [status] = useState(quote.status);
+  const [amount, setAmount] = useState(quote.total_amount ?? "");
+  const [notes, setNotes] = useState("");
+  const [trackingNo, setTrackingNo] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const allFiles = quote.items?.flatMap((item) => item.files ?? []) ?? [];
+
+  // ── File Download Handlers ──
+  const handleDownload = (file) => {
+    const href = file?.url ?? file?.path ?? file?.file_url;
+    if (!href) return;
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = file.name ?? "download";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleDownloadAll = () => allFiles.forEach(handleDownload);
+
+  const handleDownloadSlip = () => {
+    const slipUrl = quote.payment_slip_path;
+    if (!slipUrl) return;
+    const a = document.createElement("a");
+    a.href = slipUrl;
+    a.download = "payment_slip";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // ── Build Payload Based on Action Type ──
+  const buildPayload = (actionType) => {
+    const basePayload = { q_id: quote.q_id };
+
+    switch (actionType) {
+      case "ACCEPTED":
+        return {
+          ...basePayload,
+          status: "ACCEPTED",
+          payment_status: "PENDING",
+          total_amount: amount,
+          internal_notes: notes,
+        };
+
+      case "IN_PROGRESS":
+        return {
+          ...basePayload,
+          status: "IN_PROGRESS",
+          payment_status: "PAID",
+        };
+
+      case "SHIPPED":
+        return {
+          ...basePayload,
+          status: "SHIPPED",
+          tracking_no: trackingNo,
+        };
+
+      case "REJECTED":
+        return {
+          ...basePayload,
+          status: "REJECTED",
+        };
+
+      default:
+        return basePayload;
+    }
+  };
+
+  // ── Handle Action Submit ──
+  const handleSubmit = async (actionType) => {
+    setLoading(true);
+    try {
+      const payload = buildPayload(actionType);
+      const response = await updateQuotetion(payload);
+      console.log("Quote updated:", response);
+      onClose();
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating quote:", error);
+      alert("Failed to update quote. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPrimaryAction = () => {
+    const actions = {
+      PENDING: {
+        label: "Accept",
+        type: "ACCEPTED",
+        className: "bg-emerald-500 hover:bg-emerald-600",
+        disabled: false,
+      },
+      ACCEPTED: {
+        label: "Collect & Start",
+        type: "IN_PROGRESS",
+        className: "bg-blue-500 hover:bg-blue-600",
+        disabled: quote.payment_status !== "PENDING",
+      },
+      IN_PROGRESS: {
+        label: "Mark as Shipped",
+        type: "SHIPPED",
+        className: "bg-violet-600 hover:bg-violet-700",
+        disabled: false,
+      },
+    };
+
+    return actions[status] || {
+      label: "Save",
+      type: status,
+      className: "bg-slate-500 hover:bg-slate-600",
+      disabled: false,
+    };
+  };
+
+  const primary = getPrimaryAction();
+
+  return (
+    <>
+      <div className="p-5 space-y-5">
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Hash size={13} className="text-slate-400" />
+            <span className="text-[11px] font-black text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-lg">
+              {quote.q_id}
+            </span>
+            <span className="text-[11px] text-slate-400 font-semibold">{fmtDate(quote.order_date)}</span>
           </div>
-  
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {[
-              { icon: Mail,     label: "Email",   val: quote.email           },
-              { icon: Phone,    label: "Phone",   val: quote.phone || "—"    },
-              { icon: Calendar, label: "Received",val: fmtDate(quote.date)   },
-              { icon: Package,  label: "Service", val: quote.service         },
-            ].map(({ icon: Icon, label, val }) => (
-              <div key={label} className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Icon size={10} className="text-violet-400" />
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border ${STATUS_CFG[status]?.pill}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_CFG[status]?.dot}`} />
+            {STATUS_CFG[status]?.label}
+          </span>
+        </div>
+
+        <div className="border-t border-slate-100" />
+
+        {/* Shipping Details */}
+        <Section icon={Truck} title="Shipping Details">
+          <div className="grid grid-cols-3 gap-2">
+            <InfoCell label="Full Name" value={quote.shipping?.cus_name} />
+            <InfoCell label="Email" value={quote.shipping?.cus_email} />
+            <InfoCell label="Phone" value={quote.shipping?.cus_phone} />
+            <InfoCell
+              label="Address"
+              className="col-span-3"
+              value={[
+                quote.shipping?.cus_address,
+                quote.shipping?.cus_city,
+                quote.shipping?.cus_state,
+                quote.shipping?.cus_postal_code,
+                quote.shipping?.cus_country,
+              ].filter(Boolean).join(", ")}
+            />
+          </div>
+        </Section>
+
+        <div className="border-t border-slate-100" />
+
+        <Section icon={Layers} title={`Item Details (${quote.items?.length ?? 0})`}>
+          <div className="space-y-2">
+            {quote.items?.map((item, i) => (
+              <div key={item.id ?? i} className="bg-white border border-violet-100 rounded-xl px-4 py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-black text-slate-800">{item.service_type}</p>
+                  <span className="text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">
+                    Qty {item.quantity}
+                  </span>
                 </div>
-                <p className="text-xs font-bold text-slate-800 truncate">{val}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    item.material && `Material: ${item.material}`,
+                    item.quality && `Quality: ${item.quality}`,
+                    item.infill && `Infill: ${item.infill}`,
+                    item.type && `Type: ${item.type}`,
+                    item.letter_height && `Height: ${item.letter_height}`,
+                  ].filter(Boolean).map((chip) => (
+                    <span key={chip} className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
-  
-          {/* description — read only */}
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Customer Request</p>
-            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm text-slate-600 leading-relaxed">
-              {quote.description}
-            </div>
-          </div>
-  
-          {/* files */}
-          {quote.files?.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Uploaded Files ({quote.files.length})
-                </p>
-                <button onClick={() => downloadAllAsZip(quote)}
-                  className="flex items-center gap-1.5 text-[11px] font-bold text-[#5a46c2] hover:text-[#4838a3] transition-colors">
-                  <Archive size={11} /> Download All (.zip)
-                </button>
-              </div>
+        </Section>
+
+        {/* Files */}
+        {allFiles.length > 0 && (
+          <>
+            <div className="border-t border-slate-100" />
+            <Section icon={FileText} title={`Files (${allFiles.length})`}>
               <div className="space-y-1.5">
-                {quote.files.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white border border-violet-100 rounded-xl px-3.5 py-2.5 group hover:bg-violet-50/40 transition-colors">
-                    <div className="w-7 h-7 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center text-violet-600 text-[9px] font-black uppercase shrink-0">
-                      {f.name.split(".").pop()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate">{f.name}</p>
-                      <p className="text-[10px] text-slate-400">{f.size}</p>
-                    </div>
-                    <button onClick={() => downloadFile(f)}
-                      className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-[11px] font-bold text-[#5a46c2] transition-all">
+                {allFiles.map((f, i) => (
+                  <div key={i} className="flex justify-between bg-white border border-violet-100 rounded-xl px-3.5 py-2.5">
+                    <span className="text-[10px] font-black text-violet-600 uppercase">
+                      {f.file_url?.split("/").pop() ?? "?"}
+                    </span>
+                    <button onClick={() => handleDownload(f)} className="flex items-center gap-1.5 text-[11px] font-bold text-[#5a46c2] hover:text-[#4838a3]">
                       <Download size={11} /> Download
                     </button>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-  
-          {/* divider */}
-          <div className="border-t border-slate-100" />
-  
-          {/* admin actions */}
-          <div className="space-y-3">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Actions</p>
-  
-            {/* status changer */}
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Change Status</label>
-              <div className="relative">
-                <button
-                  onClick={() => setOpen(!open)}
-                  className="w-full flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-700 hover:border-violet-300 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${STATUS_CFG[status]?.dot}`} />
-                    {status}
-                  </div>
-                  <ChevronDown size={13} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+              {allFiles.length > 1 && (
+                <button onClick={handleDownloadAll} className="mt-2 w-full text-[11px] font-bold text-[#5a46c2] border border-violet-200 rounded-xl py-2 hover:bg-violet-50 flex items-center justify-center gap-1.5">
+                  <Download size={11} /> Download All
                 </button>
-                {open && (
-                  <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border border-violet-100 rounded-xl overflow-hidden z-10"
-                    style={{ boxShadow: "0 8px 24px rgba(90,70,194,.12)" }}>
-                    {STATUSES.map((s) => (
-                      <button key={s} onClick={() => { setStatus(s); setOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold hover:bg-violet-50 transition-colors text-left ${status === s ? "bg-violet-50 text-[#5a46c2]" : "text-slate-700"}`}>
-                        <span className={`w-2 h-2 rounded-full ${STATUS_CFG[s].dot}`} />
-                        {s}
-                        {status === s && <CheckCircle size={12} className="ml-auto text-[#5a46c2]" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
+              )}
+            </Section>
+          </>
+        )}
+
+        <div className="border-t border-slate-100" />
+
+        {/* Admin Actions */}
+        <Section icon={CheckCircle} title="Admin Actions">
+
+          {status === "PENDING" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Quoted Amount (LKR)</label>
+                <input
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="e.g. 8500"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Internal Notes</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Add internal notes about this quote…"
+                  className={`${inputCls} resize-none`}
+                />
               </div>
             </div>
-  
-            {/* quoted amount */}
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Quoted Amount</label>
-              <input value={amount} onChange={(e) => setAmount(e.target.value)}
-                placeholder="e.g. LKR 8,500" className={inputCls} />
+          )}
+
+          {status === "ACCEPTED" && quote.payment_status === "PENDING" && quote.payment_slip_path && (
+            <div className="flex items-center justify-between bg-white border border-violet-100 rounded-xl px-3.5 py-2.5">
+              <span className="text-[11px] font-bold text-slate-700">Payment slip uploaded</span>
+              <button onClick={handleDownloadSlip} className="flex items-center gap-1.5 text-[11px] font-bold text-[#5a46c2] hover:text-[#4838a3]">
+                <Download size={11} /> Download Slip
+              </button>
             </div>
-  
-            {/* admin notes */}
+          )}
+
+          {status === "ACCEPTED" && quote.payment_status === "PENDING" && !quote.payment_slip_path && (
+            <p className="text-[11px] text-slate-400 font-semibold">Waiting for customer to upload payment slip.</p>
+          )}
+
+          {status === "IN_PROGRESS" && (
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Internal Notes</label>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
-                rows={3} placeholder="Add internal notes about this quote…"
-                className={`${inputCls} resize-none`} />
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Tracking Number</label>
+              <input
+                value={trackingNo}
+                onChange={(e) => setTrackingNo(e.target.value)}
+                placeholder="e.g. SL123456789LK"
+                className={inputCls}
+              />
             </div>
-          </div>
-        </div>
-  
-        <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
-          <button onClick={onClose}
-            className="px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+          )}
+
+          {status === "SHIPPED" && quote.payment_status === "PAID" && (
+            <div>
+            <div className="flex items-center gap-2 bg-white border border-violet-100 rounded-xl px-3.5 py-2.5">
+              <span className="text-[11px] font-bold text-slate-700">Tracking Number:</span>
+              <span className="text-[11px] font-semibold text-[#5a46c2]">{quote.tracking_no}</span>
+            </div>
+            <br />
+            <div className="flex items-center gap-2 bg-white border border-violet-100 rounded-xl px-3.5 py-2.5">
+              <span className="text-[11px] font-bold text-slate-700">Payment Status:</span>
+              <span className="text-[11px] font-semibold text-[#5a46c2]">{quote.payment_status === "PAID" ? "Money Received" : "Pending"}</span>
+            </div>
+            </div>
+
+          )}
+
+        </Section>
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          >
             Cancel
           </button>
-          <button
-            onClick={() => onUpdate(quote.id, { status, amount, notes })}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
-            style={{ background: "linear-gradient(135deg,#5a46c2,#4838a3)" }}>
-            <CheckCircle size={13} /> Save Changes
-          </button>
+
+          {status === "PENDING" && (
+            <button
+              onClick={() => handleSubmit("REJECTED")}
+              disabled={loading}
+              className="px-4 py-2 rounded-xl text-sm font-bold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+            >
+              Reject
+            </button>
+          )}
+
+          {status === "ACCEPTED" && quote.payment_slip_path && (
+            <button
+              onClick={handleDownloadSlip}
+              disabled={loading}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            >
+              <Download size={13} /> Download Slip
+            </button>
+          )}
         </div>
-        </>
-    );
+
+        <button
+          onClick={() => handleSubmit(primary.type)}
+          disabled={loading || primary.disabled}
+          className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-50 ${primary.className}`}
+        >
+          <CheckCircle size={13} /> {loading ? "Processing..." : primary.label}
+        </button>
+      </div>
+    </>
+  );
 }

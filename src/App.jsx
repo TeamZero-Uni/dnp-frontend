@@ -1,5 +1,6 @@
 import {
   Route,
+  Navigate,
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
@@ -8,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 
 import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import UserPanelLayout from "./layouts/UserPanelLayout";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -19,7 +21,12 @@ import Cart from "./pages/shop/Cart";
 import Checkout from "./pages/shop/Checkout";
 import Payment from "./pages/shop/Payment";
 import Contact from "./pages/Contact";
-import UserProfile from "./pages/UserProfile";
+
+import ProfilePage from "./pages/user/ProfilePage";   
+import MyOrders from "./pages/user/MyOrders";        
+import Wishlist from "./pages/user/Wishlist";         
+import Settings from "./pages/user/Settings"; 
+import UserDashboard from "./pages/user/Dashboard";
 
 import Dashboard from "./pages/admin/Dashboard";
 import ProductManagement from "./pages/admin/ProductManagement";
@@ -39,6 +46,7 @@ import RequestQuote from './pages/RequestQuote';
 import Gallery from './pages/Gallery';
 import Innovation from './pages/Innovation';
 import FeedbackManagement from "./pages/admin/FeedbackManagement";
+import GoogleSuccess from "./layouts/GoogleSuccess ";
 import Feedback from "./pages/Feedback";
 
 const router = createBrowserRouter(
@@ -60,9 +68,17 @@ const router = createBrowserRouter(
         <Route path="feedback" element={<Feedback />} />
 
       <Route path="login" element={<Login />} />
+      <Route path="google-success" element={<GoogleSuccess />} />
 
       <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
-        <Route path="customer-profile" element={<UserProfile />} />
+        <Route path="account" element={<UserPanelLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="profile"  element={<ProfilePage />} />
+          <Route path="orders"   element={<MyOrders />} />
+          <Route path="wishlist" element={<Wishlist />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
