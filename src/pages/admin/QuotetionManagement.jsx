@@ -46,7 +46,6 @@ export default function QuotationManagement() {
     try {
       const data = await getQuotetions();
       setQuotes(data.data); 
-      console.log("Fetched quotes:", data.data);
     } catch (error) {
       console.error("Error fetching quotes:", error);
     }
@@ -244,8 +243,8 @@ export default function QuotationManagement() {
         </Modal>
       )}
       {modal === "add" && (
-        <Modal title="Add Quote" onClose={closeModal} onSuccess={fetchQuotes}>
-          <QuoteAddView />
+        <Modal title="Add Quote" onClose={closeModal}>
+          <QuoteAddView  onSuccess={fetchQuotes}/>
         </Modal>
       )}
     </div>

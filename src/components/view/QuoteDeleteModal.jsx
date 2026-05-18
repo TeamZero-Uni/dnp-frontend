@@ -1,36 +1,72 @@
-import React from 'react'
-import {
-  Grid3X3, Search, Download, Eye, Trash2, X,
-  FileText, Package, User, Mail, Phone, Calendar,
-  AlertTriangle, Archive, Clock, CheckCircle,
-  XCircle, Send, ChevronDown, Plus,
-} from "lucide-react";
+import { useState } from "react";
+import { FiAlertTriangle, FiLoader } from "react-icons/fi";
+import { deleteQuote } from "../../api/quoteApi";
+import toast from "react-hot-toast";
 
-function QuoteDeleteModal(quote, onClose) {
-    return (
-      
-        <div className="p-5 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-3">
-            <AlertTriangle size={22} className="text-red-500" />
-          </div>
-          <p className="text-sm font-black text-slate-900 mb-1">Delete {quote.id}?</p>
-          <p className="text-xs text-slate-400 mb-5 leading-relaxed">
-            This will permanently remove the quote for{" "}
-            <strong className="text-slate-700">{quote.customer}</strong> and all attached files.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <button onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-              Cancel
-            </button>
-            <button onClick={() => onConfirm(quote.id)}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors active:scale-95">
-              Delete Quote
-            </button>
-          </div>
+export default function QuoteDeleteModal({ quote, onClose, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteQuote(quote.q_id);
+      toast.success("Quote deleted successfully!");
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setError(err?.response?.data?.message ?? "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-rose-50 rounded-2xl p-4 flex items-start gap-4">
+        <div className="bg-rose-100 p-2 rounded-lg text-rose-600 shrink-0">
+          <FiAlertTriangle size={24} />
         </div>
- 
-    );
-}
+        <div>
+          <p className="text-sm font-bold text-rose-800">Dangerous Action</p>
+          <p className="text-sm text-rose-700/80 mt-1 leading-relaxed">
+            You are about to permanently delete quote{" "}
+            <span className="font-bold underline">{quote.q_id}</span> and all
+            attached files. This cannot be undone.
+          </p>
+        </div>
+      </div>
 
-export default QuoteDeleteModal
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
+          <p className="text-xs font-semibold text-rose-600">{error}</p>
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          onClick={onClose}
+          disabled={loading}
+          className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={loading}
+          className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-rose-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <FiLoader size={14} className="animate-spin" />
+              Deleting…
+            </>
+          ) : (
+            "Delete Quote"
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}

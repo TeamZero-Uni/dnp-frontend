@@ -3,6 +3,15 @@ import { FiX } from "react-icons/fi";
 function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+      <style>{`
+        .modal-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .modal-scroll {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
         
         <div className="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
@@ -12,7 +21,7 @@ function Modal({ title, onClose, children }) {
           </button>
         </div>
 
-        <div className="p-5 overflow-y-auto flex-1">
+        <div className="p-5 overflow-y-auto flex-1 modal-scroll">
           {children}
         </div>
 

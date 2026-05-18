@@ -3,6 +3,7 @@ import {
   CheckCircle, Download, Layers, Truck, FileText, Hash, Coins
 } from "lucide-react";
 import { updateQuotetion } from '../../api/quoteApi';
+import toast from "react-hot-toast";
 
 const STATUS_CFG = {
   PENDING: { dot: "bg-amber-400", pill: "bg-amber-50 text-amber-700 border-amber-200", label: "Pending" },
@@ -33,12 +34,24 @@ function InfoCell({ label, value, className = "" }) {
   return (
     <div className={`bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 ${className}`}>
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-      <p className="text-xs font-bold text-slate-800 break-words">{value || "—"}</p>
+      <p className="text-xs font-bold text-slate-800 wrap-break-word">{value || "—"}</p>
     </div>
   );
 }
 
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+const formatMoney = (value) => `LKR ${Number(value || 0).toLocaleString("en-LK")}`;
+
+const getInfillPrice = (infill) => {
+  const percent = Number.parseFloat(String(infill ?? "").replace("%", ""));
+  if (Number.isNaN(percent)) return null;
+
+  return percent * 100;
+};
+
+const getQuoteInfillTotal = (items = []) =>
+  items.reduce((sum, item) => sum + (getInfillPrice(item.infill) ?? 0), 0);
 
 export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
   const [status] = useState(quote.status);
@@ -47,9 +60,12 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
   const [trackingNo, setTrackingNo] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const infillTotal = getQuoteInfillTotal(quote.items ?? []);
+  const baseAmount = Number.parseFloat(String(amount ?? "").replace(/,/g, "")) || 0;
+  const finalQuotedAmount = baseAmount + infillTotal;
+
   const allFiles = quote.items?.flatMap((item) => item.files ?? []) ?? [];
 
-  // ── File Download Handlers ──
   const handleDownload = (file) => {
     const href = file?.url ?? file?.path ?? file?.file_url;
     if (!href) return;
@@ -78,7 +94,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
     document.body.removeChild(a);
   };
 
-  // ── Build Payload Based on Action Type ──
   const buildPayload = (actionType) => {
     const basePayload = { q_id: quote.q_id };
 
@@ -88,7 +103,7 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
           ...basePayload,
           status: "ACCEPTED",
           payment_status: "PENDING",
-          total_amount: amount,
+          total_amount: finalQuotedAmount,
           internal_notes: notes,
         };
 
@@ -117,18 +132,16 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
     }
   };
 
-  // ── Handle Action Submit ──
   const handleSubmit = async (actionType) => {
     setLoading(true);
     try {
       const payload = buildPayload(actionType);
       const response = await updateQuotetion(payload);
-      console.log("Quote updated:", response);
+      toast.success(response.message || "Quote updated successfully!");
       onClose();
       onSuccess();
     } catch (error) {
-      console.error("Error updating quote:", error);
-      alert("Failed to update quote. Please try again.");
+      toast.error(error?.response?.data?.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -186,7 +199,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
 
         <div className="border-t border-slate-100" />
 
-        {/* Shipping Details */}
         <Section icon={Truck} title="Shipping Details">
           <div className="grid grid-cols-3 gap-2">
             <InfoCell label="Full Name" value={quote.shipping?.cus_name} />
@@ -231,12 +243,12 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
                     </span>
                   ))}
                 </div>
+                <div className="text-[14px] ml-2 text-slate-600 mt-2">{item.description}</div>
               </div>
             ))}
           </div>
         </Section>
 
-        {/* Files */}
         {allFiles.length > 0 && (
           <>
             <div className="border-t border-slate-100" />
@@ -264,7 +276,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
 
         <div className="border-t border-slate-100" />
 
-        {/* Admin Actions */}
         <Section icon={CheckCircle} title="Admin Actions">
 
           {status === "PENDING" && (
@@ -277,6 +288,20 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
                   placeholder="e.g. 8500"
                   className={inputCls}
                 />
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Base Amount</p>
+                    <p className="text-sm font-bold text-slate-800">{formatMoney(baseAmount)}</p>
+                  </div>
+                  <div className="rounded-xl border border-violet-100 bg-violet-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-violet-500">Infill Total</p>
+                    <p className="text-sm font-bold text-violet-700">{formatMoney(infillTotal)}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Total to Store</p>
+                    <p className="text-sm font-bold text-emerald-700">{formatMoney(finalQuotedAmount)}</p>
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Internal Notes</label>
@@ -334,7 +359,6 @@ export default function QuoteReviewModal({ quote, onClose, onSuccess }) {
         </Section>
       </div>
 
-      {/* Footer */}
       <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
