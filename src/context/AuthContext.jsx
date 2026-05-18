@@ -7,6 +7,12 @@ let refreshPromise = null;
 
 export const setToken = (t) => {
   token = t;
+
+  if (t) {
+    api.defaults.headers.common.Authorization = `Bearer ${t}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
 };
 
 export const AuthProvider = ({ children }) => {
@@ -21,36 +27,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   useLayoutEffect(() => {
-    const req = api.interceptors.request.use((config) => {
-      console.log("🔵 Request URL:", config.url);
-      if (token) {
-        console.log("🟢 Token existed");
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log("🟢 Authorization header seted");
-      } else {
-        console.log("🔴 No token found");
-      }
-      return config;
-    });
+    const req = api.interceptors.request.use(
+      (config) => {
+        console.log("🔵 Request URL:", config.url);
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
     const res = api.interceptors.response.use(
-      (r) => r,
-      async (err) => {
-        const original = err.config;
-        if (!original) return Promise.reject(err);
+      (response) => response,
+
+      async (error) => {
+        const original = error.config;
+
+        if (!original) {
+          return Promise.reject(error);
+        }
 
         const isAuthRequest =
           original.url?.includes("/auth/login") ||
           original.url?.includes("/auth/register") ||
           original.url?.includes("/auth/refresh");
 
-        if (original.url?.includes("/auth/refresh")) {
-          resetAuth();
-          return Promise.reject(err);
-        }
-
         if (
-          err.response?.status === 401 &&
+          error.response?.status === 401 &&
           !original._retry &&
           !isAuthRequest
         ) {
@@ -60,19 +61,27 @@ export const AuthProvider = ({ children }) => {
             if (!refreshPromise) {
               refreshPromise = api
                 .post("/auth/refresh")
-                .then((r) => setToken(r.data.data.accessToken))
-                .finally(() => (refreshPromise = null));
+                .then((r) => {
+                  const newToken = r.data.data.accessToken;
+                  setToken(newToken);
+                  return newToken;
+                })
+                .finally(() => {
+                  refreshPromise = null;
+                });
             }
 
             await refreshPromise;
+
             return api(original);
-          } catch (error) {
+
+          } catch (err) {
             resetAuth();
-            return Promise.reject(error);
+            return Promise.reject(err);
           }
         }
-        return Promise.reject(err);
-      },
+        return Promise.reject(error);
+      }
     );
 
     return () => {
@@ -87,18 +96,20 @@ export const AuthProvider = ({ children }) => {
     const init = async () => {
       try {
         const r = await api.post("/auth/refresh");
-        setToken(r.data.data.accessToken);
+        const accessToken = r.data.data.accessToken;
+        setToken(accessToken);
         const u = await api.get("/auth/me");
-
         if (!mounted) return;
-
         setUser(u.data.data);
         setIsAuthenticated(true);
+
       } catch (error) {
         if (!mounted) return;
         resetAuth();
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -109,34 +120,60 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const refreshAccessToken = async () => {
+      try {
+        const r = await api.post("/auth/refresh");
+        const newToken = r.data.data.accessToken;
+        setToken(newToken);
+      } catch (error) {
+        resetAuth();
+      }
+    };
+
+    const interval = setInterval(
+      refreshAccessToken,
+      1000 * 60 * 9
+    );
+
+    return () => clearInterval(interval);
+
+  }, [isAuthenticated]);
+
   const loginUser = async (credentials) => {
     try {
       const response = await api.post("/auth/login", credentials);
-
-      const newToken = response.data.data.accessToken;
-      setToken(newToken);
-
+      const accessToken = response.data.data.accessToken;
+      setToken(accessToken);
       const u = await api.get("/auth/me");
-
       setUser(u.data.data);
       setIsAuthenticated(true);
-
       return u.data.data;
     } catch (error) {
       resetAuth();
-      throw new Error(error?.response?.data?.message || "Login failed");
+      throw new Error(
+        error?.response?.data?.message || "Login failed"
+      );
     }
   };
 
   const logoutUser = async () => {
     try {
       await logout();
+
     } catch (error) {
       console.error("Logout error:", error);
+
     } finally {
       resetAuth();
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider
